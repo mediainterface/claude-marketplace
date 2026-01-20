@@ -20,13 +20,9 @@
       ],
       "agents": [
         "./agents/debug-specialist.md",
-         "./agents/devops-deployment-engineer.md",
-         "./qa-test-automation-engineer.md",
-         "./agents/security-analyst.md",
          "./agents/senior-backend-engineer.md",
          "./agents/senior-frontend-engineer.md",
-         "./agents/system-architect.md",
-         "./agents/ux-ui-designer.md"
+         "./agents/test-automation-engineer.md"
       ]
     }
   ]
