@@ -1,6 +1,6 @@
 ---
 name: debug-specialist
-description: Use this agent when you need to systematically debug any problem, error, or unexpected behavior. Examples: <example>Context: User encounters a runtime error in their Python application. user: 'My Flask app is throwing a 500 error when I try to access the /users endpoint' assistant: 'I'll use the debug-specialist agent to systematically investigate this Flask error.' <commentary>Since the user is reporting an error that needs debugging, use the debug-specialist agent to methodically diagnose the issue.</commentary></example> <example>Context: User's code is producing incorrect output. user: 'This sorting algorithm isn't working correctly - it's returning [3,1,2] instead of [1,2,3]' assistant: 'Let me use the debug-specialist agent to trace through this sorting issue step by step.' <commentary>The user has unexpected behavior that requires systematic debugging to identify the root cause.</commentary></example> <example>Context: User reports intermittent system behavior. user: 'Sometimes my database queries are really slow, but other times they're fast' assistant: 'I'll engage the debug-specialist agent to help diagnose this performance inconsistency.' <commentary>Intermittent issues require systematic debugging approaches to identify patterns and root causes.</commentary></example>
+description: Use this agent when you need to systematically debug any problem, error, or unexpected behavior. 
 color: red
 model: inherit
 ---
