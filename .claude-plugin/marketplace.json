@@ -5,9 +5,9 @@
   },
   "plugins": [
     {
-      "name": "dev-workflow",
-      "source": "./dev-workflow",
-      "description": "A plugin representing the common dev workflow of doing research, planning the implementation and implementing it.",
+      "name": "mira-dev",
+      "source": "./mira-dev",
+      "description": "A plugin representing the common mira dev workflow of doing research, planning the implementation and implementing it.",
       "version": "1.0.0",
       "author": {
         "name": "Marcel & Jonas"
