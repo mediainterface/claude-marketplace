@@ -1,0 +1,56 @@
+name: Release ado-mcp
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "plugins/azure-devops/servers/ado-mcp/**"
+
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: plugins/azure-devops/servers/ado-mcp
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Pack tarball
+        run: |
+          npm pack
+          mv mediainterface-ado-mcp-*.tgz ado-mcp-latest.tgz
+
+      - name: Read version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Delete existing release
+        run: gh release delete "ado-mcp-v${{ steps.version.outputs.version }}" --yes || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: .
+
+      - name: Create release
+        run: |
+          gh release create "ado-mcp-v${{ steps.version.outputs.version }}" \
+            plugins/azure-devops/servers/ado-mcp/ado-mcp-latest.tgz \
+            --title "ado-mcp v${{ steps.version.outputs.version }}" \
+            --notes "MCP server for Azure DevOps integration." \
+            --latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: .

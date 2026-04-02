@@ -7,5 +7,12 @@
     "description": "Internal Claude Code plugin marketplace for MediaInterface",
     "pluginRoot": "./plugins"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "azure-devops",
+      "source": "./azure-devops",
+      "description": "Azure DevOps Server integration — pipeline analysis, PR workflows, changelogs",
+      "version": "1.0.0"
+    }
+  ]
 }
