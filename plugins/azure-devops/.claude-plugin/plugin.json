@@ -2,7 +2,7 @@
   "name": "azure-devops",
   "version": "1.0.0",
   "description": "Azure DevOps Server integration — pipeline analysis, PR workflows, changelogs",
-  "author": "Mediainterface GmbH",
+  "author": { "name": "MediaInterface GmbH" },
   "license": "Apache-2.0",
   "repository": "https://github.com/mediainterface/claude-marketplace",
   "keywords": ["azure-devops", "pipelines", "pull-requests", "changelog", "ado"]
