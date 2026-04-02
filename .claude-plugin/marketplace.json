@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "azure-devops",
-      "source": "./azure-devops",
+      "source": "./plugins/azure-devops",
       "description": "Azure DevOps Server integration — pipeline analysis, PR workflows, changelogs",
       "version": "1.0.0"
     }

@@ -37,13 +37,13 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 ```json
 {
   "name": "my-plugin",
-  "source": "./my-plugin",
+  "source": "./plugins/my-plugin",
   "description": "What the plugin does",
   "version": "1.0.0"
 }
 ```
 
-`source` is relative to `pluginRoot` (`./plugins`).
+`source` is relative to the repository root.
 
 ## Plugins
 
