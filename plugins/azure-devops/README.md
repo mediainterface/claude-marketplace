@@ -37,6 +37,38 @@ The MCP server reads these environment variables:
 | `ADO_PAT` | Yes | — | Personal Access Token |
 | `ADO_API_VERSION` | No | `7.1` | Azure DevOps REST API version |
 
+## Claude Code Permissions
+
+The plugin uses several Claude Code tools that require user approval. To avoid repeated permission prompts, add the following wildcard rules to your **allowed tools** in `.claude/settings.json` (or the project-level `.claude/settings.local.json`):
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(npx *)",
+      "Read",
+      "Glob",
+      "Grep",
+      "mcp__ado__*"
+    ]
+  }
+}
+```
+
+### What each permission covers
+
+| Permission | Why it's needed |
+|---|---|
+| `Bash(git *)` | Git operations — fetch, checkout, diff, log, stash, push (used by all workflows) |
+| `Bash(npx *)` | Launching the MCP server via `npx` |
+| `Read` | Reading local files (pipeline YAML, PR templates, source code) |
+| `Glob` | Finding files by pattern (PR templates, CLAUDE.md files) |
+| `Grep` | Searching code for patterns and conventions |
+| `mcp__ado__*` | All five MCP tools (`ado_get`, `ado_post`, `ado_patch`, `ado_delete`, `parse_ado_remote`) |
+
+> **Note:** If you only use read-only workflows (pipeline analysis, PR review, changelog), you can omit `mcp__ado__ado_post`, `mcp__ado__ado_patch`, and `mcp__ado__ado_delete` and use a more restrictive set instead of `mcp__ado__*`.
+
 ## Supported ADO URL Format
 
 ```
