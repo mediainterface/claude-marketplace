@@ -1,0 +1,11 @@
+{
+  "name": "mediainterface",
+  "owner": {
+    "name": "MediaInterface GmbH"
+  },
+  "metadata": {
+    "description": "Internal Claude Code plugin marketplace for MediaInterface",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": []
+}
