@@ -232,10 +232,10 @@ Five MCP tools are available via the `ado` server:
    **Title format:** `Icon <Asana-Ticket-Id> Component - Änderungsbeschreibung`
 
    - **Icon**: Infer from commit messages by majority vote:
-     - bug fix emoji if majority indicate bug fixes (`fix`, `bugfix`, `hotfix`)
-     - construction emoji if majority indicate refactoring (`refactor`, `cleanup`, `restructure`)
-     - book emoji if majority indicate documentation (`docs`, `documentation`)
-     - trophy emoji for features or if unclear (default)
+     - 🐞 if majority indicate bug fixes (`fix`, `bugfix`, `hotfix`)
+     - 🏗️ if majority indicate refactoring (`refactor`, `cleanup`, `restructure`)
+     - 📖 if majority indicate documentation (`docs`, `documentation`)
+     - 🏆 for features or if unclear (default)
      - Tie-break: use the most recent commit's category
    - **Component**: Derive from conventional commit scopes first, then from file paths if no scopes
    - **Änderungsbeschreibung**: Concise German summary of the changes
