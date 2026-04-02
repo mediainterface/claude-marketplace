@@ -17,7 +17,37 @@ allowed-tools: Bash, Read, Glob, Grep, mcp__ado__*
 1. Run `git remote get-url origin` via Bash.
 2. Call `parse_ado_remote` with the remote URL.
 3. If parsing fails, tell the user this skill only works with Azure DevOps Server repositories and stop.
-4. Store the returned `server`, `collection`, `project`, `repository` values — use them for ALL subsequent `ado_get`, `ado_post`, `ado_patch`, `ado_delete` calls.
+4. If `parse_ado_remote` fails because the `ado` MCP server is not running (tool not found / connection error), the `ADO_PAT` environment variable is most likely missing. Follow the **Authorization Troubleshooting** section below and stop.
+5. Store the returned `server`, `collection`, `project`, `repository` values — use them for ALL subsequent `ado_get`, `ado_post`, `ado_patch`, `ado_delete` calls.
+
+## Authorization Troubleshooting
+
+If any MCP tool call fails because the `ado` server is unavailable or returns an authentication/authorization error (HTTP 401/403), tell the user **exactly** what to do:
+
+> **The Azure DevOps MCP server could not start or authenticate because `ADO_PAT` is not set or is invalid.**
+>
+> You need a Personal Access Token (PAT) for your Azure DevOps Server instance.
+>
+> **How to create a PAT:**
+> 1. Open your Azure DevOps Server in the browser.
+> 2. Click your profile picture (top right) → **Security** → **Personal access tokens**.
+> 3. Click **+ New Token**.
+> 4. Give it a descriptive name (e.g. `claude-code`).
+> 5. Set the expiration as desired.
+> 6. Select the required scopes:
+>    - **Code**: Read & Write (for PR creation/update and repository access)
+>    - **Build**: Read (for pipeline analysis)
+> 7. Click **Create** and copy the token.
+>
+> **How to provide the PAT to Claude Code:**
+>
+> Add it to your shell environment (e.g. `~/.bashrc`, `~/.zshrc`, or `~/.env`):
+> ```bash
+> export ADO_PAT="your-personal-access-token"
+> ```
+> Then restart your terminal / Claude Code session so the MCP server picks it up.
+
+After providing these instructions, **stop** — do not attempt any further ADO API calls.
 
 ## Repository Mismatch Check
 
