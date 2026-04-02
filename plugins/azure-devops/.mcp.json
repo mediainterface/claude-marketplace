@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "ado": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "https://github.com/mediainterface/claude-marketplace/releases/latest/download/ado-mcp-latest.tgz"],
+      "env": {
+        "ADO_PAT": "${ADO_PAT}",
+        "ADO_API_VERSION": "${ADO_API_VERSION:-7.1}"
+      }
+    }
+  }
+}
