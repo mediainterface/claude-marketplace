@@ -10,16 +10,24 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 ├── .github/workflows/            # CI/CD workflows
 │   └── release-ado-mcp.yml      # Build + release the ado-mcp server tarball
 ├── plugins/
-│   └── azure-devops/             # Azure DevOps Server integration plugin
+│   ├── azure-devops/             # Azure DevOps Server integration plugin
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json       # Plugin manifest (name, version, description)
+│   │   ├── .mcp.json             # MCP server config (launched via npx)
+│   │   ├── README.md
+│   │   ├── servers/
+│   │   │   └── ado-mcp/          # TypeScript MCP server (5 tools)
+│   │   └── skills/
+│   │       └── azure-devops/
+│   │           └── SKILL.md      # Skill orchestrating ADO workflows
+│   └── humanizer/                # AI writing pattern removal skill
 │       ├── .claude-plugin/
-│       │   └── plugin.json       # Plugin manifest (name, version, description)
-│       ├── .mcp.json             # MCP server config (launched via npx)
+│       │   └── plugin.json
+│       ├── LICENSE               # MIT (upstream: blader/humanizer)
 │       ├── README.md
-│       ├── servers/
-│       │   └── ado-mcp/          # TypeScript MCP server (5 tools)
 │       └── skills/
-│           └── azure-devops/
-│               └── SKILL.md      # Skill orchestrating ADO workflows
+│           └── humanizer/
+│               └── SKILL.md      # Writing editor skill (29 pattern categories)
 ├── CLAUDE.md
 ├── README.md
 └── LICENSE                       # Apache-2.0
@@ -54,6 +62,14 @@ Azure DevOps Server integration providing pipeline analysis, PR review/create/up
 - **MCP Server** (`plugins/azure-devops/servers/ado-mcp/`): TypeScript, exposes `ado_get`, `ado_post`, `ado_patch`, `ado_delete`, `parse_ado_remote`. Distributed as `ado-mcp-latest.tgz` via GitHub releases, fetched at runtime with `npx`.
 - **Skill** (`plugins/azure-devops/skills/azure-devops/SKILL.md`): Orchestrates 5 workflows using the MCP tools.
 - **Requires** `ADO_PAT` env var (Personal Access Token). Optional `ADO_API_VERSION` (default `7.1`).
+
+### humanizer
+
+Writing editor skill that identifies and removes AI writing patterns. Based on [Wikipedia's "Signs of AI writing"](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing). Skill-only plugin (no MCP server).
+
+- **Skill** (`plugins/humanizer/skills/humanizer/SKILL.md`): Detects 29 AI writing pattern categories and rewrites text to sound natural.
+- **Source**: [github.com/blader/humanizer](https://github.com/blader/humanizer)
+- **No external dependencies or env vars required.**
 
 ## CI/CD
 
