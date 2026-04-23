@@ -13,6 +13,12 @@
       "source": "./plugins/azure-devops",
       "description": "Azure DevOps Server integration — pipeline analysis, PR workflows, changelogs",
       "version": "1.0.0"
+    },
+    {
+      "name": "humanizer",
+      "source": "./plugins/humanizer",
+      "description": "Remove AI writing patterns to make text sound more natural and human",
+      "version": "1.0.0"
     }
   ]
 }
