@@ -20,14 +20,21 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │   └── skills/
 │   │       └── azure-devops/
 │   │           └── SKILL.md      # Skill orchestrating ADO workflows
-│   └── humanizer/                # AI writing pattern removal skill
+│   ├── humanizer/                # AI writing pattern removal skill
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── LICENSE               # MIT (upstream: blader/humanizer)
+│   │   ├── README.md
+│   │   └── skills/
+│   │       └── humanizer/
+│   │           └── SKILL.md      # Writing editor skill (29 pattern categories)
+│   └── claude-md-improver/       # PreToolUse hook syncing CLAUDE.md on git commit
 │       ├── .claude-plugin/
 │       │   └── plugin.json
-│       ├── LICENSE               # MIT (upstream: blader/humanizer)
 │       ├── README.md
-│       └── skills/
-│           └── humanizer/
-│               └── SKILL.md      # Writing editor skill (29 pattern categories)
+│       └── hooks/
+│           ├── hooks.json        # Hook config (PreToolUse on Bash(git commit:*))
+│           └── sync-claude-md.sh # Hook script invoking `claude -p` to update CLAUDE.md
 ├── CLAUDE.md
 ├── README.md
 └── LICENSE                       # Apache-2.0
@@ -70,6 +77,13 @@ Writing editor skill that identifies and removes AI writing patterns. Based on [
 - **Skill** (`plugins/humanizer/skills/humanizer/SKILL.md`): Detects 29 AI writing pattern categories and rewrites text to sound natural.
 - **Source**: [github.com/blader/humanizer](https://github.com/blader/humanizer)
 - **No external dependencies or env vars required.**
+
+### claude-md-improver
+
+Hook-only plugin that keeps `CLAUDE.md` files in sync with staged changes before each `git commit`.
+
+- **Hook** (`plugins/claude-md-improver/hooks/sync-claude-md.sh`): PreToolUse hook matching `Bash(git commit:*)`. Invokes `claude -p --model claude-sonnet-4-6` against the staged diff and updates affected `CLAUDE.md` files (architecture, conventions, commands, prerequisites, project structure, or skill descriptions only).
+- **Requires** the `claude` CLI on `PATH`. No env vars.
 
 ## CI/CD
 

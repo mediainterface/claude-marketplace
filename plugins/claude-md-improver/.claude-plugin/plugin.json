@@ -1,0 +1,9 @@
+{
+  "name": "claude-md-improver",
+  "version": "1.0.0",
+  "description": "PreToolUse hook that keeps CLAUDE.md files in sync with staged changes before each commit",
+  "author": { "name": "MediaInterface GmbH" },
+  "license": "Apache-2.0",
+  "repository": "https://github.com/mediainterface/claude-marketplace",
+  "keywords": ["hook", "claude-md", "git", "commit", "documentation"]
+}

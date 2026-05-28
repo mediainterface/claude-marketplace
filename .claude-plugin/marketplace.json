@@ -19,6 +19,12 @@
       "source": "./plugins/humanizer",
       "description": "Remove AI writing patterns to make text sound more natural and human",
       "version": "1.0.0"
+    },
+    {
+      "name": "claude-md-improver",
+      "source": "./plugins/claude-md-improver",
+      "description": "PreToolUse hook that keeps CLAUDE.md files in sync with staged changes before each commit",
+      "version": "1.0.0"
     }
   ]
 }
