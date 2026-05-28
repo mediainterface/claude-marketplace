@@ -33,8 +33,7 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │       │   └── plugin.json
 │       ├── README.md
 │       └── hooks/
-│           ├── hooks.json        # Hook config (PreToolUse on Bash(git commit:*))
-│           └── sync-claude-md.sh # Hook script invoking `claude -p` to update CLAUDE.md
+│           └── hooks.json        # Agent hook config (PreToolUse on Bash(git commit:*))
 ├── CLAUDE.md
 ├── README.md
 └── LICENSE                       # Apache-2.0
@@ -82,8 +81,8 @@ Writing editor skill that identifies and removes AI writing patterns. Based on [
 
 Hook-only plugin that keeps `CLAUDE.md` files in sync with staged changes before each `git commit`.
 
-- **Hook** (`plugins/claude-md-improver/hooks/sync-claude-md.sh`): PreToolUse hook matching `Bash(git commit:*)`. Invokes `claude -p --model claude-sonnet-4-6` against the staged diff and updates affected `CLAUDE.md` files (architecture, conventions, commands, prerequisites, project structure, or skill descriptions only).
-- **Requires** the `claude` CLI on `PATH`. No env vars.
+- **Hook** (`plugins/claude-md-improver/hooks/hooks.json`): `type: "agent"` PreToolUse hook matching `Bash(git commit:*)`, running Sonnet 4.6 inline against the staged diff and updating affected `CLAUDE.md` files (architecture, conventions, commands, prerequisites, project structure, or skill descriptions only). Always returns `permissionDecision: allow`.
+- **Requires** Claude Code 2.1.118+ (agent hook support). No env vars or external CLI.
 
 ## CI/CD
 
