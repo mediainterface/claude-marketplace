@@ -10,9 +10,9 @@ and places the file in the correct location. Decision Records cover
 all types of decisions, not just architectural ones. The category field
 in the frontmatter indicates what kind of decision it is.
 
-This skill is part of the Memory Bank. The Memory Bank is made known to
-Claude via a rule in `.claude/rules/memory-bank.md` and contains
-conventions, decisions and lessons learned under `docs/`.
+This skill is part of the Memory Bank. Conventions live as Claude Code
+Rules in `.claude/rules/` (auto-loaded). Decisions and learnings live
+under `docs/` and are referenced from the root `CLAUDE.md`.
 
 ## Process
 
@@ -62,6 +62,7 @@ The filename is derived from the number and title:
 - Title in lowercase
 - Spaces replaced by hyphens
 - Special characters removed
+- Title portion truncated to max 80 characters to avoid path length issues on Windows
 
 Use this template:
 
@@ -112,7 +113,24 @@ deciders: {deciders}
 - Bad, because {disadvantage}
 ```
 
-### Step 5: Confirmation
+### Step 5: Update index
+
+Update `{repo-root}/docs/decisions/README.md` with the new entry. If the
+file does not exist, create it with a heading. The index lists all decisions
+with their number, title, status and category:
+
+```markdown
+# Decision Records
+
+| # | Title | Status | Category |
+|---|-------|--------|----------|
+| 0001 | [Monorepo for MIRA Suite](0001-monorepo-for-mira-suite.md) | Accepted | Architecture |
+| 0002 | [New decision title](0002-new-decision-title.md) | Proposed | Security |
+```
+
+Add the new entry at the end of the table.
+
+### Step 6: Confirmation
 
 Show the user:
 - The complete content of the created file

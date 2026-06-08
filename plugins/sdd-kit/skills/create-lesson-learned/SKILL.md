@@ -9,9 +9,9 @@ This skill guides through creating a Lesson Learned entry and places
 the file in the correct location. Each Lesson Learned is stored as its
 own file (analogous to decision records).
 
-This skill is part of the Memory Bank. The Memory Bank is made known to
-Claude via a rule in `.claude/rules/memory-bank.md` and contains
-conventions, decisions and lessons learned under `docs/`.
+This skill is part of the Memory Bank. Conventions live as Claude Code
+Rules in `.claude/rules/` (auto-loaded). Decisions and learnings live
+under `docs/` and are referenced from the root `CLAUDE.md`.
 
 ## Process
 
@@ -40,7 +40,7 @@ being discussed), suggest them instead of asking again.
 
 ### Step 3: Create file
 
-Create the file at `{repo-root}/docs/lessons-learned/YYYY-MM-DD-kebab-case-title.md`.
+Create the file at `{repo-root}/docs/learnings/YYYY-MM-DD-kebab-case-title.md`.
 
 The filename is derived from the date and title:
 - Today's date as prefix (YYYY-MM-DD)
@@ -48,8 +48,9 @@ The filename is derived from the date and title:
 - Title in lowercase
 - Spaces replaced by hyphens
 - Special characters removed
+- Title portion truncated to max 80 characters to avoid path length issues on Windows
 
-If `docs/lessons-learned/` does not exist, create the directory.
+If `docs/learnings/` does not exist, create the directory.
 
 Use this template:
 
@@ -83,7 +84,24 @@ observed-in: {PRs/reviews/stories, if provided}
 {References to existing files, if available}
 ```
 
-### Step 4: Confirmation
+### Step 4: Update index
+
+Update `{repo-root}/docs/learnings/README.md` with the new entry. If the
+file does not exist, create it with a heading. The index lists all learnings
+with their date, title, status and category:
+
+```markdown
+# Learnings
+
+| Date | Title | Status | Category |
+|------|-------|--------|----------|
+| 2026-06-07 | [Claude generates wrong enum serialization](2026-06-07-claude-generates-wrong-enum-serialization.md) | Active | KI-Pattern |
+| 2026-06-08 | [E2E tests flaky with WaitForLoadState](2026-06-08-e2e-tests-flaky-with-waitforloadstate.md) | Resolved | Testing |
+```
+
+Add the new entry at the end of the table.
+
+### Step 5: Confirmation
 
 Show the user:
 - The complete content of the created entry
@@ -92,9 +110,9 @@ Show the user:
   automatically added as reviewer."
 
 If the observation is actually a rule (e.g. "always do it this way"),
-suggest writing a convention instead.
+suggest writing a convention (Claude Code Rule in `.claude/rules/`) instead.
 
-If the observation is actually an architecture decision, suggest using
+If the observation is actually a decision, suggest using
 `/create-decision` instead.
 
 ## Lifecycle
