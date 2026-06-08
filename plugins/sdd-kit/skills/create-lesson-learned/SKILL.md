@@ -7,11 +7,11 @@ description: Creates a new Lesson Learned entry in the Memory Bank. Use this ski
 
 This skill guides through creating a Lesson Learned entry and places
 the file in the correct location. Each Lesson Learned is stored as its
-own file (analogous to ADRs).
+own file (analogous to decision records).
 
 This skill is part of the Memory Bank. The Memory Bank is made known to
 Claude via a rule in `.claude/rules/memory-bank.md` and contains
-conventions, ADRs and lessons learned under `docs/`.
+conventions, decisions and lessons learned under `docs/`.
 
 ## Process
 
@@ -36,7 +36,7 @@ being discussed), suggest them instead of asking again.
 4. **Problem**: Why is this a problem?
 5. **Solution or workaround**: What helps against it? (can also be "still open")
 6. **Observed in**: References to PRs, reviews or stories where this occurred (optional)
-7. **Related conventions/ADRs**: Are there existing conventions or ADRs that relate to this? (optional)
+7. **Related conventions/decision records**: Are there existing conventions or decision records that relate to this? (optional)
 
 ### Step 3: Create file
 
@@ -55,9 +55,11 @@ Use this template:
 
 ```markdown
 ---
+# status: Active | Resolved
 status: Active
 date: {today's date, YYYY-MM-DD}
 last-modified: {today's date, YYYY-MM-DD}
+# category: KI-Pattern | Review | Architecture | Testing
 category: {selected category}
 observed-in: {PRs/reviews/stories, if provided}
 ---
@@ -76,7 +78,7 @@ observed-in: {PRs/reviews/stories, if provided}
 
 {What helps against it?}
 
-## Related conventions/ADRs
+## Related conventions/decision records
 
 {References to existing files, if available}
 ```
@@ -93,14 +95,14 @@ If the observation is actually a rule (e.g. "always do it this way"),
 suggest writing a convention instead.
 
 If the observation is actually an architecture decision, suggest using
-`/create-adr` instead.
+`/create-decision` instead.
 
 ## Lifecycle
 
 - `Active`: Observation is current, workaround documented.
-- `Resolved`: The Lesson Learned became a convention or ADR.
+- `Resolved`: The Lesson Learned became a convention or decision record.
   Reference the new file and change the status.
 
 When the user wants to set an existing Lesson Learned to `Resolved`,
 help them: change the status, update `last-modified`, and add the
-reference to the new convention/ADR.
+reference to the new convention/decision record.

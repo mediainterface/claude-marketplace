@@ -27,9 +27,9 @@
       "version": "1.0.0"
     },
     {
-      "name": "memory-bank-skills",
-      "source": "./plugins/memory-bank-skills",
-      "description": "Memory Bank skills: /create-adr for architecture decisions, /create-lesson-learned for recurring patterns and pitfalls",
+      "name": "sdd-kit",
+      "source": "./plugins/sdd-kit",
+      "description": "SDD toolkit: /create-decision for decision records, /create-lesson-learned for recurring patterns and pitfalls",
       "version": "1.0.0"
     }
   ]

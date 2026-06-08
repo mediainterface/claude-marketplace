@@ -1,8 +1,0 @@
-{
-  "name": "memory-bank-skills",
-  "description": "Skills for the Memory Bank: create ADRs and Lessons Learned. Use /create-adr when an architecture decision needs to be documented (e.g. during spec creation). Use /create-lesson-learned when a recurring pattern or pitfall should be captured.",
-  "author": {
-    "name": "MIRA Hueter-Trio",
-    "email": "daniel.lahmann@mediainterface.de"
-  }
-}
