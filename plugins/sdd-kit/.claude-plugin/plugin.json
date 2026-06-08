@@ -1,6 +1,6 @@
 {
   "name": "sdd-kit",
-  "description": "Spec-Driven Development toolkit for the Memory Bank: create Decision Records and Lessons Learned. Use /create-decision when a decision needs to be documented (e.g. during spec creation). Use /create-lesson-learned when a recurring pattern or pitfall should be captured.",
+  "description": "Toolkit for Spec-Driven Development. Provides skills for the full SDD workflow: Memory Bank management (Decision Records, Lessons Learned), and more to come. Currently available: /create-decision to document decisions during spec creation, /create-lesson-learned to capture recurring patterns and pitfalls.",
   "author": {
     "name": "MIRA Hueter-Trio",
     "email": "daniel.lahmann@mediainterface.de"
