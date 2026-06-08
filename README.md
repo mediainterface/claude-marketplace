@@ -39,6 +39,17 @@ Writing editor that identifies and removes AI writing patterns to make text soun
 | Requires | Nothing |
 | Source | [blader/humanizer](https://github.com/blader/humanizer) (MIT, Siqi Chen) |
 
+### memory-bank-skills
+
+Skills for the Memory Bank: create Architecture Decision Records and Lessons Learned with guided workflows and standardized templates (MADR format).
+
+| | |
+|---|---|
+| Install | `claude plugin install memory-bank-skills@mediainterface` |
+| Type | Skills only |
+| Requires | Nothing |
+| Skills | `/create-adr`, `/create-lesson-learned` |
+
 ## Adding a plugin
 
 1. Create a directory under `plugins/<your-plugin-name>/`.
