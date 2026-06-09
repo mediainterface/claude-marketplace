@@ -1,0 +1,8 @@
+{
+  "name": "sdd-kit",
+  "description": "Toolkit for Spec-Driven Development. Provides skills for the full SDD workflow: Memory Bank management (Decision Records, Lessons Learned), and more to come. Currently available: /create-decision to document decisions during spec creation, /create-lesson-learned to capture recurring patterns and pitfalls.",
+  "author": {
+    "name": "MIRA Hueter-Trio",
+    "email": "daniel.lahmann@mediainterface.de"
+  }
+}
