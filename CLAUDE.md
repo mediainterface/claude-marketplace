@@ -28,12 +28,22 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │   └── skills/
 │   │       └── humanizer/
 │   │           └── SKILL.md      # Writing editor skill (29 pattern categories)
-│   └── claude-md-improver/       # PreToolUse hook syncing CLAUDE.md on git commit
+│   ├── claude-md-improver/       # PreToolUse hook syncing CLAUDE.md on git commit
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── README.md
+│   │   └── hooks/
+│   │       └── hooks.json        # Agent hook config (PreToolUse on Bash(git commit:*))
+│   └── sdd-kit/                  # Spec-Driven Development toolkit (skill-only)
 │       ├── .claude-plugin/
 │       │   └── plugin.json
-│       ├── README.md
-│       └── hooks/
-│           └── hooks.json        # Agent hook config (PreToolUse on Bash(git commit:*))
+│       └── skills/
+│           ├── create-decision/
+│           │   └── SKILL.md      # /create-decision — document decisions as Decision Records
+│           ├── create-lesson-learned/
+│           │   └── SKILL.md      # /create-lesson-learned — capture patterns and pitfalls
+│           └── ado-cli/
+│               └── SKILL.md      # /ado-cli — Azure DevOps via az CLI (cloud + newest Server)
 ├── CLAUDE.md
 ├── README.md
 └── LICENSE                       # Apache-2.0
@@ -83,6 +93,15 @@ Hook-only plugin that keeps `CLAUDE.md` files in sync with staged changes before
 
 - **Hook** (`plugins/claude-md-improver/hooks/hooks.json`): `type: "agent"` PreToolUse hook matching `Bash(git commit:*)`, running Sonnet 4.6 inline against the staged diff and updating affected `CLAUDE.md` files (architecture, conventions, commands, prerequisites, project structure, or skill descriptions only). Always returns `permissionDecision: allow`.
 - **Requires** Claude Code 2.1.118+ (agent hook support). No env vars or external CLI.
+
+### sdd-kit
+
+Toolkit for Spec-Driven Development. Skill-only plugin (no MCP server, no hooks).
+
+- **Skill** (`plugins/sdd-kit/skills/create-decision/SKILL.md`): `/create-decision` — documents decisions in the Memory Bank as Decision Records.
+- **Skill** (`plugins/sdd-kit/skills/create-lesson-learned/SKILL.md`): `/create-lesson-learned` — captures recurring patterns and pitfalls in the Memory Bank.
+- **Skill** (`plugins/sdd-kit/skills/ado-cli/SKILL.md`): `/ado-cli` — Azure DevOps via the Azure CLI (`az` + azure-devops extension). Mirrors the `azure-devops` skill's five workflows (pipeline analysis, PR review/create/update, changelog) but for cloud and the newest Server version. Auth via `az login` (Entra ID). The MCP-based `azure-devops` plugin stays for the older Server version.
+- **No external dependencies or env vars required** (beyond `az` CLI being installed and logged in for `/ado-cli`).
 
 ## CI/CD
 

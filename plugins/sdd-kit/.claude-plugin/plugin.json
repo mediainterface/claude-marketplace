@@ -1,6 +1,6 @@
 {
   "name": "sdd-kit",
-  "description": "Toolkit for Spec-Driven Development. Provides skills for the full SDD workflow: Memory Bank management (Decision Records, Lessons Learned), and more to come. Currently available: /create-decision to document decisions during spec creation, /create-lesson-learned to capture recurring patterns and pitfalls.",
+  "description": "Toolkit for Spec-Driven Development. Provides skills for the full SDD workflow: Memory Bank management (Decision Records, Lessons Learned) and Azure DevOps via the Azure CLI. Currently available: /create-decision to document decisions, /create-lesson-learned to capture recurring patterns and pitfalls, and /ado-cli for Azure DevOps pipeline analysis, PR review/create/update, and changelogs via the az CLI (cloud and newest Server version).",
   "author": {
     "name": "MIRA Hueter-Trio",
     "email": "daniel.lahmann@mediainterface.de"
