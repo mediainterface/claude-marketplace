@@ -227,7 +227,7 @@ Append exactly this content to the end of `plugins/sdd-kit/skills/ado-cli/SKILL.
 **Trigger:** User provides a pipeline URL (containing `/_build/results?buildId=`) or a numeric build ID, or asks about a build failure.
 
 1. **Parse input:** Extract `buildId` from the URL query parameter, or use the numeric ID directly.
-2. **Fetch build metadata:** `az pipelines build show --id {buildId} --org {org} --project {project} --detect false -o json`. Note `definition.id` (for step 6), `sourceBranch`, `sourceVersion`, `requestedFor`, `startTime`, `finishTime`, `result`, `repository.name`.
+2. **Fetch build metadata:** `az pipelines build show --id {buildId} --org {org} --project {project} --detect false -o json`. Note `definition.id` (for step 7), `sourceBranch`, `sourceVersion`, `requestedFor`, `startTime`, `finishTime`, `result`, `repository.name`.
    **Repository check:** compare `repository.name` against the local `repository` from Step 0; if they differ, run the Repository Mismatch Check and stop unless confirmed.
 3. **Fetch timeline:** `az devops invoke --area build --resource Timeline --route-parameters project={project} buildId={buildId} --org {org} --api-version 7.1 -o json`. From `records`, find entries where `result` is `"failed"` and `type` is `"Task"`. Note their `log.id` and any `issues[]`.
 4. **Fetch logs for each failed task:** `az devops invoke --area build --resource logs --route-parameters project={project} buildId={buildId} logId={logId} --org {org} --api-version 7.1 -o json`. Join the returned `value` array into text. Extract error lines matching `##[error]`, `error:`, `error `, `FAILED`, `fatal:`, `fatal `, `exception:`, `exception ` (case-insensitive). Focus analysis on those lines rather than dumping full logs.
