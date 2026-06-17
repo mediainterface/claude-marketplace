@@ -137,3 +137,124 @@ differ, warn before proceeding:
 > generating diffs) will use the wrong codebase. Do you want to continue anyway?"
 
 Only proceed if the user explicitly confirms.
+
+---
+
+## Workflow: Pipeline Analysis
+
+**Trigger:** User provides a pipeline URL (containing `/_build/results?buildId=`) or a numeric build ID, or asks about a build failure.
+
+1. **Parse input:** Extract `buildId` from the URL query parameter, or use the numeric ID directly.
+2. **Fetch build metadata:** `az pipelines build show --id {buildId} --org {org} --project {project} --detect false -o json`. Note `definition.id` (for step 7), `sourceBranch`, `sourceVersion`, `requestedFor`, `startTime`, `finishTime`, `result`, `repository.name`.
+   **Repository check:** compare `repository.name` against the local `repository` from Step 0; if they differ, run the Repository Mismatch Check and stop unless confirmed.
+3. **Fetch timeline:** `az devops invoke --area build --resource Timeline --route-parameters project={project} buildId={buildId} --org {org} --api-version 7.1 -o json`. From `records`, find entries where `result` is `"failed"` and `type` is `"Task"`. Note their `log.id` and any `issues[]`.
+4. **Fetch logs for each failed task:** `az devops invoke --area build --resource logs --route-parameters project={project} buildId={buildId} logId={logId} --org {org} --api-version 7.1 -o json`. Join the returned `value` array into text. Extract error lines matching `##[error]`, `error:`, `error `, `FAILED`, `fatal:`, `fatal `, `exception:`, `exception ` (case-insensitive). Focus analysis on those lines rather than dumping full logs.
+5. **Fetch associated commits:** `az devops invoke --area build --resource Changes --route-parameters project={project} buildId={buildId} --org {org} --api-version 7.1 -o json`.
+6. **Checkout the build's source branch** so local files match what the build ran against:
+   - Note current branch: `git branch --show-current` (or `git rev-parse HEAD` if detached).
+   - Stash uncommitted changes if any: `git stash -u`.
+   - Strip `refs/heads/` from `sourceBranch`, then: `git fetch origin {sourceBranch} && git checkout origin/{sourceBranch} --detach`.
+   - If the branch no longer exists, use `sourceVersion` instead: `git fetch origin {sourceVersion} && git checkout {sourceVersion} --detach`.
+7. **Fetch pipeline definition:** `az pipelines build definition show --id {definitionId} --org {org} --project {project} --detect false -o json`. If `process.yamlFilename` is present, read that YAML from the local repo and follow `template:` references.
+8. **Analyse and report:** Error summary (what failed + one-sentence root cause); detailed analysis connecting error logs to pipeline steps and source; root cause (symptom vs cause, responsible commit if any); suggested fix (concrete changes); prevention. Common categories: build, test, deployment, infrastructure, configuration, dependency.
+9. **Restore original branch:** `git checkout {originalBranch}` (or `{originalCommit}` if detached); if stashed, `git stash pop`.
+
+---
+
+## Workflow: PR Review
+
+**Trigger:** User provides a PR ID (numeric) or PR URL, or asks to review a PR.
+
+1. **Parse input:** Extract PR ID from the URL path or use the numeric ID directly.
+2. **Fetch PR metadata:** `az repos pr show --id {prId} --org {org} -o json`. Note `sourceRefName`, `targetRefName`, `title`, `description`, `createdBy`, `creationDate`, `status`, `repository.name`.
+   **Repository check:** compare `repository.name` against the local `repository`; if different, run the Repository Mismatch Check and stop unless confirmed.
+3. **Generate local git diffs:** strip `refs/heads/` from source and target, then:
+   ```bash
+   git fetch origin {sourceBranch} {targetBranch}
+   git diff --name-status origin/{targetBranch}...origin/{sourceBranch}
+   git diff --stat origin/{targetBranch}...origin/{sourceBranch}
+   git diff origin/{targetBranch}...origin/{sourceBranch}
+   git log --oneline origin/{targetBranch}...origin/{sourceBranch}
+   ```
+   **If the source branch no longer exists** (merged/deleted, `git fetch` fails): use `lastMergeSourceCommit.commitId` from the PR metadata — `git fetch origin {commitId}`, then diff against `{commitId}` instead of `origin/{sourceBranch}`.
+   **If git operations fail for any other reason, report the error and stop.** Do NOT fall back to API-based changes.
+4. **Fetch PR comment threads:** `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} --org {org} --api-version 7.1 -o json`. Filter out system-only threads (every comment has `commentType: "system"`); show human comments.
+5. **Checkout the source branch** to explore the PR state:
+   - Note current branch: `git branch --show-current` (or `git rev-parse HEAD` if detached).
+   - Stash uncommitted changes if any: `git stash -u`.
+   - `git checkout origin/{sourceBranch} --detach` (or `{commitId} --detach` if the deleted-branch fallback was used in step 3).
+6. **Gather context:** read CLAUDE.md files in/near affected dirs; read related files the change imports/extends; use Glob/Grep for conventions.
+7. **Review** covering: Summary, Code Quality, Correctness, Security (injection/XSS/secrets/OWASP), Performance (N+1, inefficiencies), Architecture (project patterns), Testing. Reference file paths and line numbers; distinguish blockers from suggestions.
+8. **Restore original branch:** `git checkout {originalBranch}` (or `{originalCommit}`); if stashed, `git stash pop`.
+
+---
+
+## Workflow: PR Creation
+
+**Trigger:** User asks to create a PR, or `$ARGUMENTS` starts with `create`.
+
+1. **Verify branch is pushed:**
+   ```bash
+   CURRENT_BRANCH=$(git branch --show-current)
+   git rev-list --count "origin/$CURRENT_BRANCH..HEAD" 2>/dev/null
+   ```
+   If the branch is untracked or has unpushed commits, ask the user whether to push. If yes: `git push -u origin $CURRENT_BRANCH`. If no: stop.
+2. **Check for existing PR:** `az repos pr list --repository {repo} --source-branch {currentBranch} --status active --org {org} --project {project} --detect false -o json`. If a PR exists, show its title and ID and ask whether to update instead (→ PR Update workflow).
+3. **Get default branch:** `az repos show --repository {repo} --org {org} --project {project} --detect false -o json`; use `defaultBranch` (strip `refs/heads/`) as the target branch.
+4. **Gather commit information:** `git log --oneline "origin/{targetBranch}..{currentBranch}"`.
+5. **Ask for Asana ticket ID** — format `ID-XXXXX` (e.g. `ID-17885`).
+6. **Check for PR template:** Glob for `.azuredevops/pull_request_template.md` in the repo root; if found, read it.
+7. **Generate title and description:**
+   **Title format:** `Icon <Asana-Ticket-Id> Component - Änderungsbeschreibung`
+   - **Icon** by majority vote over commit messages: 🐞 bug fixes (`fix`/`bugfix`/`hotfix`); 🏗️ refactor (`refactor`/`cleanup`/`restructure`); 📖 docs (`docs`/`documentation`); 🏆 features or unclear (default). Tie-break: most recent commit's category.
+   - **Component:** from conventional-commit scopes first, else from file paths.
+   - **Änderungsbeschreibung:** concise German summary.
+   **Description (German):** if a template was found, use it as structure and integrate the Asana link (`https://app.asana.com/0/search?q=ID-XXXXX`) into a suitable section (or add `## Asana`). If no template: `## Asana` section at top with the link, German summary, then the commit list.
+   *(Reminder: per Quirks, the emoji icon will be missing from the CLI's returned JSON — that is expected, the PR has it.)*
+8. **Present to user for review:** show generated title and full description; apply requested changes; repeat until approved.
+9. **Create the PR:** `az repos pr create --repository {repo} --source-branch {source} --target-branch {target} --title "{title}" --description "{description}" --org {org} --project {project} --detect false -o json` (branch names without `refs/heads/`).
+10. **Report result:** show the PR URL and ID (`pullRequestId`).
+
+---
+
+## Workflow: PR Update
+
+**Trigger:** User asks to update a PR, or `$ARGUMENTS` starts with `update`.
+
+1. **Find the PR:** determine the current branch first (`currentBranch=$(git branch --show-current)`), then `az repos pr list --repository {repo} --source-branch {currentBranch} --status active --org {org} --project {project} --detect false -o json`.
+   - None found: ask for the PR ID, then `az repos pr show --id {prId} --org {org} -o json`.
+   - One found: use it. Multiple: show list (ID + title), ask which.
+2. **Show current PR state:** display current title and description.
+3. **Ask what to update:** title, description, or Asana link.
+4. **Generate updated values** following the same conventions as PR Creation (German, title schema with icon/Asana-ID/component).
+5. **Present changes for confirmation:** old vs new.
+6. **Update the PR:** `az repos pr update --id {prId} [--title "{newTitle}"] [--description "{newDescription}"] [--status active|abandoned|completed] --org {org} -o json`. Include only the flags for fields being changed (the brackets mark optional flags — omit those you are not updating).
+7. **Report result:** confirm the update and show the PR URL. *(Per Quirks, ignore a missing emoji in the returned JSON.)*
+
+---
+
+## Workflow: Changelog
+
+**Trigger:** User asks what changed since a build or commit, or `$ARGUMENTS` starts with `changelog`.
+
+### Input Resolution
+Determine the **base commit SHA**:
+1. **Build URL** — extract `buildId` from `/_build/results?buildId=`, then proceed as build ID.
+2. **Build ID** (numeric) — `az pipelines build show --id {buildId} --org {org} --project {project} --detect false -o json`; use `sourceVersion` as the commit SHA.
+   **Repository check:** compare `repository.name` against local `repository`; if different, run the Repository Mismatch Check and stop unless confirmed.
+3. **Commit SHA** (hex, 7–40 chars) — use directly.
+
+### Steps
+1. **Repository name:** use `repository` from Step 0.
+2. **Get default branch:** `az repos show --repository {repo} --org {org} --project {project} --detect false -o json`; use `defaultBranch` (strip `refs/heads/`).
+3. **Fetch latest:** `git fetch origin {defaultBranch}`.
+4. **Ensure base commit is local:** `git cat-file -t {commit}`; if it fails, `git fetch origin {commit}`; if still failing, report "Commit {commit} not found locally or on the remote." and stop.
+5. **Check for changes:** `git rev-list --count {commit}..origin/{defaultBranch}`; if `0`, report "Default branch is at the same commit as the build — no new changes." and stop.
+6. **Commit log:** `git log --format='%h %an <%ae> %s' {commit}..origin/{defaultBranch}`.
+7. **File stats:** `git diff --stat {commit}..origin/{defaultBranch}`.
+8. **Full diff:** `git diff {commit}..origin/{defaultBranch}`.
+
+### Output
+1. **Commit Log** — all commits between base and `origin/{defaultBranch}` (short SHA, author, message).
+2. **File Overview** — `git diff --stat` grouped by top-level dir/component; totals (files, insertions, deletions).
+3. **Narrative Summary** — prose describing features added, bugs fixed, refactors, as a briefing for the next build.
