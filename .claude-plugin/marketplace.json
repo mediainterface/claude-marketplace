@@ -29,7 +29,7 @@
     {
       "name": "sdd-kit",
       "source": "./plugins/sdd-kit",
-      "description": "SDD toolkit: /create-decision for decision records, /create-lesson-learned for recurring patterns, /ado-cli for Azure DevOps via the az CLI (on-prem newest Server, PAT auth; pipelines, PRs, work items, changelogs)",
+      "description": "The skill set for our Spec-Driven Development workflow — decision records, lessons learned, and Azure DevOps via the az CLI — curated for SDD, not a general-purpose collection; most of it has little use outside that workflow.",
       "version": "1.0.0"
     }
   ]
