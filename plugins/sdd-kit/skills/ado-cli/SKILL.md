@@ -76,8 +76,8 @@ Verify the toolchain before doing real work. On any failure, give the exact fix 
    ```
 
 3. **Authenticated:** Assume the user has **already** signed the Azure CLI in to Azure
-   DevOps. Do **not** authenticate on their behalf — never set `AZURE_DEVOPS_EXT_PAT`, run
-   `az devops login`, or read a PAT from the environment yourself. Only **confirm** their
+   DevOps. Do **not** authenticate on their behalf — never run `az devops login`, set auth
+   environment variables, or read a PAT from the environment yourself. Only **confirm** their
    existing sign-in with a read-only call (covered by the Code scope below):
    ```bash
    az repos show --repository {repository} --org {organization} --project {project} --detect false -o json
@@ -101,15 +101,13 @@ Verify the toolchain before doing real work. On any failure, give the exact fix 
 >    - **Work Items** — Read & write (work item create/show/query/update)
 > 5. Click **Create** and copy the token.
 >
-> **2. Make the CLI use it** — either:
-> - Export it in your shell profile (`~/.zshrc`, `~/.bashrc`, …) and restart your session:
->   ```bash
->   export AZURE_DEVOPS_EXT_PAT="your-personal-access-token"
->   ```
-> - Or run `az devops login --org {organization}` and paste the PAT when prompted.
+> **2. Sign in with the PAT:**
+> ```bash
+> az devops login --org {organization}
+> ```
+> Paste the PAT when prompted.
 >
-> (Same PAT the MCP-based `azure-devops` skill uses as `ADO_PAT`; the az CLI reads
-> `AZURE_DEVOPS_EXT_PAT`.)
+> (You can reuse the same PAT as the MCP-based `azure-devops` skill.)
 
 After giving any Setup Check instruction (steps 1–3), **stop** — run no further `az`
 commands and do no work until it is resolved; for sign-in, until the user confirms.
