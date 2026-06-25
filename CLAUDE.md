@@ -43,7 +43,7 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │           ├── create-lesson-learned/
 │           │   └── SKILL.md      # /create-lesson-learned — capture patterns and pitfalls
 │           └── ado-cli/
-│               └── SKILL.md      # /ado-cli — Azure DevOps via az CLI (cloud + newest Server)
+│               └── SKILL.md      # /ado-cli — Azure DevOps via az CLI (on-prem newest Server, PAT auth)
 ├── CLAUDE.md
 ├── README.md
 └── LICENSE                       # Apache-2.0
@@ -100,8 +100,8 @@ Toolkit for Spec-Driven Development. Skill-only plugin (no MCP server, no hooks)
 
 - **Skill** (`plugins/sdd-kit/skills/create-decision/SKILL.md`): `/create-decision` — documents decisions in the Memory Bank as Decision Records.
 - **Skill** (`plugins/sdd-kit/skills/create-lesson-learned/SKILL.md`): `/create-lesson-learned` — captures recurring patterns and pitfalls in the Memory Bank.
-- **Skill** (`plugins/sdd-kit/skills/ado-cli/SKILL.md`): `/ado-cli` — Azure DevOps via the Azure CLI (`az` + azure-devops extension). Mirrors the `azure-devops` skill's five workflows (pipeline analysis, PR review/create/update, changelog) but for cloud and the newest Server version. Auth via `az login` (Entra ID). The MCP-based `azure-devops` plugin stays for the older Server version.
-- **No external dependencies or env vars required** (beyond `az` CLI being installed and logged in for `/ado-cli`).
+- **Skill** (`plugins/sdd-kit/skills/ado-cli/SKILL.md`): `/ado-cli` — Azure DevOps via the Azure CLI (`az` + azure-devops extension). Covers six workflows (pipeline analysis, PR review/create/update, changelog, and work item management) for the newest **on-prem** Server version. **On-prem only — no cloud (`dev.azure.com`).** Auth via a Personal Access Token (`AZURE_DEVOPS_EXT_PAT`, the same PAT as `ADO_PAT`), not `az login`/Entra. The Server is **German-localized**, so work item types/states are German (e.g. `Aufgabe`, not `Task`) — the skill fetches them from the server rather than assuming. The MCP-based `azure-devops` plugin stays for the older Server version.
+- **Requires** the `az` CLI with the `azure-devops` extension installed and an `AZURE_DEVOPS_EXT_PAT` for `/ado-cli`.
 
 ## CI/CD
 

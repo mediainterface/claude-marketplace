@@ -4,15 +4,24 @@
 **Branch:** `feature/ado-cli-skill`
 **Status:** Approved design — ready for implementation plan
 
+> **Revision (2026-06-25):** Scope narrowed to **on-prem Azure DevOps Server only**, and
+> auth changed from Entra/`az login` to a **Personal Access Token** (`AZURE_DEVOPS_EXT_PAT`).
+> Azure DevOps **cloud is dropped** — on-prem and cloud require different auth methods and we
+> run on-prem. A sixth workflow — **Work Item Management** — was also added: our Server is
+> German-localized, so it fetches the localized work item types/states from the server
+> (`Aufgabe`, not `Task`) instead of assuming English names. Where the original text below
+> says "cloud", `az login`, or "five workflows", the live `SKILL.md` is authoritative.
+
 ## Problem
 
 The existing `azure-devops` plugin talks to Azure DevOps **Server** over REST through
 a bundled MCP server (`ado_get`/`ado_post`/`ado_patch`/`ado_delete` + `parse_ado_remote`).
 It works against our **older** on-prem server version.
 
-We also run Azure DevOps **cloud** and the **newest** on-prem server version. For those we
-want a skill that does the same jobs but communicates through the **Azure CLI** (`az`) with
-the **azure-devops extension** instead of REST/MCP.
+We also run the **newest** on-prem server version. For that we want a skill that does the
+same jobs but communicates through the **Azure CLI** (`az`) with the **azure-devops
+extension** instead of REST/MCP. (Azure DevOps cloud was considered but dropped — see the
+revision note above; we do not run it, and it would need a different auth method.)
 
 Both must coexist: the MCP plugin is **not** removed. The new skill is added under the
 `sdd-kit` plugin.
@@ -37,8 +46,8 @@ Non-goals: removing or changing the existing `azure-devops` plugin; new conventi
 | Skill name | `ado-cli` (invoked as `/ado-cli`) |
 | Location | `plugins/sdd-kit/skills/ado-cli/SKILL.md` |
 | Plugin | `sdd-kit` (existing) |
-| Scope | All five workflows (mirror existing) |
-| Auth | `az login` (Entra ID) — primary and only documented path |
+| Scope | All five workflows (mirror existing); **on-prem Server only — no cloud** |
+| Auth | **Personal Access Token** via `AZURE_DEVOPS_EXT_PAT` (or `az devops login`) — *not* `az login`/Entra |
 | Conventions | Identical to existing skill (German PR titles, icon majority-vote, Asana `ID-XXXXX`, PR template handling) |
 | Transport | **Hybrid (Approach A)** — see below |
 | Existing plugin | Untouched |
@@ -57,8 +66,9 @@ Fall back to `az devops invoke` for endpoints the high-level CLI does not surfac
 - Task **logs** (`--area build --resource logs`, plain text)
 - PR **comment threads** (`--area git --resource pullRequestThreads`)
 
-All structured output requested as JSON (`-o json`). The CLI handles auth for both the
-high-level commands and `az devops invoke`, so the setup manual only needs `az login` once.
+All structured output requested as JSON (`-o json`). The CLI handles auth (via the PAT in
+`AZURE_DEVOPS_EXT_PAT`) for both the high-level commands and `az devops invoke`, so the setup
+manual only needs the PAT to be present once.
 
 Rejected: **B** (everything via `az devops invoke` — loses ergonomics, more verbose for no
 gain) and **C** (high-level commands only — can't do timeline/logs, so pipeline analysis
@@ -82,11 +92,11 @@ No MCP tools in `allowed-tools`.
 ### Step 0 — Connection detection (replaces `parse_ado_remote`)
 
 1. `git remote get-url origin`.
-2. Parse the remote ourselves. Recognise:
-   - Cloud: `https://dev.azure.com/{org}/{project}/_git/{repo}` and
-     `https://{org}@dev.azure.com/{org}/{project}/_git/{repo}`
-   - Newest on-prem server: `https://{host}/{collection}/{project}/_git/{repo}`
-   - SSH: `git@ssh.dev.azure.com:v3/{org}/{project}/{repo}`
+2. Parse the remote ourselves (on-prem Server only). Recognise:
+   - On-prem HTTPS: `https://{host}[:port]/{collection}/{project}/_git/{repo}`
+   - On-prem SSH: `ssh://{host}[:port]/{collection}/{project}/_git/{repo}` or
+     `{user}@{host}:{collection}/{project}/_git/{repo}`
+   - A cloud remote (`dev.azure.com` / `ssh.dev.azure.com`) → stop: not supported here.
 3. Derive `organization` URL, `project`, `repository`.
 4. `az devops configure --defaults organization=<orgUrl> project=<project>` and ALSO pass
    `--org`/`--project` explicitly on each call to stay robust.
@@ -99,7 +109,9 @@ Preconditions check + exact instructions on failure:
 1. Azure CLI installed (`az version`). If missing → install instructions.
 2. azure-devops extension installed (`az extension add --name azure-devops` /
    `az extension show --name azure-devops`).
-3. Authenticated (`az account show`). If not → `az login` (Entra ID) instructions.
+3. Authenticated via **PAT**: verify with `az devops project list --org {org}`. If it
+   401/403s or reports not signed in → PAT setup instructions (`AZURE_DEVOPS_EXT_PAT`,
+   or `az devops login`). *Not* `az login`/Entra — that is the cloud path.
 
 On any failure, give exact commands and **stop** — no further `az` calls.
 

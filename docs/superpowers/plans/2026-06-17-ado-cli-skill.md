@@ -2,7 +2,15 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add an `ado-cli` skill to the `sdd-kit` plugin that performs the same five Azure DevOps workflows as the existing `azure-devops` skill, but communicates through the Azure CLI (`az` + azure-devops extension) instead of the REST/MCP server — targeting Azure DevOps cloud and the newest on-prem server version.
+> **Revision (2026-06-25):** Post-implementation, scope was narrowed to **on-prem Server
+> only** (cloud dropped) and auth changed from Entra/`az login` to a **PAT**
+> (`AZURE_DEVOPS_EXT_PAT`). A sixth **Work Item Management** workflow was added (German-
+> localized types/states, fetched from the server — `Aufgabe`, not `Task`). The embedded
+> SKILL.md / manifest / CLAUDE.md snippets below are the *original* version (cloud,
+> `az login`, five workflows); the **live files are authoritative**. Do not re-apply the
+> snippets verbatim.
+
+**Goal:** Add an `ado-cli` skill to the `sdd-kit` plugin that performs the same five Azure DevOps workflows as the existing `azure-devops` skill, but communicates through the Azure CLI (`az` + azure-devops extension) instead of the REST/MCP server — targeting the newest **on-prem** Azure DevOps Server version (authenticated with a PAT; cloud is out of scope).
 
 **Architecture:** A single behavioral `SKILL.md` (no MCP server, no code). Transport is **hybrid**: first-class `az repos` / `az pipelines` commands where they exist, with `az devops invoke` for endpoints the high-level CLI doesn't surface (build timeline, task logs, PR threads). All local git operations and PR/changelog conventions are carried over byte-for-byte from the existing skill. The existing `azure-devops` plugin is left untouched.
 

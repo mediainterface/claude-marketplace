@@ -1,38 +1,46 @@
 ---
 name: ado-cli
 description: >-
-  Work with Azure DevOps via the Azure CLI (az + azure-devops extension) —
-  analyse pipeline failures, review pull requests, create and update pull requests,
-  and generate changelogs since a given build or commit. This is the CLI variant
-  of the azure-devops skill, for Azure DevOps cloud and the newest on-prem Server
-  version. Use when the user mentions ADO pipelines, builds, PRs, changelogs, or
-  pastes Azure DevOps URLs and the repo targets the cloud / newest server, or when
-  the user asks to use the az CLI for Azure DevOps.
-argument-hint: <PIPELINE_URL_OR_BUILD_ID | PR_ID_OR_URL | create | update | changelog>
+  Work with on-prem Azure DevOps Server via the Azure CLI (az + azure-devops
+  extension) — analyse pipeline failures, review pull requests, create and update pull
+  requests, manage work items (German-localized types, e.g. Aufgabe/Fehler), and generate
+  changelogs since a given build or commit. This is the CLI variant of the azure-devops
+  skill, for the newest on-prem Azure DevOps Server version (authenticated with a Personal
+  Access Token, NOT Entra/`az login`). Use when the user mentions ADO pipelines, builds,
+  PRs, work items / Arbeitselemente / Aufgaben, changelogs, or pastes Azure DevOps Server
+  URLs, or when the user asks to use the az CLI for Azure DevOps.
+argument-hint: <PIPELINE_URL_OR_BUILD_ID | PR_ID_OR_URL | create | update | changelog | workitem [create|show|update]>
 allowed-tools: Bash, Read, Glob, Grep
 ---
 
 # Azure DevOps CLI Skill
 
 This skill mirrors the `azure-devops` skill but talks to the server through the
-Azure CLI (`az`) with the `azure-devops` extension instead of REST/MCP. Use it for
-Azure DevOps **cloud** and the **newest** on-prem Server version. The MCP-based
-`azure-devops` skill remains the right choice for the older Server version.
+Azure CLI (`az`) with the `azure-devops` extension instead of REST/MCP. Use it for the
+**newest** on-prem Azure DevOps **Server** version. The MCP-based `azure-devops` skill
+remains the right choice for the older Server version.
+
+> **On-prem Server only — no Azure DevOps cloud.** This skill does not support
+> `dev.azure.com`. On-prem Server authenticates with a **Personal Access Token (PAT)**,
+> whereas the cloud uses Entra ID (`az login`); the two need different auth and we run
+> on-prem, so the cloud path is intentionally omitted. Our Server is also **German-
+> localized** (its UI and work item types are German), which the workflows below assume.
 
 ## Step 0: Detect ADO Connection
 
 1. Run `git remote get-url origin` via Bash.
 2. Parse the remote URL into `organization` (a full URL), `project`, and `repository`.
-   Recognise these forms:
-   - **Cloud:** `https://dev.azure.com/{org}/{project}/_git/{repo}` or
-     `https://{org}@dev.azure.com/{org}/{project}/_git/{repo}`
-     → `organization = https://dev.azure.com/{org}`
-   - **Newest on-prem Server:** `https://{host}[:port]/{collection}/{project}/_git/{repo}`
+   This skill targets **on-prem Azure DevOps Server**; recognise these forms:
+   - **HTTPS (common):** `https://{host}[:port]/{collection}/{project}/_git/{repo}`
      → `organization = https://{host}[:port]/{collection}`
-   - **SSH:** `git@ssh.dev.azure.com:v3/{org}/{project}/{repo}`
-     → `organization = https://dev.azure.com/{org}`
-3. If the URL matches none of these, tell the user this skill only works with Azure
-   DevOps repositories and stop.
+   - **SSH:** `ssh://{host}[:port]/{collection}/{project}/_git/{repo}` or
+     `{user}@{host}:{collection}/{project}/_git/{repo}` → take `{collection}`, `{project}`,
+     `{repo}` from the path and build `organization = https://{host}/{collection}`
+     (confirm the HTTPS base with the user if the host/port is ambiguous).
+3. If the remote points at Azure DevOps **cloud** (`dev.azure.com` or
+   `ssh.dev.azure.com`), stop and tell the user this skill is on-prem Server only —
+   cloud is not supported here. If the URL matches no Azure DevOps form at all, tell the
+   user this skill only works with Azure DevOps Server repositories and stop.
 4. Set CLI defaults so later commands are terse:
    ```bash
    az devops configure --defaults organization={organization} project={project}
@@ -69,14 +77,43 @@ Verify the toolchain before doing real work. On any failure, give the exact fix 
    az extension add --name azure-devops
    ```
 
-3. **Authenticated (Entra ID):**
+3. **Authenticated (Personal Access Token):** On-prem Azure DevOps Server authenticates
+   with a **PAT**, *not* `az login`/Entra ID. Make a PAT available to the CLI in one of
+   two ways:
+   - Export it as an environment variable — the az CLI reads this automatically:
+     ```bash
+     export AZURE_DEVOPS_EXT_PAT="your-personal-access-token"
+     ```
+   - Or run `az devops login --org {organization}` and paste the PAT when prompted.
+
+   Verify it works with a lightweight authenticated call:
    ```bash
-   az account show
+   az devops project list --org {organization} -o json
    ```
-   If this fails:
-   > **You are not signed in.** Run `az login` and complete the browser sign-in
-   > (Entra ID), then re-run. For an on-prem Server that uses the same Entra tenant,
-   > `az login` is sufficient.
+   If this returns an authentication/authorization error (HTTP 401/403) or reports that
+   you are not signed in, the PAT is missing or invalid — give the user the **PAT setup
+   instructions** below and **stop**.
+
+### PAT setup instructions
+
+> **The Azure CLI could not authenticate to your Azure DevOps Server because no valid
+> Personal Access Token (PAT) is available.**
+>
+> **Create a PAT:**
+> 1. Open your Azure DevOps Server in the browser.
+> 2. Profile picture (top right) → **Security** → **Personal access tokens**.
+> 3. Click **+ New Token**, give it a descriptive name (e.g. `claude-code`), set an expiration.
+> 4. Select the scopes: **Code** Read & Write (PR creation/update, repo access) and
+>    **Build** Read (pipeline analysis).
+> 5. Click **Create** and copy the token.
+>
+> **Provide it to the CLI** by exporting it in your shell profile (`~/.zshrc`, `~/.bashrc`, …):
+> ```bash
+> export AZURE_DEVOPS_EXT_PAT="your-personal-access-token"
+> ```
+> Then restart your terminal / Claude Code session and re-run. (This is the same PAT the
+> MCP-based `azure-devops` skill uses as `ADO_PAT`; the az CLI specifically reads
+> `AZURE_DEVOPS_EXT_PAT`.)
 
 After giving any of these instructions, **stop** — do not attempt further `az` calls.
 
@@ -117,6 +154,13 @@ discover the correct one with `az devops invoke --query "[?area=='build']"` (or
 | Update PR | `az repos pr update --id {prId} [--title "{title}"] [--description "{description}"] [--status active\|abandoned\|completed] --org {org} -o json` |
 | List active PRs by source branch | `az repos pr list --repository {repo} --source-branch {branch} --status active --org {org} --project {project} --detect false -o json` |
 | PR comment threads | `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} --org {org} --api-version 7.1 -o json` |
+| Work item **types** (localized names) | `az devops invoke --area wit --resource workItemTypes --route-parameters project={project} --org {org} --api-version 7.1 -o json` |
+| Work item type **states** (localized) | `az devops invoke --area wit --resource workItemTypeStates --route-parameters project={project} type={typeName} --org {org} --api-version 7.1 -o json` |
+| Show work item | `az boards work-item show --id {id} --org {org} -o json` |
+| Create work item | `az boards work-item create --title "{title}" --type "{germanTypeName}" [--description "{description}"] [--assigned-to "{user}"] --org {org} --project {project} -o json` |
+| Update work item | `az boards work-item update --id {id} [--title "{title}"] [--state "{germanState}"] [--assigned-to "{user}"] --org {org} -o json` |
+| Link work item to parent | `az boards work-item relation add --id {childId} --relation-type parent --target-id {parentId} --org {org} -o json` |
+| Query work items (WIQL) | `az boards query --wiql "{wiql}" --org {org} --project {project} -o json` |
 
 **CLI-vs-REST differences to remember:**
 - `--source-branch` / `--target-branch` take the **bare** branch name (`feature/x`), NOT
@@ -125,6 +169,11 @@ discover the correct one with `az devops invoke --query "[?area=='build']"` (or
   local git operations, same as the REST skill.
 - The task-log `invoke` returns a JSON object with a `value` array of log lines; join
   that array to reconstruct the plain-text log.
+- **German installation:** work item **type** names (`Aufgabe`, not `Task`) and **state**
+  names (`Aktiv`, not `Active`) are localized. `--type` / `--state` and WIQL *values* take
+  these German names — fetch them from the server (see the Work Item Management workflow)
+  rather than assuming. WIQL *field reference names* (`System.WorkItemType`, `System.State`)
+  stay invariant English.
 
 ## Repository Mismatch Check
 
@@ -258,3 +307,77 @@ Determine the **base commit SHA**:
 1. **Commit Log** — all commits between base and `origin/{defaultBranch}` (short SHA, author, message).
 2. **File Overview** — `git diff --stat` grouped by top-level dir/component; totals (files, insertions, deletions).
 3. **Narrative Summary** — prose describing features added, bugs fixed, refactors, as a briefing for the next build.
+
+---
+
+## Workflow: Work Item Management
+
+**Trigger:** User asks to create, show, query, or update an Azure DevOps **work item**
+(German: *Arbeitselement* — e.g. *Aufgabe*, *Fehler*, *Benutzergeschichte*), or
+`$ARGUMENTS` starts with `workitem` (e.g. `workitem create`, `workitem show 1234`,
+`workitem update 1234`).
+
+> **German installation — never assume English type/state names.** Our Server is
+> German, so work item **types** and **states** are localized: `Task` → **Aufgabe**,
+> `Bug` → **Fehler**; states like `New`/`Active`/`Closed` appear as
+> **Neu**/**Aktiv**/**Geschlossen**. The exact names depend on the project's process
+> template, so **fetch them from the server first** (step 1) instead of guessing.
+
+### Step 1 — Discover the localized types and states (do this BEFORE create/query/update)
+Fetch the project's real work item types so you use the actual German names:
+```bash
+az devops invoke --area wit --resource workItemTypes \
+  --route-parameters project={project} --org {org} --api-version 7.1 -o json
+```
+Use each type's `name` field (the localized display name, e.g. `Aufgabe`) — that is what
+`--type` and WIQL `[System.WorkItemType]` values expect. If the `--resource` name is
+rejected, discover the correct one with `az devops invoke --query "[?area=='wit']"` and
+match the `routeTemplate`.
+
+For state values, read the chosen type's localized states:
+```bash
+az devops invoke --area wit --resource workItemTypeStates \
+  --route-parameters project={project} type={germanTypeName} --org {org} --api-version 7.1 -o json
+```
+Only fall back to an English guess if discovery genuinely fails — and tell the user you did.
+
+### Create
+1. Run **step 1**. If the user named a type in English (e.g. "task"), map it to the
+   matching German `name` from the fetched list (`Aufgabe`). If there is no clear match,
+   show the available types and ask which to use — do not invent one.
+2. Gather: title (required), type, description, and optionally assignee, area, iteration,
+   and a parent work item to link.
+3. Create the work item:
+   ```bash
+   az boards work-item create --title "{title}" --type "{germanTypeName}" \
+     [--description "{description}"] [--assigned-to "{user}"] \
+     [--area "{area}"] [--iteration "{iteration}"] \
+     --org {org} --project {project} -o json
+   ```
+4. **Optional — link to a parent:**
+   ```bash
+   az boards work-item relation add --id {newId} --relation-type parent \
+     --target-id {parentId} --org {org} -o json
+   ```
+5. Report the new work item ID and URL. *(Per Quirks, an emoji in the title may be absent
+   from the returned JSON — expected; the work item has it.)*
+
+### Show / Query
+- **Show one:** `az boards work-item show --id {id} --org {org} -o json`.
+- **Query many (WIQL):** build the query with the localized values from step 1:
+  ```bash
+  az boards query --org {org} --project {project} -o json \
+    --wiql "SELECT [System.Id], [System.Title], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Aufgabe' AND [System.State] <> 'Geschlossen' ORDER BY [System.ChangedDate] DESC"
+  ```
+  Field reference names (`[System.WorkItemType]`, `[System.State]`) are invariant English;
+  the **values** (`'Aufgabe'`, `'Geschlossen'`) are the localized names from step 1.
+
+### Update
+1. Identify the work item (ID from the user, or via Show/Query above).
+2. For a **state** change, get the valid localized states for its type from step 1 first.
+3. Update only the fields being changed:
+   ```bash
+   az boards work-item update --id {id} [--title "{title}"] [--state "{germanState}"] \
+     [--assigned-to "{user}"] [--description "{description}"] --org {org} -o json
+   ```
+4. Confirm the change and report the work item URL.
