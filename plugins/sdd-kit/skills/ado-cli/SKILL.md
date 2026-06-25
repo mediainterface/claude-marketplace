@@ -78,9 +78,9 @@ Verify the toolchain before doing real work. On any failure, give the exact fix 
 3. **Authenticated:** Assume the user has **already** signed the Azure CLI in to Azure
    DevOps. Do **not** authenticate on their behalf — never set `AZURE_DEVOPS_EXT_PAT`, run
    `az devops login`, or read a PAT from the environment yourself. Only **confirm** their
-   existing sign-in with a read-only call:
+   existing sign-in with a read-only call (covered by the Code scope below):
    ```bash
-   az devops project list --org {organization} -o json
+   az repos show --repository {repository} --org {organization} --project {project} --detect false -o json
    ```
    If this returns an authentication/authorization error (HTTP 401/403) or reports the user
    is not signed in, **stop**, show them the **authentication instructions** below, and
@@ -95,8 +95,10 @@ Verify the toolchain before doing real work. On any failure, give the exact fix 
 > 1. Open your Azure DevOps Server in the browser.
 > 2. Profile picture (top right) → **Security** → **Personal access tokens**.
 > 3. Click **+ New Token**, give it a descriptive name (e.g. `claude-code`), set an expiration.
-> 4. Select the scopes: **Code** Read & Write (PR creation/update, repo access) and
->    **Build** Read (pipeline analysis).
+> 4. Select the scopes the skill's workflows need:
+>    - **Code** — Read & write (PR review/create/update, repository and changelog access)
+>    - **Build** — Read (pipeline analysis)
+>    - **Work Items** — Read & write (work item create/show/query/update)
 > 5. Click **Create** and copy the token.
 >
 > **2. Make the CLI use it** — either:
