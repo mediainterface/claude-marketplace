@@ -96,7 +96,7 @@ Hook-only plugin that keeps `CLAUDE.md` files in sync with staged changes before
 
 ### sdd-kit
 
-The skill set for MediaInterface's Spec-Driven Development (SDD) workflow — the skills we rely on across SDD (capturing the decisions and lessons behind a spec, then running the Azure DevOps work a plan turns into), not a general-purpose collection. Skill-only plugin (no MCP server, no hooks).
+The skill set for MediaInterface's Spec-Driven Development (SDD) workflow — the skills we rely on across SDD (capturing the decisions and lessons behind a spec, then running the Azure DevOps work a plan turns into), not a general-purpose collection. So far it contains only skills; no hooks or MCP server have been added yet.
 
 - **Skill** (`plugins/sdd-kit/skills/create-decision/SKILL.md`): `/create-decision` — documents decisions in the Memory Bank as Decision Records.
 - **Skill** (`plugins/sdd-kit/skills/create-lesson-learned/SKILL.md`): `/create-lesson-learned` — captures recurring patterns and pitfalls in the Memory Bank.
