@@ -1,14 +1,14 @@
 ---
 name: ado-cli
 description: >-
-  Work with on-prem Azure DevOps Server via the Azure CLI (az + azure-devops
-  extension) — analyse pipeline failures, review pull requests, create and update pull
-  requests, manage work items (German-localized types, e.g. Aufgabe/Fehler), and generate
-  changelogs since a given build or commit. This is the CLI variant of the azure-devops
-  skill, for the newest on-prem Azure DevOps Server version (authenticated with a Personal
-  Access Token, NOT Entra/`az login`). Use when the user mentions ADO pipelines, builds,
-  PRs, work items / Arbeitselemente / Aufgaben, changelogs, or pastes Azure DevOps Server
-  URLs, or when the user asks to use the az CLI for Azure DevOps.
+  Work with Azure DevOps via the Azure CLI (az + azure-devops extension) — analyse
+  pipeline failures, review pull requests, create and update pull requests, manage work
+  items (German-localized types, e.g. Aufgabe/Fehler), and generate changelogs since a
+  given build or commit. This is the CLI variant of the azure-devops skill, for the
+  newest Azure DevOps Server version, authenticated with a Personal Access Token (PAT).
+  Use when the user mentions ADO pipelines, builds, PRs, work items / Arbeitselemente /
+  Aufgaben, changelogs, or pastes Azure DevOps URLs, or when the user asks to use the az
+  CLI for Azure DevOps.
 argument-hint: <PIPELINE_URL_OR_BUILD_ID | PR_ID_OR_URL | create | update | changelog | workitem [create|show|update]>
 allowed-tools: Bash, Read, Glob, Grep
 ---
@@ -17,30 +17,27 @@ allowed-tools: Bash, Read, Glob, Grep
 
 This skill mirrors the `azure-devops` skill but talks to the server through the
 Azure CLI (`az`) with the `azure-devops` extension instead of REST/MCP. Use it for the
-**newest** on-prem Azure DevOps **Server** version. The MCP-based `azure-devops` skill
-remains the right choice for the older Server version.
+**newest** Azure DevOps **Server** version; the MCP-based `azure-devops` skill remains the
+right choice for the older Server version.
 
-> **On-prem Server only — no Azure DevOps cloud.** This skill does not support
-> `dev.azure.com`. On-prem Server authenticates with a **Personal Access Token (PAT)**,
-> whereas the cloud uses Entra ID (`az login`); the two need different auth and we run
-> on-prem, so the cloud path is intentionally omitted. Our Server is also **German-
-> localized** (its UI and work item types are German), which the workflows below assume.
+> **German-localized Server.** Our Azure DevOps is German, so its work item types and
+> states are German (e.g. `Aufgabe`, not `Task`) — the workflows below fetch them from the
+> server rather than assuming English names. Authentication uses a **Personal Access Token**
+> (see the Setup Check).
 
 ## Step 0: Detect ADO Connection
 
 1. Run `git remote get-url origin` via Bash.
 2. Parse the remote URL into `organization` (a full URL), `project`, and `repository`.
-   This skill targets **on-prem Azure DevOps Server**; recognise these forms:
-   - **HTTPS (common):** `https://{host}[:port]/{collection}/{project}/_git/{repo}`
+   Recognise these forms:
+   - **HTTPS:** `https://{host}[:port]/{collection}/{project}/_git/{repo}`
      → `organization = https://{host}[:port]/{collection}`
    - **SSH:** `ssh://{host}[:port]/{collection}/{project}/_git/{repo}` or
      `{user}@{host}:{collection}/{project}/_git/{repo}` → take `{collection}`, `{project}`,
-     `{repo}` from the path and build `organization = https://{host}/{collection}`
+     and `{repo}` from the path and build `organization = https://{host}/{collection}`
      (confirm the HTTPS base with the user if the host/port is ambiguous).
-3. If the remote points at Azure DevOps **cloud** (`dev.azure.com` or
-   `ssh.dev.azure.com`), stop and tell the user this skill is on-prem Server only —
-   cloud is not supported here. If the URL matches no Azure DevOps form at all, tell the
-   user this skill only works with Azure DevOps Server repositories and stop.
+3. If the URL matches no Azure DevOps form, tell the user this skill only works with
+   Azure DevOps repositories and stop.
 4. Set CLI defaults so later commands are terse:
    ```bash
    az devops configure --defaults organization={organization} project={project}
@@ -77,9 +74,8 @@ Verify the toolchain before doing real work. On any failure, give the exact fix 
    az extension add --name azure-devops
    ```
 
-3. **Authenticated (Personal Access Token):** On-prem Azure DevOps Server authenticates
-   with a **PAT**, *not* `az login`/Entra ID. Make a PAT available to the CLI in one of
-   two ways:
+3. **Authenticated (Personal Access Token):** The CLI authenticates to Azure DevOps with a
+   **PAT**. Make one available to the CLI in one of two ways:
    - Export it as an environment variable — the az CLI reads this automatically:
      ```bash
      export AZURE_DEVOPS_EXT_PAT="your-personal-access-token"
