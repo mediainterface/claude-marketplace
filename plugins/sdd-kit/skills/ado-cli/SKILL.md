@@ -22,8 +22,9 @@ right choice for the older Server version.
 
 > **German-localized Server.** Our Azure DevOps is German, so its work item types and
 > states are German (e.g. `Aufgabe`, not `Task`) — the workflows below fetch them from the
-> server rather than assuming English names. Authentication uses a **Personal Access Token**
-> (see the Setup Check).
+> server rather than assuming English names. The skill assumes you are **already signed in**
+> to Azure DevOps and never authenticates for you — the Setup Check confirms it and, if not,
+> shows you how.
 
 ## Step 0: Detect ADO Connection
 
@@ -74,28 +75,23 @@ Verify the toolchain before doing real work. On any failure, give the exact fix 
    az extension add --name azure-devops
    ```
 
-3. **Authenticated (Personal Access Token):** The CLI authenticates to Azure DevOps with a
-   **PAT**. Make one available to the CLI in one of two ways:
-   - Export it as an environment variable — the az CLI reads this automatically:
-     ```bash
-     export AZURE_DEVOPS_EXT_PAT="your-personal-access-token"
-     ```
-   - Or run `az devops login --org {organization}` and paste the PAT when prompted.
-
-   Verify it works with a lightweight authenticated call:
+3. **Authenticated:** Assume the user has **already** signed the Azure CLI in to Azure
+   DevOps. Do **not** authenticate on their behalf — never set `AZURE_DEVOPS_EXT_PAT`, run
+   `az devops login`, or read a PAT from the environment yourself. Only **confirm** their
+   existing sign-in with a read-only call:
    ```bash
    az devops project list --org {organization} -o json
    ```
-   If this returns an authentication/authorization error (HTTP 401/403) or reports that
-   you are not signed in, the PAT is missing or invalid — give the user the **PAT setup
-   instructions** below and **stop**.
+   If this returns an authentication/authorization error (HTTP 401/403) or reports the user
+   is not signed in, **stop**, show them the **authentication instructions** below, and
+   wait — do not start any work until they confirm they have signed in.
 
-### PAT setup instructions
+### Authentication instructions (show these to the user; do not act on them yourself)
 
-> **The Azure CLI could not authenticate to your Azure DevOps Server because no valid
-> Personal Access Token (PAT) is available.**
+> **You are not signed in to Azure DevOps in the Azure CLI.** Please sign in yourself, then
+> tell me to continue.
 >
-> **Create a PAT:**
+> **1. Create a Personal Access Token (PAT):**
 > 1. Open your Azure DevOps Server in the browser.
 > 2. Profile picture (top right) → **Security** → **Personal access tokens**.
 > 3. Click **+ New Token**, give it a descriptive name (e.g. `claude-code`), set an expiration.
@@ -103,15 +99,18 @@ Verify the toolchain before doing real work. On any failure, give the exact fix 
 >    **Build** Read (pipeline analysis).
 > 5. Click **Create** and copy the token.
 >
-> **Provide it to the CLI** by exporting it in your shell profile (`~/.zshrc`, `~/.bashrc`, …):
-> ```bash
-> export AZURE_DEVOPS_EXT_PAT="your-personal-access-token"
-> ```
-> Then restart your terminal / Claude Code session and re-run. (This is the same PAT the
-> MCP-based `azure-devops` skill uses as `ADO_PAT`; the az CLI specifically reads
+> **2. Make the CLI use it** — either:
+> - Export it in your shell profile (`~/.zshrc`, `~/.bashrc`, …) and restart your session:
+>   ```bash
+>   export AZURE_DEVOPS_EXT_PAT="your-personal-access-token"
+>   ```
+> - Or run `az devops login --org {organization}` and paste the PAT when prompted.
+>
+> (Same PAT the MCP-based `azure-devops` skill uses as `ADO_PAT`; the az CLI reads
 > `AZURE_DEVOPS_EXT_PAT`.)
 
-After giving any of these instructions, **stop** — do not attempt further `az` calls.
+After giving any Setup Check instruction (steps 1–3), **stop** — run no further `az`
+commands and do no work until it is resolved; for sign-in, until the user confirms.
 
 ## Quirks — expected false signals (do NOT treat as errors)
 
