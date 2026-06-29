@@ -28,12 +28,28 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │   └── skills/
 │   │       └── humanizer/
 │   │           └── SKILL.md      # Writing editor skill (29 pattern categories)
-│   └── claude-md-improver/       # PreToolUse hook syncing CLAUDE.md on git commit
+│   ├── claude-md-improver/       # PreToolUse hook syncing CLAUDE.md on git commit
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── README.md
+│   │   └── hooks/
+│   │       └── hooks.json        # Agent hook config (PreToolUse on Bash(git commit:*))
+│   └── sdd-kit/                  # Spec-Driven Development toolkit (skill-only)
 │       ├── .claude-plugin/
 │       │   └── plugin.json
-│       ├── README.md
-│       └── hooks/
-│           └── hooks.json        # Agent hook config (PreToolUse on Bash(git commit:*))
+│       └── skills/
+│           ├── create-decision/
+│           │   └── SKILL.md      # /create-decision — document decisions as Decision Records
+│           ├── create-lesson-learned/
+│           │   └── SKILL.md      # /create-lesson-learned — capture patterns and pitfalls
+│           ├── ado-shared/
+│           │   └── REFERENCE.md  # Shared ADO setup/auth/command-map (not a skill)
+│           ├── ado-pr/
+│           │   └── SKILL.md      # /ado-pr — PR review/create/update/comment via az CLI
+│           ├── ado-workitem/
+│           │   └── SKILL.md      # /ado-workitem — German-localized work items via az CLI
+│           └── ado-pipeline/
+│               └── SKILL.md      # /ado-pipeline — pipeline analysis + changelog via az CLI
 ├── CLAUDE.md
 ├── README.md
 └── LICENSE                       # Apache-2.0
@@ -83,6 +99,15 @@ Hook-only plugin that keeps `CLAUDE.md` files in sync with staged changes before
 
 - **Hook** (`plugins/claude-md-improver/hooks/hooks.json`): `type: "agent"` PreToolUse hook matching `Bash(git commit:*)`, running Sonnet 4.6 inline against the staged diff and updating affected `CLAUDE.md` files (architecture, conventions, commands, prerequisites, project structure, or skill descriptions only). Always returns `permissionDecision: allow`.
 - **Requires** Claude Code 2.1.118+ (agent hook support). No env vars or external CLI.
+
+### sdd-kit
+
+The skill set for MediaInterface's Spec-Driven Development (SDD) workflow — the skills we rely on across SDD (capturing the decisions and lessons behind a spec, then running the Azure DevOps work a plan turns into), not a general-purpose collection. So far it contains only skills; no hooks or MCP server have been added yet.
+
+- **Skill** (`plugins/sdd-kit/skills/create-decision/SKILL.md`): `/create-decision` — documents decisions in the Memory Bank as Decision Records.
+- **Skill** (`plugins/sdd-kit/skills/create-lesson-learned/SKILL.md`): `/create-lesson-learned` — captures recurring patterns and pitfalls in the Memory Bank.
+- **Azure DevOps skills** (`plugins/sdd-kit/skills/ado-pr`, `ado-workitem`, `ado-pipeline`): Azure DevOps via the Azure CLI (`az` + azure-devops extension), split into `/ado-pr` (PR review/create/update/comment), `/ado-workitem` (work item create/show/query/update), and `/ado-pipeline` (pipeline-failure analysis + changelog), for the newest Azure DevOps Server version. Shared connection detection, sign-in check, command map, quirks, and error-handling live in `skills/ado-shared/REFERENCE.md` — a non-skill file the three SKILL.md files link to by relative path. They assume the user is already signed in via `az devops login` (PAT-based); they never authenticate themselves and prompt the user if sign-in is missing. The Server is **German-localized**, so work item types/states are German (e.g. `Aufgabe`, not `Task`) — fetched from the server rather than assumed. The MCP-based `azure-devops` plugin stays for the older Server version.
+- **Requires** the `az` CLI with the `azure-devops` extension installed and the user signed in via `az devops login` for the `/ado-pr`, `/ado-workitem`, and `/ado-pipeline` skills.
 
 ## CI/CD
 
