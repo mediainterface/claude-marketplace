@@ -41,14 +41,14 @@ Writing editor that identifies and removes AI writing patterns to make text soun
 
 ### sdd-kit
 
-Spec-Driven Development toolkit: create Decision Records and Lessons Learned with guided workflows and standardized templates (MADR format).
+Spec-Driven Development toolkit: capture Decision Records and Lessons Learned with guided workflows and standardized templates (MADR format), and run the Azure DevOps side of delivery — pull requests, work items, and pipelines/changelogs — through the Azure CLI.
 
 | | |
 |---|---|
 | Install | `claude plugin install sdd-kit@mediainterface` |
 | Type | Skills only |
-| Requires | Nothing |
-| Skills | `/create-decision`, `/create-lesson-learned` |
+| Requires | Nothing for `/create-decision` and `/create-lesson-learned`. The `/ado-*` skills need the `az` CLI with the `azure-devops` extension and an Azure DevOps sign-in via `az devops login` (PAT). |
+| Skills | `/create-decision`, `/create-lesson-learned`, `/ado-pr`, `/ado-workitem`, `/ado-pipeline` |
 
 ## Adding a plugin
 
