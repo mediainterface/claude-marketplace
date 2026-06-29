@@ -118,10 +118,13 @@ The Azure CLI produces two misleading outputs that are safe to ignore. In both c
 **proceed as if the operation succeeded**; the user will call it out if something
 genuinely failed.
 
-1. **Emoji stripped from return value.** When a PR or work item title/description
-   contains an emoji, the CLI applies the emoji correctly to the resource, but the JSON
-   it prints back omits the emoji. This is expected. Do **not** retry, "fix", or warn
-   about a missing emoji — the resource has it.
+1. **Emoji stripped from the return value.** When a PR or work item title/description
+   contains an emoji, the CLI may print JSON with the emoji missing even though the resource
+   actually has it — **verified present in the web UI**. This has been observed as a
+   **Windows console-encoding (cp1252) artifact**; the echo/input behaviour may differ on
+   macOS/Linux, so **verify once per platform** rather than treating it as a universal
+   guarantee. Once confirmed for your platform, do **not** retry, "fix", or warn about a
+   missing emoji in the returned JSON — check the web UI if unsure.
 
 2. **False compatibility warning.** The CLI may print a warning that it is not
    compatible with this Azure DevOps Server version. This is a **false positive** — the
@@ -186,6 +189,22 @@ differ, warn before proceeding:
 
 Only proceed if the user explicitly confirms.
 
+## Error handling & local-state safety
+
+Some workflows check out a branch/commit and stash the user's uncommitted work. Treat the
+**checkout and its restore as a try/finally**: before checking out, record the current
+branch (or commit, if detached) as `originalRef` and whether you stashed; then guarantee the
+restore runs **whether the workflow succeeds, errors, or is interrupted** — never leave the
+user in a detached HEAD with their changes still stashed.
+
+On any `az`/`git` failure or interruption:
+1. **Restore local git state first** — `git checkout {originalRef}`, then `git stash pop` if
+   you stashed — before doing anything else.
+2. **Report, don't paper over** — show the exact command that failed and its error output,
+   then **stop**. Do not silently retry, guess, or fall back to another transport (e.g.
+   API-based changes).
+3. **Auth errors (HTTP 401/403):** stop and follow the Setup Check sign-in instructions.
+
 ---
 
 ## Workflow: Pipeline Analysis
@@ -198,14 +217,16 @@ Only proceed if the user explicitly confirms.
 3. **Fetch timeline:** `az devops invoke --area build --resource Timeline --route-parameters project={project} buildId={buildId} --org {org} --api-version 7.1 -o json`. From `records`, find entries where `result` is `"failed"` and `type` is `"Task"`. Note their `log.id` and any `issues[]`.
 4. **Fetch logs for each failed task:** `az devops invoke --area build --resource logs --route-parameters project={project} buildId={buildId} logId={logId} --org {org} --api-version 7.1 -o json`. Join the returned `value` array into text. Extract error lines matching `##[error]`, `error:`, `error `, `FAILED`, `fatal:`, `fatal `, `exception:`, `exception ` (case-insensitive). Focus analysis on those lines rather than dumping full logs.
 5. **Fetch associated commits:** `az devops invoke --area build --resource Changes --route-parameters project={project} buildId={buildId} --org {org} --api-version 7.1 -o json`.
-6. **Checkout the build's source branch** so local files match what the build ran against:
-   - Note current branch: `git branch --show-current` (or `git rev-parse HEAD` if detached).
+6. **Checkout the build's source branch** so local files match what the build ran against
+   (the restore in step 9 MUST run even if a later step fails — see "Error handling &
+   local-state safety"):
+   - Record the current branch (or commit if detached) as `originalRef`: `git branch --show-current` / `git rev-parse HEAD`. Remember whether you stash below.
    - Stash uncommitted changes if any: `git stash -u`.
    - Strip `refs/heads/` from `sourceBranch`, then: `git fetch origin {sourceBranch} && git checkout origin/{sourceBranch} --detach`.
    - If the branch no longer exists, use `sourceVersion` instead: `git fetch origin {sourceVersion} && git checkout {sourceVersion} --detach`.
 7. **Fetch pipeline definition:** `az pipelines build definition show --id {definitionId} --org {org} --project {project} --detect false -o json`. If `process.yamlFilename` is present, read that YAML from the local repo and follow `template:` references.
 8. **Analyse and report:** Error summary (what failed + one-sentence root cause); detailed analysis connecting error logs to pipeline steps and source; root cause (symptom vs cause, responsible commit if any); suggested fix (concrete changes); prevention. Common categories: build, test, deployment, infrastructure, configuration, dependency.
-9. **Restore original branch:** `git checkout {originalBranch}` (or `{originalCommit}` if detached); if stashed, `git stash pop`.
+9. **Restore local state (always — on success, error, or interruption):** `git checkout {originalRef}`; if you stashed, `git stash pop`. If any step from 6 onward fails, do this **first**, then report the error and stop.
 
 ---
 
@@ -227,13 +248,14 @@ Only proceed if the user explicitly confirms.
    **If the source branch no longer exists** (merged/deleted, `git fetch` fails): use `lastMergeSourceCommit.commitId` from the PR metadata — `git fetch origin {commitId}`, then diff against `{commitId}` instead of `origin/{sourceBranch}`.
    **If git operations fail for any other reason, report the error and stop.** Do NOT fall back to API-based changes.
 4. **Fetch PR comment threads:** `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} --org {org} --api-version 7.1 -o json`. Filter out system-only threads (every comment has `commentType: "system"`); show human comments.
-5. **Checkout the source branch** to explore the PR state:
-   - Note current branch: `git branch --show-current` (or `git rev-parse HEAD` if detached).
+5. **Checkout the source branch** to explore the PR state (the restore in step 8 MUST run
+   even if a later step fails — see "Error handling & local-state safety"):
+   - Record the current branch (or commit if detached) as `originalRef`. Remember whether you stash below.
    - Stash uncommitted changes if any: `git stash -u`.
    - `git checkout origin/{sourceBranch} --detach` (or `{commitId} --detach` if the deleted-branch fallback was used in step 3).
 6. **Gather context:** read CLAUDE.md files in/near affected dirs; read related files the change imports/extends; use Glob/Grep for conventions.
-7. **Review** covering: Summary, Code Quality, Correctness, Security (injection/XSS/secrets/OWASP), Performance (N+1, inefficiencies), Architecture (project patterns), Testing. Reference file paths and line numbers; distinguish blockers from suggestions.
-8. **Restore original branch:** `git checkout {originalBranch}` (or `{originalCommit}`); if stashed, `git stash pop`.
+7. **Review** covering: Summary, Code Quality, Correctness, Security (injection/XSS/secrets/OWASP), Performance (N+1, inefficiencies), Architecture (project patterns), Testing. Reference file paths and line numbers; distinguish blockers from suggestions. **This review is read-only** — it produces the written review for the user; to post comments or resolve threads on the PR, use the **PR Comments** workflow.
+8. **Restore local state (always — on success, error, or interruption):** `git checkout {originalRef}`; if you stashed, `git stash pop`. If any step from 5 onward fails, do this **first**, then report and stop.
 
 ---
 
