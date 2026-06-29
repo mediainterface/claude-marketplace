@@ -1,6 +1,6 @@
 {
   "name": "sdd-kit",
-  "description": "The skill set for our Spec-Driven Development (SDD) workflow. These are the skills we actually reach for while doing SDD — capturing the decisions and lessons behind a spec, then running the Azure DevOps work a plan turns into — so it is deliberately not a general-purpose collection, and most of it has little use outside SDD. /create-decision records design decisions as Decision Records in the Memory Bank, /create-lesson-learned captures recurring patterns and pitfalls for later specs, and /ado-cli handles the Azure DevOps side of delivery via the az CLI: pipeline analysis, PR review/create/update, work item management, and changelogs (PAT auth).",
+  "description": "The skill set for our Spec-Driven Development (SDD) workflow. These are the skills we actually reach for while doing SDD — capturing the decisions and lessons behind a spec, then running the Azure DevOps work a plan turns into — so it is deliberately not a general-purpose collection, and most of it has little use outside SDD. /create-decision records design decisions as Decision Records in the Memory Bank, /create-lesson-learned captures recurring patterns and pitfalls for later specs, and /ado-cli handles the Azure DevOps side of delivery via the az CLI: pipeline analysis, PR review/create/update/comment, work item management, and changelogs (PAT auth).",
   "author": {
     "name": "MIRA Hueter-Trio",
     "email": "daniel.lahmann@mediainterface.de"

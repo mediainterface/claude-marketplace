@@ -2,14 +2,14 @@
 name: ado-cli
 description: >-
   Work with Azure DevOps via the Azure CLI (az + azure-devops extension) — analyse
-  pipeline failures, review pull requests, create and update pull requests, manage work
-  items (German-localized types, e.g. Aufgabe/Fehler), and generate changelogs since a
+  pipeline failures, review pull requests, create/update/comment on pull requests, manage
+  work items (German-localized types, e.g. Aufgabe/Fehler), and generate changelogs since a
   given build or commit. This is the CLI variant of the azure-devops skill, for the
   newest Azure DevOps Server version, authenticated with a Personal Access Token (PAT).
   Use when the user mentions ADO pipelines, builds, PRs, work items / Arbeitselemente /
   Aufgaben, changelogs, or pastes Azure DevOps URLs, or when the user asks to use the az
   CLI for Azure DevOps.
-argument-hint: <PIPELINE_URL_OR_BUILD_ID | PR_ID_OR_URL | create | update | changelog | workitem [create|show|update]>
+argument-hint: <PIPELINE_URL_OR_BUILD_ID | PR_ID_OR_URL | create | update | comment [add|reply|resolve] | changelog | workitem [create|show|update]>
 allowed-tools: Bash, Read, Glob, Grep
 ---
 
@@ -148,7 +148,11 @@ discover the correct one with `az devops invoke --query "[?area=='build']"` (or
 | Create PR | `az repos pr create --repository {repo} --source-branch {source} --target-branch {target} --title "{title}" --description "{description}" --org {org} --project {project} --detect false -o json` |
 | Update PR | `az repos pr update --id {prId} [--title "{title}"] [--description "{description}"] [--status active\|abandoned\|completed] --org {org} -o json` |
 | List active PRs by source branch | `az repos pr list --repository {repo} --source-branch {branch} --status active --org {org} --project {project} --detect false -o json` |
-| PR comment threads | `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} --org {org} --api-version 7.1 -o json` |
+| PR comment threads (list) | `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} --org {org} --api-version 7.1 -o json` |
+| Add PR comment thread | `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} --http-method POST --in-file {body.json} --media-type application/json --org {org} --api-version 7.1 -o json` |
+| Reply to a PR thread | `az devops invoke --area git --resource pullRequestThreadComments --route-parameters project={project} repositoryId={repo} pullRequestId={prId} threadId={threadId} --http-method POST --in-file {body.json} --media-type application/json --org {org} --api-version 7.1 -o json` |
+| Resolve/reopen a PR thread | `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} threadId={threadId} --http-method PATCH --in-file {body.json} --media-type application/json --org {org} --api-version 7.1 -o json` |
+| Link / list / unlink PR work items | `az repos pr work-item add\|list\|remove --id {prId} [--work-items {id}] --org {org} -o json` |
 | Work item **types** (localized names) | `az devops invoke --area wit --resource workItemTypes --route-parameters project={project} --org {org} --api-version 7.1 -o json` |
 | Work item type **states** (localized) | `az devops invoke --area wit --resource workItemTypeStates --route-parameters project={project} type={typeName} --org {org} --api-version 7.1 -o json` |
 | Show work item | `az boards work-item show --id {id} --org {org} -o json` |
@@ -246,18 +250,20 @@ Only proceed if the user explicitly confirms.
 2. **Check for existing PR:** `az repos pr list --repository {repo} --source-branch {currentBranch} --status active --org {org} --project {project} --detect false -o json`. If a PR exists, show its title and ID and ask whether to update instead (→ PR Update workflow).
 3. **Get default branch:** `az repos show --repository {repo} --org {org} --project {project} --detect false -o json`; use `defaultBranch` (strip `refs/heads/`) as the target branch.
 4. **Gather commit information:** `git log --oneline "origin/{targetBranch}..{currentBranch}"`.
-5. **Ask for Asana ticket ID** — format `ID-XXXXX` (e.g. `ID-17885`).
+5. **Ask for the work item ID(s)** the PR delivers — the Azure DevOps work item number(s), e.g. `1234`.
 6. **Check for PR template:** Glob for `.azuredevops/pull_request_template.md` in the repo root; if found, read it.
 7. **Generate title and description:**
-   **Title format:** `Icon <Asana-Ticket-Id> Component - Änderungsbeschreibung`
+   **Title format:** `Icon #<WorkItemId> Component - Änderungsbeschreibung`
    - **Icon** by majority vote over commit messages: 🐞 bug fixes (`fix`/`bugfix`/`hotfix`); 🏗️ refactor (`refactor`/`cleanup`/`restructure`); 📖 docs (`docs`/`documentation`); 🏆 features or unclear (default). Tie-break: most recent commit's category.
+   - **#<WorkItemId>:** the Azure DevOps work item this PR delivers, written as `#1234` (in ADO, `#id` auto-links to the work item).
    - **Component:** from conventional-commit scopes first, else from file paths.
    - **Änderungsbeschreibung:** concise German summary.
-   **Description (German):** if a template was found, use it as structure and integrate the Asana link (`https://app.asana.com/0/search?q=ID-XXXXX`) into a suitable section (or add `## Asana`). If no template: `## Asana` section at top with the link, German summary, then the commit list.
+   **Description (German):** reference the linked work item(s) as `#1234` (auto-links). If a template was found, use it as structure and put the `#1234` reference in a suitable section; if no template, lead with a short German summary that references `#1234`, then the commit list.
    *(Reminder: per Quirks, the emoji icon will be missing from the CLI's returned JSON — that is expected, the PR has it.)*
 8. **Present to user for review:** show generated title and full description; apply requested changes; repeat until approved.
-9. **Create the PR:** `az repos pr create --repository {repo} --source-branch {source} --target-branch {target} --title "{title}" --description "{description}" --org {org} --project {project} --detect false -o json` (branch names without `refs/heads/`).
-10. **Report result:** show the PR URL and ID (`pullRequestId`).
+9. **Create the PR:** `az repos pr create --repository {repo} --source-branch {source} --target-branch {target} --title "{title}" --description "{description}" --org {org} --project {project} --detect false -o json` (branch names without `refs/heads/`). Note the `pullRequestId`.
+10. **Link the work item(s) to the PR** (the direct association, in addition to the `#id` mention): `az repos pr work-item add --id {prId} --work-items {id} [{id2} …] --org {org} -o json`.
+11. **Report result:** show the PR URL and ID (`pullRequestId`), and the linked work item(s).
 
 ---
 
@@ -268,12 +274,57 @@ Only proceed if the user explicitly confirms.
 1. **Find the PR:** determine the current branch first (`currentBranch=$(git branch --show-current)`), then `az repos pr list --repository {repo} --source-branch {currentBranch} --status active --org {org} --project {project} --detect false -o json`.
    - None found: ask for the PR ID, then `az repos pr show --id {prId} --org {org} -o json`.
    - One found: use it. Multiple: show list (ID + title), ask which.
-2. **Show current PR state:** display current title and description.
-3. **Ask what to update:** title, description, or Asana link.
-4. **Generate updated values** following the same conventions as PR Creation (German, title schema with icon/Asana-ID/component).
+2. **Show current PR state:** display current title and description, and the linked work items (`az repos pr work-item list --id {prId} --org {org} -o json`).
+3. **Ask what to update:** title, description, status, or linked work item(s).
+4. **Generate updated values** following the same conventions as PR Creation (German; title schema `Icon #<WorkItemId> Component - Änderungsbeschreibung`).
 5. **Present changes for confirmation:** old vs new.
-6. **Update the PR:** `az repos pr update --id {prId} [--title "{newTitle}"] [--description "{newDescription}"] [--status active|abandoned|completed] --org {org} -o json`. Include only the flags for fields being changed (the brackets mark optional flags — omit those you are not updating).
+6. **Update the PR:** `az repos pr update --id {prId} [--title "{newTitle}"] [--description "{newDescription}"] [--status active|abandoned|completed] --org {org} -o json`. Include only the flags for fields being changed (the brackets mark optional flags — omit those you are not updating). To change linked work items: `az repos pr work-item add --id {prId} --work-items {id} --org {org} -o json` (or `... work-item remove ... --work-items {id}`).
 7. **Report result:** confirm the update and show the PR URL. *(Per Quirks, ignore a missing emoji in the returned JSON.)*
+
+---
+
+## Workflow: PR Comments
+
+**Trigger:** User asks to add a comment to a PR, reply to a PR comment, or resolve/reopen a
+comment thread, or `$ARGUMENTS` starts with `comment`.
+
+ADO PR comments live in **threads**; each thread has one or more comments and a `status`
+(`active`, `fixed` = resolved, `closed`, `wontFix`, `byDesign`, `pending`). The az CLI has no
+first-class comment command, so use `az devops invoke` against the `git` area. POST/PATCH
+bodies are passed as a file via `--in-file` — write them with `mktemp`, and **JSON-escape**
+the comment text (quotes, newlines). If a `--resource` name is rejected, discover it with
+`az devops invoke --query "[?area=='git']"`.
+
+1. **Find the PR:** as in PR Update — current branch via `az repos pr list ...`, else ask for
+   the ID; then `az repos pr show --id {prId} --org {org} -o json`.
+2. **List threads** (needed to reply/resolve): `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} --org {org} --api-version 7.1 -o json`. Skip system-only threads (every comment `commentType: "system"`); show each human thread's `id` (threadId), `status`, and its comments (`id`, author, `content`).
+
+### Add a comment (new thread)
+1. Get the comment text. For a code comment, also get the file path (from repo root) and line.
+2. Write the body to a temp file (add `threadContext` only for a file/line-anchored comment):
+   ```bash
+   f=$(mktemp); cat > "$f" <<'JSON'
+   { "comments": [ { "parentCommentId": 0, "content": "<text>", "commentType": "text" } ],
+     "status": "active",
+     "threadContext": { "filePath": "/path/from/repo/root",
+       "rightFileStart": { "line": <N>, "offset": 1 },
+       "rightFileEnd": { "line": <N>, "offset": 1 } } }
+   JSON
+   ```
+3. POST it: `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} --http-method POST --in-file "$f" --media-type application/json --org {org} --api-version 7.1 -o json`; then `rm "$f"`.
+
+### Reply to a thread (answer)
+1. From the thread list, note the `threadId` and the **last** comment's `id` in it (the `parentCommentId`).
+2. Body: `f=$(mktemp); printf '{ "parentCommentId": <lastCommentId>, "content": "<text>", "commentType": "text" }' > "$f"`.
+3. POST it: `az devops invoke --area git --resource pullRequestThreadComments --route-parameters project={project} repositoryId={repo} pullRequestId={prId} threadId={threadId} --http-method POST --in-file "$f" --media-type application/json --org {org} --api-version 7.1 -o json`; then `rm "$f"`.
+
+### Resolve / reopen a thread
+1. Note the `threadId`.
+2. Body — `{ "status": "fixed" }` to resolve (or `"closed"`), `{ "status": "active" }` to reopen:
+   `f=$(mktemp); printf '{ "status": "fixed" }' > "$f"`.
+3. PATCH it: `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} threadId={threadId} --http-method PATCH --in-file "$f" --media-type application/json --org {org} --api-version 7.1 -o json`; then `rm "$f"`.
+
+Report what changed: the new comment/thread `id`, or the thread's new `status`.
 
 ---
 
