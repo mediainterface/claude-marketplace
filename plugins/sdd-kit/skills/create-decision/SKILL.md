@@ -68,8 +68,8 @@ Use this template:
 
 ```markdown
 ---
-# status: Proposed | Accepted | Declined | Deprecated | Superseded by NNNN
-status: Proposed
+# status: Active | Declined | Deprecated | Superseded by NNNN
+status: Active
 date: {today's date, YYYY-MM-DD}
 last-modified: {today's date, YYYY-MM-DD}
 # category: Architecture | Security | API | Testing | Infrastructure
@@ -124,8 +124,8 @@ with their number, title, status and category:
 
 | # | Title | Status | Category |
 |---|-------|--------|----------|
-| 0001 | [Monorepo for MIRA Suite](0001-monorepo-for-mira-suite.md) | Accepted | Architecture |
-| 0002 | [New decision title](0002-new-decision-title.md) | Proposed | Security |
+| 0001 | [Monorepo for MIRA Suite](0001-monorepo-for-mira-suite.md) | Active | Architecture |
+| 0002 | [New decision title](0002-new-decision-title.md) | Active | Security |
 ```
 
 Add the new entry at the end of the table.
@@ -135,14 +135,18 @@ Add the new entry at the end of the table.
 Show the user:
 - The complete content of the created file
 - The file path
-- The note: "The decision has status 'Proposed'. It becomes binding once
-  the Hüter-Trio sets it to 'Accepted' in the PR review."
+- The note: "The decision has status 'Active' and is binding immediately —
+  the team is trusted to make it. The Hüter-Trio reviews it in the PR and
+  only acts if something is wrong: by setting it to 'Declined', marking it
+  'Deprecated', or superseding it with a new decision."
 - The note: "Check in the decision together with the spec and create a PR."
 
 ## Important
 
-- The status is always `Proposed` on creation. Only the Hüter-Trio sets
-  the status to `Accepted` or `Declined`.
+- The status is always `Active` on creation — the team is trusted to make
+  the decision and it is binding right away. The Hüter-Trio reviews decisions
+  and only acts if something is wrong: setting the status to `Declined`,
+  marking it `Deprecated`, or superseding it with a new decision.
 - Decisions are never deleted. When a decision is revised, create a new
   decision record that supersedes the old one.
 - When the user asks about available categories: the list is fixed and
