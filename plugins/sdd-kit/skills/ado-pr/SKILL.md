@@ -6,7 +6,7 @@ description: >-
   and create/answer/resolve PR comment threads. Use when the user mentions an ADO pull
   request / PR, pastes a PR URL or ID, or asks to review, open, update, or comment on a PR.
   Targets the newest Azure DevOps Server version; assumes you are already signed in (PAT).
-argument-hint: <PR_ID_OR_URL | create | update | comment [add|reply|resolve]>
+argument-hint: <PR_ID_OR_URL | create [spec] | update | comment [add|reply|resolve]>
 allowed-tools: Bash, Read, Glob, Grep
 ---
 
@@ -19,8 +19,8 @@ pastes a PR URL/ID or asks to review, open, update, or comment on an Azure DevOp
 > **Shared setup first.** Before any `az` command, complete **Step 0 (connection detection)**
 > and the **Setup Check (sign-in confirmation)** in
 > [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md). That file also holds the
-> **Command Map**, **Repository Mismatch Check**, **Quirks**, and **Error handling &
-> local-state safety** rules the workflows below refer to. `{org}` = `organization`,
+> **Command Map**, **Title schema**, **Repository Mismatch Check**, **Quirks**, and
+> **Error handling & local-state safety** rules the workflows below refer to. `{org}` = `organization`,
 > `{repo}` = `repository`, `{project}` come from Step 0.
 
 ---
@@ -56,7 +56,8 @@ pastes a PR URL/ID or asks to review, open, update, or comment on an Azure DevOp
 
 ## Workflow: PR Creation
 
-**Trigger:** User asks to create a PR, or `$ARGUMENTS` starts with `create`.
+**Trigger:** User asks to create a PR, or `$ARGUMENTS` starts with `create` (`create spec`
+forces a spec PR — see step 7).
 
 1. **Verify branch is pushed:**
    ```bash
@@ -66,16 +67,40 @@ pastes a PR URL/ID or asks to review, open, update, or comment on an Azure DevOp
    If the branch is untracked or has unpushed commits, ask the user whether to push. If yes: `git push -u origin $CURRENT_BRANCH`. If no: stop.
 2. **Check for existing PR:** `az repos pr list --repository {repo} --source-branch {currentBranch} --status active --org {org} --project {project} --detect false -o json`. If a PR exists, show its title and ID and ask whether to update instead (→ PR Update workflow).
 3. **Get default branch:** `az repos show --repository {repo} --org {org} --project {project} --detect false -o json`; use `defaultBranch` (strip `refs/heads/`) as the target branch.
-4. **Gather commit information:** `git log --oneline "origin/{targetBranch}..{currentBranch}"`.
+4. **Gather commit and change information:** `git log --oneline "origin/{targetBranch}..{currentBranch}"` and `git diff --name-only "origin/{targetBranch}..{currentBranch}"` (the changed-file list is used to detect a spec-only PR in step 7).
 5. **Ask for the work item ID(s)** the PR delivers — the Azure DevOps work item number(s), e.g. `1234`.
 6. **Check for PR template:** Glob for `.azuredevops/pull_request_template.md` in the repo root; if found, read it.
-7. **Generate title and description:**
-   **Title format:** `Icon #<WorkItemId> Component - Änderungsbeschreibung`
-   - **Icon** by majority vote over commit messages: 🐞 bug fixes (`fix`/`bugfix`/`hotfix`); 🏗️ refactor (`refactor`/`cleanup`/`restructure`); 📖 docs (`docs`/`documentation`); 🏆 features or unclear (default). Tie-break: most recent commit's category.
-   - **#<WorkItemId>:** the Azure DevOps work item this PR delivers, written as `#1234` (in ADO, `#id` auto-links to the work item).
-   - **Component:** from conventional-commit scopes first, else from file paths.
+7. **Determine the PR kind, then generate title and description.**
+
+   **Spec PR vs implementation PR.** In the SDD workflow a spec and its implementation are
+   **never** in the same PR. This is a **spec PR** when the user invoked `create spec`, or when
+   every changed file (from step 4) is documentation/spec/ADR — i.e. `*.md` or anything under
+   `docs/` (including `docs/decisions/`) — and no source code changed. When auto-detected,
+   **confirm first:** *"Only spec/ADR/doc files changed — create this as a spec PR (📝)?"* A
+   mixed diff is an implementation PR.
+
+   **Title** — shared schema `<Marker> #<WorkItemId> Component - Änderungsbeschreibung`
+   (see **Title schema** in the shared reference):
+   - **Implementation PR — `<Marker>` = change-category emoji** by majority vote over commit
+     messages: 🐞 bug fixes (`fix`/`bugfix`/`hotfix`); 🏗️ refactor (`refactor`/`cleanup`/`restructure`);
+     📖 docs (`docs`/`documentation`); 🏆 features or unclear (default). Tie-break: most recent
+     commit's category.
+   - **Spec PR — `<Marker>` = 📝** (overrides the vote).
+   - **#<WorkItemId>:** the Azure DevOps work item this PR delivers, written as `#1234`.
+   - **Component:** from conventional-commit scopes first, else from file paths. A spec PR has
+     no code paths, so derive it from the spec subject; **if it cannot be determined, ask the user.**
    - **Änderungsbeschreibung:** concise German summary.
-   **Description (German):** reference the linked work item(s) as `#1234` (auto-links). If a template was found, use it as structure and put the `#1234` reference in a suitable section; if no template, lead with a short German summary that references `#1234`, then the commit list.
+
+   **Description (German):**
+   - **Implementation PR:** reference the linked work item(s) as `#1234` (auto-links). If a
+     template was found, use it as structure and put the `#1234` reference in a suitable
+     section; if no template, lead with a short German summary that references `#1234`, then
+     the commit list.
+   - **Spec PR — summary only:** a short German summary that references `#1234` and nothing
+     else — **no affected-components section, no document list, no commit list** (there is no
+     code change). If a template was found, fill only its summary section and leave the
+     code-oriented sections (affected components, testing, …) empty or removed.
+
    *(Reminder: per Quirks, the emoji icon will be missing from the CLI's returned JSON — that is expected, the PR has it.)*
 8. **Present to user for review:** show generated title and full description; apply requested changes; repeat until approved.
 9. **Create the PR:** `az repos pr create --repository {repo} --source-branch {source} --target-branch {target} --title "{title}" --description "{description}" --org {org} --project {project} --detect false -o json` (branch names without `refs/heads/`). Note the `pullRequestId`.
@@ -93,7 +118,7 @@ pastes a PR URL/ID or asks to review, open, update, or comment on an Azure DevOp
    - One found: use it. Multiple: show list (ID + title), ask which.
 2. **Show current PR state:** display current title and description, and the linked work items (`az repos pr work-item list --id {prId} --org {org} -o json`).
 3. **Ask what to update:** title, description, status, or linked work item(s).
-4. **Generate updated values** following the same conventions as PR Creation (German; title schema `Icon #<WorkItemId> Component - Änderungsbeschreibung`).
+4. **Generate updated values** following the same conventions as PR Creation (German; the shared **Title schema**, including the 📝 spec-PR marker and the summary-only spec description — see PR Creation step 7).
 5. **Present changes for confirmation:** old vs new.
 6. **Update the PR:** `az repos pr update --id {prId} [--title "{newTitle}"] [--description "{newDescription}"] [--status active|abandoned|completed] --org {org} -o json`. Include only the flags for fields being changed (the brackets mark optional flags — omit those you are not updating). To change linked work items: `az repos pr work-item add --id {prId} --work-items {id} --org {org} -o json` (or `... work-item remove ... --work-items {id}`).
 7. **Report result:** confirm the update and show the PR URL. *(Per Quirks, ignore a missing emoji in the returned JSON.)*
