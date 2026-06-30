@@ -111,9 +111,11 @@ forces a spec PR — see step 7).
      optionally the key commits), **Betroffene Komponenten** (the affected components), and
      **Risikobewertung** (pick `Niedrig`/`Mittel`/`Hoch` and justify after `weil`).
    - **Spec PR:** fill **Inhalt** (short German summary) and **Risikobewertung** only; **omit
-     Betroffene Komponenten** (there is no code change — risk is usually `Niedrig`, but state the
-     real reason). No document list, no commit list. The work item is **still linked** to the PR
-     in step 10 — only the description body differs, the link is not.
+     Betroffene Komponenten** (no code change yet). The **Risikobewertung assesses the risk of the
+     implementation the spec describes** — its scope, complexity, and impact — *not* the risk of
+     merging the spec document (that would be pointless). So do **not** default to `Niedrig`; judge
+     the level from what the spec proposes. No document list, no commit list. The work item is
+     **still linked** to the PR in step 10 — only the description body differs, the link is not.
    - **Both kinds must keep the `Risikobewertung` section.** If a repo template was found but has
      no risk-assessment section, append one.
 
