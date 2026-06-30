@@ -30,7 +30,7 @@
       "name": "sdd-kit",
       "source": "./plugins/sdd-kit",
       "description": "The skill set for our Spec-Driven Development workflow — decision records, lessons learned, and Azure DevOps via the az CLI — curated for SDD, not a general-purpose collection; most of it has little use outside that workflow.",
-      "version": "1.1.1"
+      "version": "1.1.2"
     }
   ]
 }

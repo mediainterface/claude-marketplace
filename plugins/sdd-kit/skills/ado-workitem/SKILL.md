@@ -21,7 +21,7 @@ asks to create, find, or update an Azure DevOps work item (*Arbeitselement* — 
 > **Shared setup first.** Before any `az` command, complete **Step 0 (connection detection)**
 > and the **Setup Check (sign-in confirmation)** in
 > [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md). That file also holds the
-> **Command Map**, **Quirks**, and **Error handling** rules. `{org}` = `organization`,
+> **Command Map**, **Title schema**, **Quirks**, and **Error handling** rules. `{org}` = `organization`,
 > `{project}` come from Step 0.
 
 > **German installation — never assume English type/state names.** Our Server is German, so
@@ -60,22 +60,40 @@ Only fall back to an English guess if discovery genuinely fails — and tell the
 1. Run **step 1**. If the user named a type in English (e.g. "task"), map it to the
    matching German `name` from the fetched list (`Aufgabe`). If there is no clear match,
    show the available types and ask which to use — do not invent one.
-2. Gather: title (required), type, description, and optionally assignee, area, iteration,
-   and a parent work item to link.
-3. Create the work item:
+2. Gather: the **type**, the **description** (`<Beschreibung>`), the **parent work item**
+   (its ID — the SDD default; almost every item sits under one), the affected
+   **component/application**, and optionally assignee, area, iteration.
+3. **Build the title** per the shared **Title schema**. The shape depends on whether the work
+   item has a parent:
+   - **With a parent:** `<ParentType> #<ParentID> <Component/Application> - <Beschreibung>`
+   - **Without a parent (top-level item):** `<Component/Application> - <Beschreibung>` —
+     **omit the type marker and the `#<ID>` entirely**; there is no parent to read them from,
+     so do *not* substitute the item's own type or a placeholder. Example:
+     `controller-app - Wartungsdialog überarbeiten`.
+
+   Fill the parts as:
+   - **`<ParentType>` and `#<ParentID>`** (only when a parent exists): fetch the parent
+     (`az boards work-item show --id {parentId} --org {org} -o json`) and read its localized
+     type name from `fields["System.WorkItemType"]`; use that word and the parent's ID — e.g.
+     parent is a User Story #45 → `User Story #45 …`; parent is a Fehler #45 → `Fehler #45 …`.
+     **Never assume the type word — take it from the parent.**
+   - **`<Component/Application>`:** the specific affected app/component (e.g. `mira-desktop`);
+     **if it cannot be determined, ask the user.**
+   - **`<Beschreibung>`:** concise German summary.
+4. Create the work item with the assembled title:
    ```bash
    az boards work-item create --title "{title}" --type "{germanTypeName}" \
      [--description "{description}"] [--assigned-to "{user}"] \
      [--area "{area}"] [--iteration "{iteration}"] \
      --org {org} --project {project} -o json
    ```
-4. **Optional — link to a parent:**
+5. **Link to the parent** (if any — this is also the authoritative link behind the
+   `#<ParentID>` reference in the title):
    ```bash
    az boards work-item relation add --id {newId} --relation-type parent \
      --target-id {parentId} --org {org} -o json
    ```
-5. Report the new work item ID and URL. *(Per Quirks, an emoji in the title may be absent
-   from the returned JSON — expected; the work item has it.)*
+6. Report the new work item ID and URL.
 
 ### Show / Query
 - **Show one:** `az boards work-item show --id {id} --org {org} -o json`.
@@ -90,7 +108,9 @@ Only fall back to an English guess if discovery genuinely fails — and tell the
 ### Update
 1. Identify the work item (ID from the user, or via Show/Query above).
 2. For a **state** change, get the valid localized states for its type from step 1 first.
-3. Update only the fields being changed:
+3. Update only the fields being changed. **When changing the title**, rebuild it per the
+   shared **Title schema** (`<ParentType> #<ParentID> <Component/Application> - <Beschreibung>`)
+   — fetch the parent for the type word and ID, exactly as in Create.
    ```bash
    az boards work-item update --id {id} [--title "{title}"] [--state "{germanState}"] \
      [--assigned-to "{user}"] [--description "{description}"] --org {org} -o json
