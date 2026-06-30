@@ -98,13 +98,15 @@ forces a spec PR — see step 7).
      the commit list.
    - **Spec PR — summary only:** a short German summary that references `#1234` and nothing
      else — **no affected-components section, no document list, no commit list** (there is no
-     code change). If a template was found, fill only its summary section and leave the
-     code-oriented sections (affected components, testing, …) empty or removed.
+     code change). The work item is **still linked** to the PR in step 10, exactly as for an
+     implementation PR — only the description body is trimmed, the link is not. If a template
+     was found, fill only its summary section and leave the code-oriented sections (affected
+     components, testing, …) empty or removed.
 
    *(Reminder: per Quirks, the emoji icon will be missing from the CLI's returned JSON — that is expected, the PR has it.)*
 8. **Present to user for review:** show generated title and full description; apply requested changes; repeat until approved.
 9. **Create the PR:** `az repos pr create --repository {repo} --source-branch {source} --target-branch {target} --title "{title}" --description "{description}" --org {org} --project {project} --detect false -o json` (branch names without `refs/heads/`). Note the `pullRequestId`.
-10. **Link the work item(s) to the PR** (the direct association, in addition to the `#id` mention): `az repos pr work-item add --id {prId} --work-items {id} [{id2} …] --org {org} -o json`.
+10. **Link the work item(s) to the PR — always, for every PR type (implementation *and* spec).** This is the direct association, in addition to the `#id` mention; the `#id` text alone is not a link, so never skip this step even when the description already references `#1234`: `az repos pr work-item add --id {prId} --work-items {id} [{id2} …] --org {org} -o json`.
 11. **Report result:** show the PR URL and ID (`pullRequestId`), and the linked work item(s).
 
 ---

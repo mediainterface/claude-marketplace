@@ -131,8 +131,9 @@ PR titles and work item titles share one shape so the two stay visually consiste
   - **Work item** (`ado-workitem`): the **parent work item's type name** as a German word
     (e.g. `User Story`, `Fehler`, `Feature`), read from the parent — never assumed.
 - **`#<ID>`** — a `#1234` reference ADO renders as an auto-link. It is only the *readable*
-  reference; the authoritative link is set separately (the PR↔work-item link, or the parent
-  relation). For a PR it is the delivered work item; for a work item it is the **parent's** ID.
+  reference; the actual link is **always** set separately and is never replaced by the mention
+  (the PR↔work-item link via `az repos pr work-item add`, or the parent relation for a work
+  item). For a PR it is the delivered work item; for a work item it is the **parent's** ID.
 - **`<Component/Application>`** — the specific affected app/component, e.g. `mira-desktop`,
   `controller-app`. Derive it from context (commit scopes, file paths, the spec/work-item
   subject); **if it cannot be determined confidently, ask the user** — do not guess.
