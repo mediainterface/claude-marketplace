@@ -107,8 +107,9 @@ Show the user:
 - The complete content of the created entry
 - The file path
 - The note: "Create a PR with this change. The entry is active immediately —
-  the team is trusted to capture it. The Hüter-Trio is added as reviewer and
-  only weighs in if something needs correcting."
+  the team is trusted to capture it. The Hüter-Trio is not added as a
+  reviewer; they review new entries on a scheduled basis (all changes since
+  their last meeting) and only weigh in if something needs correcting."
 
 If the observation is actually a rule (e.g. "always do it this way"),
 suggest writing a convention (Claude Code Rule in `.claude/rules/`) instead.

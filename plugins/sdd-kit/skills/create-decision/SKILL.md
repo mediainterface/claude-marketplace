@@ -136,17 +136,20 @@ Show the user:
 - The complete content of the created file
 - The file path
 - The note: "The decision has status 'Active' and is binding immediately —
-  the team is trusted to make it. The Hüter-Trio reviews it in the PR and
-  only acts if something is wrong: by setting it to 'Declined', marking it
-  'Deprecated', or superseding it with a new decision."
+  the team is trusted to make it. The Hüter-Trio is not added as a reviewer;
+  they review new decisions on a scheduled basis (everything since their last
+  meeting) and only act if something is wrong: by setting it to 'Declined',
+  marking it 'Deprecated', or superseding it with a new decision."
 - The note: "Check in the decision together with the spec and create a PR."
 
 ## Important
 
 - The status is always `Active` on creation — the team is trusted to make
-  the decision and it is binding right away. The Hüter-Trio reviews decisions
-  and only acts if something is wrong: setting the status to `Declined`,
-  marking it `Deprecated`, or superseding it with a new decision.
+  the decision and it is binding right away. The Hüter-Trio is not added as a
+  PR reviewer; they review new decisions on a scheduled basis (all records
+  since their last meeting) and only act if something is wrong: setting the
+  status to `Declined`, marking it `Deprecated`, or superseding it with a new
+  decision.
 - Decisions are never deleted. When a decision is revised, create a new
   decision record that supersedes the old one.
 - When the user asks about available categories: the list is fixed and
