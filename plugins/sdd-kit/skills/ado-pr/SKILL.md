@@ -92,11 +92,13 @@ forces a spec PR — see step 7).
    - **Änderungsbeschreibung:** concise German summary.
 
    **Description (German).** Use the repo's PR template if step 6 found one; otherwise build the
-   description from this **default template** (recreate it verbatim — it is our standard structure):
+   description from this **default template** (recreate it verbatim — it is our standard structure).
+   Do **not** reference the work item in the description (no `#1234`): it is already linked to the
+   PR in step 10, so a mention here only adds noise. The work-item reference lives in the title.
 
    ```
    **Inhalt**
-   <kurze Zusammenfassung, referenziert #1234>
+   <kurze Zusammenfassung>
 
    **Betroffene Komponenten**
    <betroffene Komponenten/Anwendungen>
@@ -105,21 +107,20 @@ forces a spec PR — see step 7).
    Niedrig|Mittel|Hoch, weil <Begründung>
    ```
 
-   - **Implementation PR:** fill all three sections — **Inhalt** (short German summary that
-     references `#1234`, optionally the key commits), **Betroffene Komponenten** (the affected
-     components), and **Risikobewertung** (pick `Niedrig`/`Mittel`/`Hoch` and justify after `weil`).
-   - **Spec PR:** fill **Inhalt** (short German summary that references `#1234`) and
-     **Risikobewertung** only; **omit Betroffene Komponenten** (there is no code change — risk is
-     usually `Niedrig`, but state the real reason). No document list, no commit list. The work
-     item is **still linked** to the PR in step 10 — only the description body differs, the link
-     is not.
+   - **Implementation PR:** fill all three sections — **Inhalt** (short German summary,
+     optionally the key commits), **Betroffene Komponenten** (the affected components), and
+     **Risikobewertung** (pick `Niedrig`/`Mittel`/`Hoch` and justify after `weil`).
+   - **Spec PR:** fill **Inhalt** (short German summary) and **Risikobewertung** only; **omit
+     Betroffene Komponenten** (there is no code change — risk is usually `Niedrig`, but state the
+     real reason). No document list, no commit list. The work item is **still linked** to the PR
+     in step 10 — only the description body differs, the link is not.
    - **Both kinds must keep the `Risikobewertung` section.** If a repo template was found but has
      no risk-assessment section, append one.
 
    *(Reminder: per Quirks, the emoji icon will be missing from the CLI's returned JSON — that is expected, the PR has it.)*
 8. **Present to user for review:** show generated title and full description; apply requested changes; repeat until approved.
 9. **Create the PR:** `az repos pr create --repository {repo} --source-branch {source} --target-branch {target} --title "{title}" --description "{description}" --org {org} --project {project} --detect false -o json` (branch names without `refs/heads/`). Note the `pullRequestId`.
-10. **Link the work item(s) to the PR — always, for every PR type (implementation *and* spec).** This is the direct association, in addition to the `#id` mention; the `#id` text alone is not a link, so never skip this step even when the description already references `#1234`: `az repos pr work-item add --id {prId} --work-items {id} [{id2} …] --org {org} -o json`.
+10. **Link the work item(s) to the PR — always, for every PR type (implementation *and* spec).** This is the direct association, in addition to the `#id` in the title; the title's `#id` is not itself a link, so never skip this step (the description deliberately does not repeat the work item — it is linked here): `az repos pr work-item add --id {prId} --work-items {id} [{id2} …] --org {org} -o json`.
 11. **Report result:** show the PR URL and ID (`pullRequestId`), and the linked work item(s).
 
 ---
