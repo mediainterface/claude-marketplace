@@ -1,6 +1,6 @@
 {
   "name": "sdd-kit",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "The skill set for our Spec-Driven Development (SDD) workflow. These are the skills we actually reach for while doing SDD — capturing the decisions and lessons behind a spec, then running the Azure DevOps work a plan turns into — so it is deliberately not a general-purpose collection, and most of it has little use outside SDD. /create-decision records design decisions as Decision Records in the Memory Bank, /create-lesson-learned captures recurring patterns and pitfalls for later specs, and three Azure DevOps skills run the delivery side via the az CLI: /ado-pr (review, create, update, and comment on pull requests), /ado-workitem (German-localized work items), and /ado-pipeline (pipeline-failure analysis and changelogs) — all PAT-authenticated against the newest Server, with shared setup in skills/ado-shared/REFERENCE.md.",
   "author": {
     "name": "MIRA Hueter-Trio",
