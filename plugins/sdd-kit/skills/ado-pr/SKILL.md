@@ -69,7 +69,7 @@ forces a spec PR — see step 7).
 3. **Get default branch:** `az repos show --repository {repo} --org {org} --project {project} --detect false -o json`; use `defaultBranch` (strip `refs/heads/`) as the target branch.
 4. **Gather commit and change information:** `git log --oneline "origin/{targetBranch}..{currentBranch}"` and `git diff --name-only "origin/{targetBranch}..{currentBranch}"` (the changed-file list is used to detect a spec-only PR in step 7).
 5. **Ask for the work item ID(s)** the PR delivers — the Azure DevOps work item number(s), e.g. `1234`.
-6. **Check for PR template:** Glob for `.azuredevops/pull_request_template.md` in the repo root; if found, read it.
+6. **Check for a PR template:** Glob for `.azuredevops/pull_request_template.md` in the repo root; if found, read it and use it as the description structure. If none is found, use the **default template** in step 7.
 7. **Determine the PR kind, then generate title and description.**
 
    **Spec PR vs implementation PR.** In the SDD workflow a spec and its implementation are
@@ -91,17 +91,30 @@ forces a spec PR — see step 7).
      no code paths, so derive it from the spec subject; **if it cannot be determined, ask the user.**
    - **Änderungsbeschreibung:** concise German summary.
 
-   **Description (German):**
-   - **Implementation PR:** reference the linked work item(s) as `#1234` (auto-links). If a
-     template was found, use it as structure and put the `#1234` reference in a suitable
-     section; if no template, lead with a short German summary that references `#1234`, then
-     the commit list.
-   - **Spec PR — summary only:** a short German summary that references `#1234` and nothing
-     else — **no affected-components section, no document list, no commit list** (there is no
-     code change). The work item is **still linked** to the PR in step 10, exactly as for an
-     implementation PR — only the description body is trimmed, the link is not. If a template
-     was found, fill only its summary section and leave the code-oriented sections (affected
-     components, testing, …) empty or removed.
+   **Description (German).** Use the repo's PR template if step 6 found one; otherwise build the
+   description from this **default template** (recreate it verbatim — it is our standard structure):
+
+   ```
+   **Inhalt**
+   <kurze Zusammenfassung, referenziert #1234>
+
+   **Betroffene Komponenten**
+   <betroffene Komponenten/Anwendungen>
+
+   **Risikobewertung**
+   Niedrig|Mittel|Hoch, weil <Begründung>
+   ```
+
+   - **Implementation PR:** fill all three sections — **Inhalt** (short German summary that
+     references `#1234`, optionally the key commits), **Betroffene Komponenten** (the affected
+     components), and **Risikobewertung** (pick `Niedrig`/`Mittel`/`Hoch` and justify after `weil`).
+   - **Spec PR:** fill **Inhalt** (short German summary that references `#1234`) and
+     **Risikobewertung** only; **omit Betroffene Komponenten** (there is no code change — risk is
+     usually `Niedrig`, but state the real reason). No document list, no commit list. The work
+     item is **still linked** to the PR in step 10 — only the description body differs, the link
+     is not.
+   - **Both kinds must keep the `Risikobewertung` section.** If a repo template was found but has
+     no risk-assessment section, append one.
 
    *(Reminder: per Quirks, the emoji icon will be missing from the CLI's returned JSON — that is expected, the PR has it.)*
 8. **Present to user for review:** show generated title and full description; apply requested changes; repeat until approved.
