@@ -129,7 +129,9 @@ PR titles and work item titles share one shape so the two stay visually consiste
   - **PR** (`ado-pr`): a change-category **emoji** — 🐞 bug, 🏗️ refactor, 📖 docs,
     🏆 feature/default, 📝 spec-only PR (the PR-creation workflow defines how it is chosen).
   - **Work item** (`ado-workitem`): the **parent work item's type name** as a German word
-    (e.g. `User Story`, `Fehler`, `Feature`), read from the parent — never assumed.
+    (e.g. `User Story`, `Fehler`, `Feature`), read from the parent — never assumed. A work
+    item **without a parent** has no marker and no `#<ID>`; its title is just
+    `<Component/Application> - <Beschreibung>`.
 - **`#<ID>`** — a `#1234` reference ADO renders as an auto-link. It is only the *readable*
   reference; the actual link is **always** set separately and is never replaced by the mention
   (the PR↔work-item link via `az repos pr work-item add`, or the parent relation for a work
