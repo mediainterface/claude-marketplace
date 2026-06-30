@@ -136,20 +136,23 @@ Show the user:
 - The complete content of the created file
 - The file path
 - The note: "The decision has status 'Active' and is binding immediately —
-  the team is trusted to make it. The Hüter-Trio is not added as a reviewer;
-  they review new decisions on a scheduled basis (everything since their last
-  meeting) and only act if something is wrong: by setting it to 'Declined',
-  marking it 'Deprecated', or superseding it with a new decision."
+  the team is trusted to make it and manages the lifecycle itself, deprecating
+  a decision or superseding it with a new one as things evolve. The Hüter-Trio
+  is not added as a reviewer; they review new decisions on a scheduled basis
+  (everything since their last meeting) and only guard: they flag any
+  contradictory or nonsensical decision to be declined or revised and make sure
+  decisions are applied everywhere, so the architecture and code do not drift."
 - The note: "Check in the decision together with the spec and create a PR."
 
 ## Important
 
-- The status is always `Active` on creation — the team is trusted to make
-  the decision and it is binding right away. The Hüter-Trio is not added as a
-  PR reviewer; they review new decisions on a scheduled basis (all records
-  since their last meeting) and only act if something is wrong: setting the
-  status to `Declined`, marking it `Deprecated`, or superseding it with a new
-  decision.
+- The status is always `Active` on creation, and the team manages the
+  lifecycle itself: it deprecates decisions or supersedes them with new ones
+  as things evolve. The Hüter-Trio does not run the lifecycle and is not added
+  as a PR reviewer; they review on a scheduled basis (all records since their
+  last meeting) and only guard — flagging any contradictory or nonsensical
+  decision to be declined or revised, and ensuring decisions are applied
+  everywhere so the architecture and code do not drift.
 - Decisions are never deleted. When a decision is revised, create a new
   decision record that supersedes the old one.
 - When the user asks about available categories: the list is fixed and
