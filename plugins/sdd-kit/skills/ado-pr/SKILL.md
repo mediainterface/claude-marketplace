@@ -110,14 +110,16 @@ forces a spec PR — see step 7).
    - **Implementation PR:** fill all three sections — **Inhalt** (short German summary,
      optionally the key commits), **Betroffene Komponenten** (the affected components), and
      **Risikobewertung** (pick `Niedrig`/`Mittel`/`Hoch` and justify after `weil`).
-   - **Spec PR:** fill **Inhalt** (short German summary) and **Risikobewertung** only; **omit
-     Betroffene Komponenten** (no code change yet). The **Risikobewertung assesses the risk of the
-     implementation the spec describes** — its scope, complexity, and impact — *not* the risk of
-     merging the spec document (that would be pointless). So do **not** default to `Niedrig`; judge
-     the level from what the spec proposes. No document list, no commit list. The work item is
-     **still linked** to the PR in step 10 — only the description body differs, the link is not.
-   - **Both kinds must keep the `Risikobewertung` section.** If a repo template was found but has
-     no risk-assessment section, append one.
+   - **Spec PR:** fill **Inhalt** (short German summary) and the risk section; **omit Betroffene
+     Komponenten** (no code change yet). Title the risk section **Erwartetes Umsetzungsrisiko**
+     (not `Risikobewertung`): it assesses the risk of the **implementation the spec describes** —
+     its scope, complexity, and impact — *not* the risk of merging the spec document (that would
+     be pointless). So do **not** default to `Niedrig`; judge the level from what the spec
+     proposes. No document list, no commit list. The work item is **still linked** to the PR in
+     step 10 — only the description body differs, the link is not.
+   - **Both kinds must include a risk section** — **Risikobewertung** for an implementation PR,
+     **Erwartetes Umsetzungsrisiko** for a spec PR. If a repo template was found but has none,
+     append the appropriate one.
 
    *(Reminder: per Quirks, the emoji icon will be missing from the CLI's returned JSON — that is expected, the PR has it.)*
 8. **Present to user for review:** show generated title and full description; apply requested changes; repeat until approved.
