@@ -68,8 +68,8 @@ Use this template:
 
 ```markdown
 ---
-# status: Proposed | Accepted | Declined | Deprecated | Superseded by NNNN
-status: Proposed
+# status: Active | Declined | Deprecated | Superseded by NNNN
+status: Active
 date: {today's date, YYYY-MM-DD}
 last-modified: {today's date, YYYY-MM-DD}
 # category: Architecture | Security | API | Testing | Infrastructure
@@ -124,8 +124,8 @@ with their number, title, status and category:
 
 | # | Title | Status | Category |
 |---|-------|--------|----------|
-| 0001 | [Monorepo for MIRA Suite](0001-monorepo-for-mira-suite.md) | Accepted | Architecture |
-| 0002 | [New decision title](0002-new-decision-title.md) | Proposed | Security |
+| 0001 | [Monorepo for MIRA Suite](0001-monorepo-for-mira-suite.md) | Active | Architecture |
+| 0002 | [New decision title](0002-new-decision-title.md) | Active | Security |
 ```
 
 Add the new entry at the end of the table.
@@ -135,14 +135,24 @@ Add the new entry at the end of the table.
 Show the user:
 - The complete content of the created file
 - The file path
-- The note: "The decision has status 'Proposed'. It becomes binding once
-  the Hüter-Trio sets it to 'Accepted' in the PR review."
+- The note: "The decision has status 'Active' and is binding immediately —
+  the team is trusted to make it and manages the lifecycle itself, deprecating
+  a decision or superseding it with a new one as things evolve. The Hüter-Trio
+  is not added as a reviewer; they review new decisions on a scheduled basis
+  (everything since their last meeting) and only guard: they flag any
+  contradictory or nonsensical decision to be declined or revised and make sure
+  decisions are applied everywhere, so the architecture and code do not drift."
 - The note: "Check in the decision together with the spec and create a PR."
 
 ## Important
 
-- The status is always `Proposed` on creation. Only the Hüter-Trio sets
-  the status to `Accepted` or `Declined`.
+- The status is always `Active` on creation, and the team manages the
+  lifecycle itself: it deprecates decisions or supersedes them with new ones
+  as things evolve. The Hüter-Trio does not run the lifecycle and is not added
+  as a PR reviewer; they review on a scheduled basis (all records since their
+  last meeting) and only guard — flagging any contradictory or nonsensical
+  decision to be declined or revised, and ensuring decisions are applied
+  everywhere so the architecture and code do not drift.
 - Decisions are never deleted. When a decision is revised, create a new
   decision record that supersedes the old one.
 - When the user asks about available categories: the list is fixed and
