@@ -2,45 +2,40 @@
 /*
  * SessionStart hook for sdd-kit.
  *
- * Injects a project-level SDD policy that OVERRIDES the superpowers brainstorming
- * skill's writing-plans handoff: once a spec is written and approved, route to
- * /spec-pr (open a PR for the spec and stop) instead of writing an implementation
- * plan or code.
+ * Injects the project SDD policy (hooks/sdd-policy.md) as SessionStart
+ * `additionalContext` — the same channel superpowers uses for its own primer — so
+ * it overrides the brainstorming skill's writing-plans handoff and routes to
+ * /spec-pr. The hook's matcher (startup|clear|compact) re-injects it after
+ * compaction, keeping it present through a long session.
  *
- * Delivered as SessionStart `additionalContext` — the same channel superpowers uses
- * for its own primer — with matcher startup|clear|compact so the policy re-injects
- * after compaction and stays present through a long brainstorming session.
- *
- * Node so it runs everywhere Claude Code runs, including Windows, with no extra
- * tooling.
+ * The policy prose lives in sdd-policy.md so it can grow without touching this
+ * script; JSON.stringify handles escaping the Markdown. Node so it runs everywhere
+ * Claude Code runs, including Windows.
  */
 "use strict";
 
-const POLICY =
-  "PROJECT SDD POLICY — this project-level instruction OVERRIDES the superpowers " +
-  "brainstorming skill's writing-plans handoff. In this Spec-Driven-Development " +
-  "workflow, once the brainstorming skill has produced a design spec and the user " +
-  "has approved it, do NOT invoke the writing-plans skill and do NOT write an " +
-  "implementation plan or any code. Instead, invoke the sdd-kit:spec-pr skill, " +
-  "which opens a pull request for the spec (plus any Memory Bank items) and then " +
-  "stops until the PR is merged. The implementation plan (writing-plans) comes " +
-  "only AFTER the spec PR is merged, as a separate later effort. Proceed to " +
-  "writing-plans now ONLY if the user explicitly asks for an implementation plan " +
-  "in this session.";
+const fs = require("fs");
+const path = require("path");
 
-// SessionStart passes a small JSON payload on stdin; we don't need it, but consume
-// it so nothing blocks on the pipe.
+// Consume the SessionStart payload on stdin so nothing blocks on the pipe.
 try {
-  require("fs").readFileSync(0, "utf8");
+  fs.readFileSync(0, "utf8");
 } catch (_) {
   /* no stdin — fine */
+}
+
+let policy;
+try {
+  policy = fs.readFileSync(path.join(__dirname, "sdd-policy.md"), "utf8").trim();
+} catch (_) {
+  process.exit(0); // policy file missing -> inject nothing rather than error out
 }
 
 process.stdout.write(
   JSON.stringify({
     hookSpecificOutput: {
       hookEventName: "SessionStart",
-      additionalContext: POLICY,
+      additionalContext: policy,
     },
   })
 );
