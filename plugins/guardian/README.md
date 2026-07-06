@@ -29,8 +29,8 @@ needs a closer look.
   `/memory-bank-changes "3 weeks ago"`.
 - **Output**: a scannable terminal report grouped by artifact type, with a
   guardian-flags callout (e.g. a *deleted* decision — decisions are never
-  deleted, only superseded). Offers to save the report to
-  `docs/guardian-review-YYYY-MM-DD.md`.
+  deleted, only superseded). The report is ephemeral — printed, not written into
+  the repo — unless you explicitly ask to save it to a path you name.
 - **Scope**: read-only, works offline (pure `git` + file reads), and always
   runs against the repo of the **current working directory** — run it once
   inside each project repo you want to review.

@@ -14,8 +14,8 @@ is fine or something needs a closer look.
 The change data comes from **git history** (author, date, commit message, and
 which files were added/modified/deleted) enriched with each record's own
 **content** (title, category, status, deciders, and a short reasoning summary).
-It is **read-only**: it never edits records, except an optional saved report
-the user explicitly asks for.
+It is **read-only**: it never edits records or writes files — it just prints
+the report, unless the user explicitly asks to save it to a path they name.
 
 The skill always operates on **the repo of the current working directory** —
 run it once inside each project repo you want to review.
@@ -109,11 +109,12 @@ touched.
 List anything worth a closer look (see the flags section). If nothing is
 unusual, say `Flags: none`.
 
-### Step 7 — Offer to save
+### Step 7 — Do not save by default
 
-After printing, ask whether to write the report to
-`docs/guardian-review-YYYY-MM-DD.md` (today's date). Only write it on explicit
-confirmation, then show the path.
+A review is an ephemeral, point-in-time artifact, so do not write it into the
+repo. Print the report and stop. Only if the user explicitly asks to keep it,
+save it to a path they name — do not invent a default location under `docs/`
+and do not commit review files on your own initiative.
 
 ## Report format
 
