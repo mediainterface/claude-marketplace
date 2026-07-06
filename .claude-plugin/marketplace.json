@@ -35,7 +35,7 @@
     {
       "name": "guardian",
       "source": "./plugins/guardian",
-      "description": "Tools for the guardians (Hüter-Trio) — starting with /memory-bank-changes, which reports what changed in the Memory Bank (decisions, learnings, conventions) since a date, by whom, and why, from git history plus record content.",
+      "description": "Tools for the guardians (the Hüter-Trio) to review and guard the Memory Bank so the team's decisions, learnings, and conventions stay consistent and the architecture and code don't drift.",
       "version": "1.0.0"
     }
   ]

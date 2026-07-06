@@ -1,7 +1,7 @@
 {
   "name": "guardian",
   "version": "1.0.0",
-  "description": "Tools for the guardians (Hüter-Trio) to do their job. First skill: /memory-bank-changes reports every Memory Bank change (decision records, lessons learned, and Claude Code rule conventions) since a date — default the last 7 days — reconstructing what changed, by whom, and why from git history plus each record's content, so a guardian can trace and review recent activity and decide whether anything needs a closer look. Read-only; runs against the repo of the current working directory.",
+  "description": "Tools for the guardians (the Hüter-Trio) to do their job — reviewing and guarding the Memory Bank so the team's decisions, learnings, and conventions stay consistent and the architecture and code don't drift.",
   "author": {
     "name": "MIRA Hueter-Trio",
     "email": "daniel.lahmann@mediainterface.de"
