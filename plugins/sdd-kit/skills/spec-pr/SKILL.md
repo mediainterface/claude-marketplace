@@ -22,8 +22,8 @@ write code — getting the spec merged, and any later implementation, are separa
 efforts.
 
 > **This skill is the SDD replacement for brainstorming's `writing-plans` handoff.**
-> A PostToolUse hook in this plugin injects a reminder to run it once a spec is
-> written; you can also invoke it manually at any time.
+> A SessionStart hook in this plugin injects the policy that routes here; you can
+> also invoke it manually at any time.
 
 ## When NOT to use it
 
