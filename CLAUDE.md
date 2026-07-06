@@ -34,22 +34,29 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │   ├── README.md
 │   │   └── hooks/
 │   │       └── hooks.json        # Agent hook config (PreToolUse on Bash(git commit:*))
-│   └── sdd-kit/                  # Spec-Driven Development toolkit (skill-only)
+│   ├── sdd-kit/                  # Spec-Driven Development toolkit (skill-only)
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   └── skills/
+│   │       ├── create-decision/
+│   │       │   └── SKILL.md      # /create-decision — document decisions as Decision Records
+│   │       ├── create-lesson-learned/
+│   │       │   └── SKILL.md      # /create-lesson-learned — capture patterns and pitfalls
+│   │       ├── ado-shared/
+│   │       │   └── REFERENCE.md  # Shared ADO setup/auth/command-map (not a skill)
+│   │       ├── ado-pr/
+│   │       │   └── SKILL.md      # /ado-pr — PR review/create/update/comment via az CLI
+│   │       ├── ado-workitem/
+│   │       │   └── SKILL.md      # /ado-workitem — German-localized work items via az CLI
+│   │       └── ado-pipeline/
+│   │           └── SKILL.md      # /ado-pipeline — pipeline analysis + changelog via az CLI
+│   └── guardian/                 # Guardian (Hüter-Trio) tooling (skill-only)
 │       ├── .claude-plugin/
 │       │   └── plugin.json
+│       ├── README.md
 │       └── skills/
-│           ├── create-decision/
-│           │   └── SKILL.md      # /create-decision — document decisions as Decision Records
-│           ├── create-lesson-learned/
-│           │   └── SKILL.md      # /create-lesson-learned — capture patterns and pitfalls
-│           ├── ado-shared/
-│           │   └── REFERENCE.md  # Shared ADO setup/auth/command-map (not a skill)
-│           ├── ado-pr/
-│           │   └── SKILL.md      # /ado-pr — PR review/create/update/comment via az CLI
-│           ├── ado-workitem/
-│           │   └── SKILL.md      # /ado-workitem — German-localized work items via az CLI
-│           └── ado-pipeline/
-│               └── SKILL.md      # /ado-pipeline — pipeline analysis + changelog via az CLI
+│           └── memory-bank-changes/
+│               └── SKILL.md      # /memory-bank-changes — report Memory Bank changes since a date, by whom and why
 ├── CLAUDE.md
 ├── README.md
 └── LICENSE                       # Apache-2.0
@@ -108,6 +115,13 @@ The skill set for MediaInterface's Spec-Driven Development (SDD) workflow — th
 - **Skill** (`plugins/sdd-kit/skills/create-lesson-learned/SKILL.md`): `/create-lesson-learned` — captures recurring patterns and pitfalls in the Memory Bank.
 - **Azure DevOps skills** (`plugins/sdd-kit/skills/ado-pr`, `ado-workitem`, `ado-pipeline`): Azure DevOps via the Azure CLI (`az` + azure-devops extension), split into `/ado-pr` (PR review/create/update/comment), `/ado-workitem` (work item create/show/query/update), and `/ado-pipeline` (pipeline-failure analysis + changelog), for the newest Azure DevOps Server version. Shared connection detection, sign-in check, command map, title schema, quirks, and error-handling live in `skills/ado-shared/REFERENCE.md` — a non-skill file the three SKILL.md files link to by relative path. The shared title schema (`<Marker> #<ID> <Component/Application> - <Beschreibung>`) keeps PR titles (change-category emoji incl. 📝 for spec-only PRs) and work item titles (parent's type word + parent ID) consistent. They assume the user is already signed in via `az devops login` (PAT-based); they never authenticate themselves and prompt the user if sign-in is missing. The Server is **German-localized**, so work item types/states are German (e.g. `Aufgabe`, not `Task`) — fetched from the server rather than assumed. The MCP-based `azure-devops` plugin stays for the older Server version.
 - **Requires** the `az` CLI with the `azure-devops` extension installed and the user signed in via `az devops login` for the `/ado-pr`, `/ado-workitem`, and `/ado-pipeline` skills.
+
+### guardian
+
+Tools for the guardians (the Hüter-Trio) to do their job. The guardians review the Memory Bank on a scheduled basis — everything since their last meeting — and guard it against contradictory or nonsensical records and drift. Skill-only so far; it will grow.
+
+- **Skill** (`plugins/guardian/skills/memory-bank-changes/SKILL.md`): `/memory-bank-changes [since]` — reports every Memory Bank change since a date (default the last 7 days) so a guardian can trace **what changed, by whom, and why**. It reconstructs the timeline from **git history** (author, date, commit message, added/modified/deleted/renamed files) and enriches each touched record with its **content** (title, category, status, deciders, a short reasoning summary, and status transitions such as `Active → Resolved`). Covers all three Memory Bank artifacts — Decision Records (`docs/decisions/`), Lessons Learned (`docs/learnings/`), and Conventions (Claude Code Rules in `.claude/rules/`) — the same locations `sdd-kit`'s `/create-decision` and `/create-lesson-learned` write to. Output is a scannable terminal report grouped by artifact type with a guardian-flags callout (e.g. a *deleted* decision, since decisions are only ever superseded), and it offers to save the report to `docs/guardian-review-YYYY-MM-DD.md`. Read-only, works offline (pure `git` + file reads), and always runs against the repo of the **current working directory** — run it once per project repo.
+- **Requires** the Memory Bank to live in a git repository (it always does). No env vars, external services, or extra CLIs.
 
 ## CI/CD
 
