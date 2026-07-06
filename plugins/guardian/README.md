@@ -2,11 +2,12 @@
 
 Tools for the **guardians** (the Hüter-Trio) to do their job.
 
-The guardians review the Memory Bank on a scheduled basis — everything that
-changed since their last meeting — and guard it: they flag any contradictory or
-nonsensical record and make sure decisions are applied everywhere, so the
-architecture and code do not drift. This plugin collects the tools they need for
-that work. It starts with one skill and will grow.
+The guardians watch over the whole repository and its architecture — not just
+the Memory Bank. They review changes on a scheduled basis (everything since
+their last meeting), flag anything contradictory or nonsensical, and make sure
+decisions are applied everywhere, so the architecture and code do not drift.
+This plugin collects the tools they need for that work, starting with the
+Memory Bank and growing from there.
 
 ## Skills
 
