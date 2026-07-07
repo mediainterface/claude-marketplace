@@ -121,33 +121,22 @@ Only fall back to an English guess if discovery genuinely fails — and tell the
    a work item to — or clear it from — a team (see **Team Area/Iteration** below).
 4. Confirm the change and report the work item URL.
 
-### Team Area/Iteration (for the authenticated user)
+### Area / Iteration paths
 
-Some flows (e.g. sdd-kit's implementation-tasks policy) set a task's **Area** and
-**Iteration** to the **authenticated user's team**, then clear them when the parent
-story is done. Resolve and apply the team like this:
+Set a work item's **Area** and **Iteration** with `--area`/`--iteration` (on create or
+update); both are project-relative, backslash-separated (e.g. `{project}\{team}`), and
+the **project root** is just `{project}` (the first path segment, no team).
 
-1. **Find the signed-in identity.** The ConnectionData API returns `authenticatedUser`:
-   ```bash
-   az devops invoke --area connectionData --resource connectionData \
-     --org {org} --api-version 7.1 -o json
-   ```
-   Read `authenticatedUser` (its `providerDisplayName` and the account/email under
-   `properties`). If the `--area`/`--resource` names are rejected, discover the right
-   ones with `az devops invoke --query "[?contains(area,'onnection')]"`.
-2. **Find the user's team.** List the project's teams, then check membership:
-   ```bash
-   az devops team list --project {project} --org {org} -o json
-   az devops team list-member --team "{teamName}" --project {project} --org {org} -o json
-   ```
-   If the user is in exactly one team, use it; if several, **ask which team**.
-3. **Build the paths.** Both Area and Iteration are `{project}\{team}` (a team's
-   default area path is the team name under the project — confirm against the team's
-   settings if unsure). Set them on create with `--area`/`--iteration`, or update
-   later:
-   ```bash
-   # assign to the team
-   az boards work-item update --id {id} --area "{project}\\{team}" --iteration "{project}\\{team}" --org {org} -o json
-   # clear the team (reset to project root, no team)
-   az boards work-item update --id {id} --area "{project}" --iteration "{project}" --org {org} -o json
-   ```
+To place a child under the **same team as its parent** (e.g. sdd-kit's
+implementation-tasks flow), read the parent's paths and reuse them — you already fetch
+the parent for the title:
+```bash
+az boards work-item show --id {parentId} --org {org} -o json   # System.AreaPath, System.IterationPath
+```
+Apply them on the child, or change them later:
+```bash
+# inherit the parent's team
+az boards work-item update --id {id} --area "{parentAreaPath}" --iteration "{parentIterationPath}" --org {org} -o json
+# clear the team (reset to the project root — the first path segment)
+az boards work-item update --id {id} --area "{project}" --iteration "{project}" --org {org} -o json
+```

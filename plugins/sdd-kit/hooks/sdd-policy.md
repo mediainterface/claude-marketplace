@@ -27,19 +27,18 @@ When an implementation plan is created for a spec **and a user story is referenc
 - **After the plan is written and approved, confirm before creating anything.**
   Fetch the referenced user story and show the user its **ID and title** — so a wrong
   work item is caught before any tasks are created — the list of tasks you would
-  create from the plan's todo list, and the **team Area/Iteration paths** the tasks
-  will get (see below). **Explicitly ask whether to create them.** Proceed only on an
-  explicit yes; if the user declines or names a different story or team, adjust or
-  skip accordingly.
+  create from the plan's todo list, and the **Area/Iteration paths** the tasks will
+  inherit (the user story's own paths). **Explicitly ask whether to create them, and
+  let the user adjust the paths.** Proceed only on an explicit yes; if the user
+  declines or names a different story, adjust or skip accordingly.
 - **On confirmation**, create one Azure DevOps **task** (*Aufgabe*) for each item on
   the plan's todo list using the `sdd-kit:ado-workitem` skill, each as a **child of
   that user story** (parent link + `#<id>` in the title). Set each task's **Area Path
-  and Iteration Path to the authenticated user's team** — `<Project>\<Team>` for both
-  — resolving the team as `ado-workitem` describes (ask the user if they belong to
-  more than one team). Titles and descriptions follow that skill's conventions —
-  human-readable **German**, from the shared title schema (`User Story #<id>
-  <Component/Application> - <Beschreibung>`), with type and state names fetched from
-  the server (never assumed).
+  and Iteration Path to the referenced user story's own paths** — read them from the
+  user story — unless the user adjusted them at the confirmation step. Titles and
+  descriptions follow that skill's conventions — human-readable **German**, from the
+  shared title schema (`User Story #<id> <Component/Application> - <Beschreibung>`),
+  with type and state names fetched from the server (never assumed).
 - **During implementation, drive each task through its lifecycle** via `ado-workitem`,
   mirroring the plan step it represents: when you start working on the step, set its
   task to the server's *active* state (e.g. *Aktiv*); when the step is complete, set
@@ -47,6 +46,7 @@ When an implementation plan is created for a spec **and a user story is referenc
   state names from the server rather than guessing.
 - **When the whole user story is finished** (all its tasks are closed), **reset the
   Area Path and Iteration Path of the tasks you created** back to the project root
-  `<Project>` (no team), via `ado-workitem`. Leave the user story itself untouched.
+  (the project name — the first segment of the path, no team), via `ado-workitem`.
+  Leave the user story itself untouched.
 
 If no user story is referenced, implement the plan normally (skip this part).
