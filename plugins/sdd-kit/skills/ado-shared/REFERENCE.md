@@ -121,27 +121,27 @@ genuinely failed.
 
 ## Title schema (PRs & work items)
 
-PR titles and work item titles share one shape so the two stay visually consistent:
+**PR titles** (`ado-pr`) — `<Marker> #<WorkItemId> <Component/Application> - <Beschreibung>`:
 
-> `<Marker> #<ID> <Component/Application> - <Beschreibung>`
-
-- **`<Marker>`** depends on the skill:
-  - **PR** (`ado-pr`): a change-category **emoji** — 🐞 bug, 🏗️ refactor, 📖 docs,
-    🏆 feature/default, 📝 spec-only PR (the PR-creation workflow defines how it is chosen).
-  - **Work item** (`ado-workitem`): the **parent work item's type name** as a German word
-    (e.g. `User Story`, `Fehler`, `Feature`), read from the parent — never assumed. A work
-    item **without a parent** has no marker and no `#<ID>`; its title is just
-    `<Component/Application> - <Beschreibung>`.
-- **`#<ID>`** — a `#1234` reference ADO renders as an auto-link. It is only the *readable*
-  reference; the actual link is **always** set separately and is never replaced by the mention
-  (the PR↔work-item link via `az repos pr work-item add`, or the parent relation for a work
-  item). For a PR it is the delivered work item; for a work item it is the **parent's** ID.
+- **`<Marker>`** — a change-category **emoji**: 🐞 bug, 🏗️ refactor, 📖 docs,
+  🏆 feature/default, 📝 spec-only PR (the PR-creation workflow defines how it is chosen).
+- **`#<WorkItemId>`** — a `#1234` reference to the delivered work item, which ADO renders as
+  an auto-link. It is only the *readable* reference; the actual PR↔work-item link is **always**
+  set separately (`az repos pr work-item add`) and is never replaced by the mention.
 - **`<Component/Application>`** — the specific affected app/component, e.g. `mira-desktop`,
-  `controller-app`. Derive it from context (commit scopes, file paths, the spec/work-item
-  subject); **if it cannot be determined confidently, ask the user** — do not guess.
+  `controller-app`. Derive it from context (commit scopes, file paths, the spec subject);
+  **if it cannot be determined confidently, ask the user** — do not guess.
 - **`<Beschreibung>`** — a concise German summary.
 
-(Per Quirks, an emoji in a returned title may be missing from the CLI's JSON — expected;
+**Work item titles** (`ado-workitem`) — just the concise German description, `<Beschreibung>`.
+**No marker, no `#<ID>`, no component prefix** — those made titles long and hard to read. The
+parent relationship is still set separately (the parent relation), it is just not shown in the
+title.
+
+> Example: `Commit, Docs-PR erstellen, Nach-Merge-Pipelinelauf prüfen` — **not**
+> `User Story #250 docs - Commit, Docs-PR erstellen, Nach-Merge-Pipelinelauf prüfen`.
+
+(Per Quirks, an emoji in a returned PR title may be missing from the CLI's JSON — expected;
 the resource has it.)
 
 ## Command Map (REST endpoint → az command)

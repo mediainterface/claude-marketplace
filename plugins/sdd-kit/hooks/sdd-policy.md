@@ -33,12 +33,12 @@ When an implementation plan is created for a spec **and a user story is referenc
   declines or names a different story, adjust or skip accordingly.
 - **On confirmation**, create one Azure DevOps **task** (*Aufgabe*) for each item on
   the plan's todo list using the `sdd-kit:ado-workitem` skill, each as a **child of
-  that user story** (parent link + `#<id>` in the title). Set each task's **Area Path
-  and Iteration Path to the referenced user story's own paths** — read them from the
-  user story — unless the user adjusted them at the confirmation step. Titles and
-  descriptions follow that skill's conventions — human-readable **German**, from the
-  shared title schema (`User Story #<id> <Component/Application> - <Beschreibung>`),
-  with type and state names fetched from the server (never assumed).
+  that user story** (parent relation). Set each task's **Area Path and Iteration Path
+  to the referenced user story's own paths** — read them from the user story — unless
+  the user adjusted them at the confirmation step. Titles and descriptions follow that
+  skill's conventions — human-readable **German**, the title being just the concise
+  description (per the shared title schema), with type and state names fetched from the
+  server (never assumed).
 - **During implementation, drive each task through its lifecycle** via `ado-workitem`,
   mirroring the plan step it represents: when you start working on the step, set its
   task to the server's *active* state (e.g. *Aktiv*); when the step is complete, set
