@@ -69,23 +69,23 @@ default=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null 
 ```
 
 - If `current` is already a dedicated branch (not `default`), stay on it.
-- If `current` **is** the default branch, move the spec/memory commits onto a new
-  branch so the default stays clean — but only when they are **not yet pushed**:
+- If `current` **is** the default branch, move to a new branch **before committing**,
+  so nothing lands on the default. Create and switch to it — this carries the spec
+  (committed or not) onto the new branch:
 
   ```bash
-  git rev-list --count "origin/$default..HEAD"   # count of unpushed commits
+  git checkout -b "spec/<topic>"
   ```
 
-  If that count is > 0 and those commits are the spec/memory commits, create the
-  branch at HEAD and reset the local default back:
+  If the spec had **already been committed** to the default branch and those commits
+  are **not yet pushed**, also reset the local default pointer back so it stays clean
+  (safe — `git branch -f` touches neither the working tree nor the new branch):
 
   ```bash
-  git branch "spec/<topic>"
-  git reset --hard "origin/$default"
-  git checkout "spec/<topic>"
+  git branch -f "$default" "origin/$default"
   ```
 
-  If the spec commits were **already pushed** to the default branch, do NOT rewrite
+  If those commits were **already pushed** to the default branch, do NOT rewrite
   history — tell the user and ask how to proceed.
 
 Derive `<topic>` from the spec filename (the segment between the date and
@@ -111,8 +111,8 @@ git remote get-url origin
   follow the **PR Creation** workflow in the `ado-pr` skill
   ([../ado-pr/SKILL.md](../ado-pr/SKILL.md)) — complete **Step 0** and the **Setup
   Check** in [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md) first. Follow
-  the shared **Title schema** with the **📝 spec-only** marker (see “Title schema
-  (PRs & work items)” in the reference). Adaptation for a spec PR: the linked **work
+  the shared **Title schema** with the **📝 spec-only** marker (see the "Title schema
+  (PRs & work items)" section in the reference). Adaptation for a spec PR: the linked **work
   item is optional** — omit the `#<ID>` reference and the `az repos pr work-item add`
   link step if the spec has none. Push the branch, create the PR, and note the
   `pullRequestId`.
