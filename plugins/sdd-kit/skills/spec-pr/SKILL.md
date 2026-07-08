@@ -112,9 +112,10 @@ git remote get-url origin
   ([../ado-pr/SKILL.md](../ado-pr/SKILL.md)) — complete **Step 0** and the **Setup
   Check** in [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md) first. Follow
   the shared **Title schema** with the **📝 spec-only** marker (see the "Title schema
-  (PRs & work items)" section in the reference). Adaptation for a spec PR: the linked **work
-  item is optional** — omit the `#<ID>` reference and the `az repos pr work-item add`
-  link step if the spec has none. Push the branch, create the PR, and note the
+  (PRs & work items)" section in the reference). A linked **work item is required** —
+  ADO mandates one for every PR — so `ado-pr` asks for it and links it (and it appears
+  as `#<ID>` in the title); if the spec has no associated work item yet, ask the user
+  which one to link before creating the PR. Push the branch, create the PR, and note the
   `pullRequestId`.
 - **GitHub remote** (`github.com`): push and open the PR with the `gh` CLI, reusing
   the **📝 spec-only** marker:
