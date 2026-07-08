@@ -16,6 +16,11 @@ The implementation plan (`writing-plans`) happens only **after** the spec PR is
 merged, as a separate later effort. Proceed to `writing-plans` now **only** if the
 user explicitly asks for an implementation plan in this session.
 
+**Ticket state.** If a work item / ticket is referenced during spec creation, check
+its state (via `sdd-kit:ado-workitem`): it should be in the **Refinement** state. If
+it is not, **point this out to the user** so they can correct it — do not change the
+state yourself.
+
 ## Implementation: plan steps → Azure DevOps tasks
 
 This part applies during implementation — after the spec PR has merged, when the
@@ -24,6 +29,10 @@ plan is actually written and executed.
 When an implementation plan is created for a spec **and a user story is referenced**
 (an existing Azure DevOps user story, mentioned by ID):
 
+- **Check the user story's state first.** During implementation it should be in the
+  **Implementation** state; if it is not, **point this out to the user** so they can
+  correct it — do not change the story's state yourself (you manage the *tasks'*
+  states, not the story's).
 - **After the plan is written and approved, confirm before creating anything.**
   Fetch the referenced user story and show the user its **ID and title** — so a wrong
   work item is caught before any tasks are created — the list of tasks you would
