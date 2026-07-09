@@ -59,12 +59,16 @@ window in the report header.
 
 ```bash
 git log --since="<WINDOW>" --date=short -M --name-status \
-  --pretty=format:'@@ %h | %an | %ad | %s' \
+  --pretty=format:'@@ %h | %an | %cd | %s' \
   -- docs/decisions docs/learnings .claude/rules
 ```
 
 Non-existent directories in the pathspec are ignored (no error), so pass all
-three. Each `@@` line is one commit: `hash | author | date | subject`. The
+three. Each `@@` line is one commit: `hash | author | commit-date | subject`.
+The date is the **commit** date (`%cd`), which is what `--since` filters on — do
+not use the author date (`%ad`): on a squash merge it is carried over from the
+branch and can predate the window, which would print a date older than the
+"changes since" date. For normally-committed records the two are identical. The
 lines under it are file changes:
 
 | Marker | Meaning |
@@ -85,9 +89,11 @@ Drop `README.md` index files from the record list.
   For a convention, use its H1 or filename.
 - **Modified** records: detect a status transition from the diff —
   ```bash
-  git log --since="<WINDOW>" -p -- <path> | grep -E '^[+-]status:'
+  git log --since="<WINDOW>" --follow -p -- <path> | grep -E '^[+-]status:'
   ```
-  and report it as e.g. `Active → Resolved`.
+  and report it as e.g. `Active → Resolved`. `--follow` tracks the file across
+  an in-window rename, so a transition in a commit under the old name is not
+  missed (Step 3's `-M` already reports such renames).
 - **Deleted** records: the file is gone, so recover its title/context from the
   last committed version — `git show <commit>^:<path>`.
 
