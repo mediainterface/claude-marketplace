@@ -68,7 +68,7 @@ forces a spec PR — see step 7).
 2. **Check for existing PR:** `az repos pr list --repository {repo} --source-branch {currentBranch} --status active --org {org} --project {project} --detect false -o json`. If a PR exists, show its title and ID and ask whether to update instead (→ PR Update workflow).
 3. **Get default branch:** `az repos show --repository {repo} --org {org} --project {project} --detect false -o json`; use `defaultBranch` (strip `refs/heads/`) as the target branch.
 4. **Gather commit and change information:** `git log --oneline "origin/{targetBranch}..{currentBranch}"` and `git diff --name-only "origin/{targetBranch}..{currentBranch}"` (the changed-file list is used to detect a spec-only PR in step 7).
-5. **Ask for the work item ID(s)** the PR delivers — the Azure DevOps work item number(s), e.g. `1234`.
+5. **Ask for the work item ID(s)** the PR delivers — the Azure DevOps work item number(s), e.g. `1234`. A linked work item is **required** for every PR here (branch policy enforces it); if the user has none, ask for one before creating the PR — do not proceed without it.
 6. **Check for a PR template:** Glob for `.azuredevops/pull_request_template.md` in the repo root; if found, read it and use it as the description structure. If none is found, use the **default template** in step 7.
 7. **Determine the PR kind, then generate title and description.**
 
