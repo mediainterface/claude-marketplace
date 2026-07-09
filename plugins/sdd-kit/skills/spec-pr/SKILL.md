@@ -8,7 +8,7 @@ description: >-
   remote: Azure DevOps → the ado-pr workflow, GitHub → the gh CLI. Also triggers on
   "PR the spec", "open a spec PR", or "ship the spec for review".
 argument-hint: (run after a spec is written & approved; no arguments needed)
-allowed-tools: Bash, Read, Glob, Grep
+allowed-tools: Bash, Read, Glob, Grep, Skill
 ---
 
 # Spec → Pull Request (SDD gate)
