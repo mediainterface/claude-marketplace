@@ -34,14 +34,20 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │   ├── README.md
 │   │   └── hooks/
 │   │       └── hooks.json        # Agent hook config (PreToolUse on Bash(git commit:*))
-│   ├── sdd-kit/                  # Spec-Driven Development toolkit (skill-only)
+│   ├── sdd-kit/                  # Spec-Driven Development toolkit (skills + spec→PR hook)
 │   │   ├── .claude-plugin/
 │   │   │   └── plugin.json
+│   │   ├── hooks/
+│   │   │   ├── hooks.json        # SessionStart hook — inject the SDD spec→PR policy
+│   │   │   ├── inject-sdd-policy.js  # Node: reads sdd-policy.md → additionalContext
+│   │   │   └── sdd-policy.md      # the SDD policy prose injected at SessionStart
 │   │   └── skills/
 │   │       ├── create-decision/
 │   │       │   └── SKILL.md      # /create-decision — document decisions as Decision Records
 │   │       ├── create-lesson-learned/
 │   │       │   └── SKILL.md      # /create-lesson-learned — capture patterns and pitfalls
+│   │       ├── spec-pr/
+│   │       │   └── SKILL.md      # /spec-pr — open a PR for the spec, then stop (no plan/code)
 │   │       ├── ado-shared/
 │   │       │   └── REFERENCE.md  # Shared ADO setup/auth/command-map (not a skill)
 │   │       ├── ado-pr/
@@ -109,12 +115,14 @@ Hook-only plugin that keeps `CLAUDE.md` files in sync with staged changes before
 
 ### sdd-kit
 
-The skill set for MediaInterface's Spec-Driven Development (SDD) workflow — the skills we rely on across SDD (capturing the decisions and lessons behind a spec, then running the Azure DevOps work a plan turns into), not a general-purpose collection. So far it contains only skills; no hooks or MCP server have been added yet.
+The skill set for MediaInterface's Spec-Driven Development (SDD) workflow — the skills we rely on across SDD (capturing the decisions and lessons behind a spec, gating the spec into a pull request, then running the Azure DevOps work a plan turns into), not a general-purpose collection. It is mostly skills plus one hook (the spec→PR redirect); no MCP server.
 
 - **Skill** (`plugins/sdd-kit/skills/create-decision/SKILL.md`): `/create-decision` — documents decisions in the Memory Bank as Decision Records.
 - **Skill** (`plugins/sdd-kit/skills/create-lesson-learned/SKILL.md`): `/create-lesson-learned` — captures recurring patterns and pitfalls in the Memory Bank.
-- **Azure DevOps skills** (`plugins/sdd-kit/skills/ado-pr`, `ado-workitem`, `ado-pipeline`): Azure DevOps via the Azure CLI (`az` + azure-devops extension), split into `/ado-pr` (PR review/create/update/comment), `/ado-workitem` (work item create/show/query/update), and `/ado-pipeline` (pipeline-failure analysis + changelog), for the newest Azure DevOps Server version. Shared connection detection, sign-in check, command map, title schema, quirks, and error-handling live in `skills/ado-shared/REFERENCE.md` — a non-skill file the three SKILL.md files link to by relative path. The shared title schema (`<Marker> #<ID> <Component/Application> - <Beschreibung>`) keeps PR titles (change-category emoji incl. 📝 for spec-only PRs) and work item titles (parent's type word + parent ID) consistent. They assume the user is already signed in via `az devops login` (PAT-based); they never authenticate themselves and prompt the user if sign-in is missing. The Server is **German-localized**, so work item types/states are German (e.g. `Aufgabe`, not `Task`) — fetched from the server rather than assumed. The MCP-based `azure-devops` plugin stays for the older Server version.
-- **Requires** the `az` CLI with the `azure-devops` extension installed and the user signed in via `az devops login` for the `/ado-pr`, `/ado-workitem`, and `/ado-pipeline` skills.
+- **Skill** (`plugins/sdd-kit/skills/spec-pr/SKILL.md`): `/spec-pr` — the SDD replacement for the superpowers brainstorming skill's `writing-plans` handoff. After a spec is written and approved, it opens a pull request for the spec (offering to bundle Memory Bank items via `/create-decision` and `/create-lesson-learned` into the same PR) and then **stops** — no implementation plan, no code — until the PR is merged. Auto-detects the remote: Azure DevOps → the `/ado-pr` creation workflow (shared title schema, **📝 spec-only** marker, linked work item required as on any ADO PR); GitHub → the `gh` CLI. Invokable manually, or triggered automatically by the hook below.
+- **Hook** (`plugins/sdd-kit/hooks/hooks.json` + `hooks/inject-sdd-policy.js` + `hooks/sdd-policy.md`): a `type: "command"` **SessionStart** hook (matcher `startup|clear|compact`, mirroring superpowers). The `Skill` tool is not hookable, so rather than intercept the handoff we override it at the same layer superpowers uses to deliver it: the **Node** script reads the policy prose from `hooks/sdd-policy.md` and emits it as `hookSpecificOutput.additionalContext`. The policy has two parts: (1) after a spec is approved, override the brainstorming skill's `writing-plans` handoff and route to `/spec-pr` (open the spec PR and stop) unless the user explicitly asks for a plan, flagging a referenced ticket that is not in the **Refinement** state; and (2) during implementation, when a user story is referenced (which should be in the **Implementation** state — flagged if not), create ADO tasks via `/ado-workitem` for the approved plan's todo items — after an explicit confirmation that states the target user story — with each task's Area/Iteration inherited from the referenced user story (shown in the gate for adjustment), driving each through its state lifecycle (active on start, closed on completion), and resetting the tasks' Area/Iteration to the project root once the story is finished. The prose lives in its own file so it can grow without touching the script; `compact` re-injection keeps it present across long sessions.
+- **Azure DevOps skills** (`plugins/sdd-kit/skills/ado-pr`, `ado-workitem`, `ado-pipeline`): Azure DevOps via the Azure CLI (`az` + azure-devops extension), split into `/ado-pr` (PR review/create/update/comment), `/ado-workitem` (work item create/show/query/update), and `/ado-pipeline` (pipeline-failure analysis + changelog), for the newest Azure DevOps Server version. Shared connection detection, sign-in check, command map, title schema, quirks, and error-handling live in `skills/ado-shared/REFERENCE.md` — a non-skill file the three SKILL.md files link to by relative path. The title schema gives PR titles the shape `<Marker> #<WorkItemId> <Component/Application> - <Beschreibung>` (change-category emoji incl. 📝 for spec-only PRs), while work item titles are just the concise German description (the parent type/ID/component prefix was dropped as too long). They assume the user is already signed in via `az devops login` (PAT-based); they never authenticate themselves and prompt the user if sign-in is missing. The Server is **German-localized**, so work item types/states are German (e.g. `Aufgabe`, not `Task`) — fetched from the server rather than assumed. The MCP-based `azure-devops` plugin stays for the older Server version.
+- **Requires** the `az` CLI with the `azure-devops` extension installed and the user signed in via `az devops login` for the `/ado-pr`, `/ado-workitem`, and `/ado-pipeline` skills. `/spec-pr` reuses that ADO setup for Azure DevOps remotes and needs the `gh` CLI (authenticated) when the remote is GitHub.
 
 ### guardian
 

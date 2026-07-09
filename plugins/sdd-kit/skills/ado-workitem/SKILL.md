@@ -60,26 +60,14 @@ Only fall back to an English guess if discovery genuinely fails — and tell the
 1. Run **step 1**. If the user named a type in English (e.g. "task"), map it to the
    matching German `name` from the fetched list (`Aufgabe`). If there is no clear match,
    show the available types and ask which to use — do not invent one.
-2. Gather: the **type**, the **description** (`<Beschreibung>`), the **parent work item**
-   (its ID — the SDD default; almost every item sits under one), the affected
-   **component/application**, and optionally assignee, area, iteration.
-3. **Build the title** per the shared **Title schema**. The shape depends on whether the work
-   item has a parent:
-   - **With a parent:** `<ParentType> #<ParentID> <Component/Application> - <Beschreibung>`
-   - **Without a parent (top-level item):** `<Component/Application> - <Beschreibung>` —
-     **omit the type marker and the `#<ID>` entirely**; there is no parent to read them from,
-     so do *not* substitute the item's own type or a placeholder. Example:
-     `controller-app - Wartungsdialog überarbeiten`.
-
-   Fill the parts as:
-   - **`<ParentType>` and `#<ParentID>`** (only when a parent exists): fetch the parent
-     (`az boards work-item show --id {parentId} --org {org} -o json`) and read its localized
-     type name from `fields["System.WorkItemType"]`; use that word and the parent's ID — e.g.
-     parent is a User Story #45 → `User Story #45 …`; parent is a Fehler #45 → `Fehler #45 …`.
-     **Never assume the type word — take it from the parent.**
-   - **`<Component/Application>`:** the specific affected app/component (e.g. `mira-desktop`);
-     **if it cannot be determined, ask the user.**
-   - **`<Beschreibung>`:** concise German summary.
+2. Gather: the **type**, the **description** (`<Beschreibung>` — this is also the title, see
+   step 3), the **parent work item** (its ID — the SDD default; almost every item sits under
+   one), and optionally assignee, area, iteration.
+3. **Build the title:** just the concise German description (`<Beschreibung>`) — see the
+   shared **Title schema**. Do **not** prefix the parent type, a `#<ID>`, or the component;
+   work item titles are the description alone (that prefix made them long and unreadable).
+   The parent is still linked in step 5 — it is just not shown in the title. Example:
+   `Wartungsdialog überarbeiten`.
 4. Create the work item with the assembled title:
    ```bash
    az boards work-item create --title "{title}" --type "{germanTypeName}" \
@@ -87,8 +75,9 @@ Only fall back to an English guess if discovery genuinely fails — and tell the
      [--area "{area}"] [--iteration "{iteration}"] \
      --org {org} --project {project} -o json
    ```
-5. **Link to the parent** (if any — this is also the authoritative link behind the
-   `#<ParentID>` reference in the title):
+5. **Link to the parent** (if any — the SDD default; this parent relation is the real
+   link, and the only place the parent is recorded now that the title no longer carries
+   a `#<ParentID>` reference):
    ```bash
    az boards work-item relation add --id {newId} --relation-type parent \
      --target-id {parentId} --org {org} -o json
@@ -108,11 +97,35 @@ Only fall back to an English guess if discovery genuinely fails — and tell the
 ### Update
 1. Identify the work item (ID from the user, or via Show/Query above).
 2. For a **state** change, get the valid localized states for its type from step 1 first.
-3. Update only the fields being changed. **When changing the title**, rebuild it per the
-   shared **Title schema** (`<ParentType> #<ParentID> <Component/Application> - <Beschreibung>`)
-   — fetch the parent for the type word and ID, exactly as in Create.
+3. Update only the fields being changed. **When changing the title**, set it to the concise
+   German description (`<Beschreibung>`) per the shared **Title schema** — no parent type,
+   `#<ID>`, or component prefix.
    ```bash
    az boards work-item update --id {id} [--title "{title}"] [--state "{germanState}"] \
+     [--area "{areaPath}"] [--iteration "{iterationPath}"] \
      [--assigned-to "{user}"] [--description "{description}"] --org {org} -o json
    ```
+   Area/Iteration paths are project-relative and backslash-separated (e.g.
+   `{project}\{team}`; the project root is just `{project}`). Use these to (re)assign
+   a work item to — or clear it from — a team (see **Team Area/Iteration** below).
 4. Confirm the change and report the work item URL.
+
+### Area / Iteration paths
+
+Set a work item's **Area** and **Iteration** with `--area`/`--iteration` (on create or
+update); both are project-relative, backslash-separated (e.g. `{project}\{team}`), and
+the **project root** is just `{project}` (the first path segment, no team).
+
+To place a child under the **same team as its parent** (e.g. sdd-kit's
+implementation-tasks flow), read the parent's paths and reuse them — you already fetch
+the parent for the title:
+```bash
+az boards work-item show --id {parentId} --org {org} -o json   # System.AreaPath, System.IterationPath
+```
+Apply them on the child, or change them later:
+```bash
+# inherit the parent's team
+az boards work-item update --id {id} --area "{parentAreaPath}" --iteration "{parentIterationPath}" --org {org} -o json
+# clear the team (reset to the project root — the first path segment)
+az boards work-item update --id {id} --area "{project}" --iteration "{project}" --org {org} -o json
+```
