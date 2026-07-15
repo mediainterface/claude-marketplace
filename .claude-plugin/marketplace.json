@@ -29,8 +29,8 @@
     {
       "name": "sdd-kit",
       "source": "./plugins/sdd-kit",
-      "description": "The skill set for our Spec-Driven Development workflow — decision records, lessons learned, a spec→PR gate that opens a PR for the spec instead of writing an implementation plan, and Azure DevOps via the az CLI — curated for SDD, not a general-purpose collection; most of it has little use outside that workflow.",
-      "version": "1.2.0"
+      "description": "The skill set for our Spec-Driven Development workflow — decision records, lessons learned, a spec→PR gate that opens a PR for the spec instead of writing an implementation plan, and Azure DevOps via the az CLI — curated for SDD, not a general-purpose collection; most of it has little use outside that workflow. The SDD policy auto-activates only in repos whose git origin is the MI collection on ado.mediainterface.de; everywhere else the skills stay manual.",
+      "version": "1.3.0"
     }
   ]
 }

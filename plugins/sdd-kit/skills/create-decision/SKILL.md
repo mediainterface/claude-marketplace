@@ -21,16 +21,7 @@ under `docs/` and are referenced from the root `CLAUDE.md`.
 Find the repo root directory (where `.git/` is located). All paths in
 this skill are relative to the repo root.
 
-### Step 2: Determine next decision number
-
-Read all files in `{repo-root}/docs/decisions/` and find the highest
-existing number. The new number is that number + 1, formatted as a
-four-digit number with leading zeros (e.g. `0001`, `0002`, `0013`).
-
-If `docs/decisions/` does not exist, create the directory and start
-with `0001`.
-
-### Step 3: Gather information
+### Step 2: Gather information
 
 Ask the user for the following information. If answers are already apparent
 from the conversation context (e.g. because a spec is currently being
@@ -52,23 +43,27 @@ written), suggest them instead of asking again.
 
 For each considered option, also ask about pros and cons.
 
-### Step 4: Create file
+### Step 3: Create file
 
-Create the file at `{repo-root}/docs/decisions/NNNN-kebab-case-title.md`.
+Create the file at `{repo-root}/docs/decisions/YYYY-MM-DD-kebab-case-title.md`.
 
-The filename is derived from the number and title:
-- Number as four digits with leading zeros
+The filename is derived from the date and title:
+- Today's date as prefix (YYYY-MM-DD)
 - Then a hyphen
 - Title in lowercase
 - Spaces replaced by hyphens
 - Special characters removed
 - Title portion truncated to max 80 characters to avoid path length issues on Windows
 
+If `docs/decisions/` does not exist, create the directory. If the
+resulting filename already exists (same title on the same day), make
+the title more specific instead of overwriting.
+
 Use this template:
 
 ```markdown
 ---
-# status: Active | Declined | Deprecated | Superseded by NNNN
+# status: Active | Declined | Deprecated | Superseded by YYYY-MM-DD-kebab-case-title
 status: Active
 date: {today's date, YYYY-MM-DD}
 last-modified: {today's date, YYYY-MM-DD}
@@ -113,24 +108,25 @@ deciders: {deciders}
 - Bad, because {disadvantage}
 ```
 
-### Step 5: Update index
+### Step 4: Update index
 
 Update `{repo-root}/docs/decisions/README.md` with the new entry. If the
 file does not exist, create it with a heading. The index lists all decisions
-with their number, title, status and category:
+with their date, title, status and category:
 
 ```markdown
 # Decision Records
 
-| # | Title | Status | Category |
-|---|-------|--------|----------|
-| 0001 | [Monorepo for MIRA Suite](0001-monorepo-for-mira-suite.md) | Active | Architecture |
-| 0002 | [New decision title](0002-new-decision-title.md) | Active | Security |
+| Date | Title | Status | Category |
+|------|-------|--------|----------|
+| 2026-07-15 | [Monorepo for MIRA Suite](2026-07-15-monorepo-for-mira-suite.md) | Active | Architecture |
+| 2026-07-16 | [New decision title](2026-07-16-new-decision-title.md) | Active | Security |
 ```
 
-Add the new entry at the end of the table.
+Add the new entry at the end of the table, which keeps it
+chronologically sorted.
 
-### Step 6: Confirmation
+### Step 5: Confirmation
 
 Show the user:
 - The complete content of the created file
@@ -154,6 +150,11 @@ Show the user:
   decision to be declined or revised, and ensuring decisions are applied
   everywhere so the architecture and code do not drift.
 - Decisions are never deleted. When a decision is revised, create a new
-  decision record that supersedes the old one.
+  decision record that supersedes the old one, and set the old record's
+  status to `Superseded by <new record's filename without .md>`.
+- Repos may still contain records with the legacy sequential naming
+  (`NNNN-…`). Leave them exactly as they are — old and new names coexist
+  in the same directory. Never renumber or rename existing records:
+  renaming is what causes stale references.
 - When the user asks about available categories: the list is fixed and
   can only be extended by the Hüter-Trio.
