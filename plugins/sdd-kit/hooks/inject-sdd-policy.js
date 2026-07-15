@@ -8,11 +8,12 @@
  * /spec-pr. The hook's matcher (startup|clear|compact) re-injects it after
  * compaction, keeping it present through a long session.
  *
- * The SDD workflow is MediaInterface-internal, so the policy is injected only
- * when the session's project has an `origin` remote pointing at the MI
- * collection on ado.mediainterface.de (https, ssh:// or scp-like form). In any
- * other repo the hook emits nothing; the sdd-kit skills remain manually
- * invokable there, which is the explicit opt-in.
+ * The SDD workflow is MediaInterface-internal, so the policy is always injected
+ * together with an applicability preamble derived from the project's `origin`
+ * remote: in the MI collection on ado.mediainterface.de (https, ssh:// or
+ * scp-like form) the policy is in force; with any other origin Claude is primed
+ * but must ask the user before following it; without a git repo or origin it is
+ * reference-only and Claude does not ask at all.
  *
  * The policy prose lives in sdd-policy.md so it can grow without touching this
  * script; JSON.stringify handles escaping the Markdown. Node so it runs everywhere
@@ -27,6 +28,28 @@ const path = require("path");
 const ADO_HOST = "ado.mediainterface.de";
 const ADO_COLLECTION = "mi";
 
+const PREAMBLES = {
+  mi:
+    "# SDD policy applicability\n\n" +
+    "This session's project has its git origin in the MI collection on " +
+    "ado.mediainterface.de: the SDD policy below is in force.",
+  other:
+    "# SDD policy applicability\n\n" +
+    "This session's project has a git origin outside the MI collection on " +
+    "ado.mediainterface.de, so the SDD policy below is NOT automatically in " +
+    "force (its wording assumes an MI project). It is included so you know the " +
+    "workflow: before acting on any part of it — e.g. when a spec has been " +
+    "approved and you would route to /spec-pr instead of writing-plans, or when " +
+    "ADO tasks would be created — ask the user once whether this project should " +
+    "follow the SDD workflow, and follow it only on an explicit yes.",
+  none:
+    "# SDD policy applicability\n\n" +
+    "This session's project has no git origin (or is not a git repository), so " +
+    "the SDD policy below is NOT in force. It is included only for reference — " +
+    "do not ask the user about it; follow it only if the user explicitly asks " +
+    "for the SDD workflow.",
+};
+
 // The SessionStart payload's `cwd` is the project directory the session runs in.
 let cwd = process.cwd();
 try {
@@ -36,10 +59,6 @@ try {
   }
 } catch (_) {
   /* no or malformed stdin — fall back to process.cwd() */
-}
-
-if (!originIsMiCollection(cwd)) {
-  process.exit(0); // not an MI repo -> the SDD policy does not apply
 }
 
 let policy;
@@ -53,14 +72,16 @@ process.stdout.write(
   JSON.stringify({
     hookSpecificOutput: {
       hookEventName: "SessionStart",
-      additionalContext: policy,
+      additionalContext: PREAMBLES[originStatus(cwd)] + "\n\n" + policy,
     },
   })
 );
 
 process.exit(0);
 
-function originIsMiCollection(dir) {
+// 'mi' when origin is the MI collection, 'other' for any other origin,
+// 'none' when there is no git repo or no origin remote.
+function originStatus(dir) {
   let url;
   try {
     url = execSync("git remote get-url origin", {
@@ -69,9 +90,10 @@ function originIsMiCollection(dir) {
       stdio: ["ignore", "pipe", "ignore"],
     }).trim();
   } catch (_) {
-    return false; // no git repo or no origin remote
+    return "none";
   }
-  return matchesMiCollection(url);
+  if (!url) return "none";
+  return matchesMiCollection(url) ? "mi" : "other";
 }
 
 // True when the host is ado.mediainterface.de and the first path segment is
