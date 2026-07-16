@@ -1,0 +1,9 @@
+{
+  "name": "guardian",
+  "version": "1.0.0",
+  "description": "Tools for the guardians (the Hüter-Trio) to do their job — watching over the whole repository and its architecture, the Memory Bank included, so the codebase stays consistent and doesn't drift.",
+  "author": {
+    "name": "MIRA Hueter-Trio",
+    "email": "daniel.lahmann@mediainterface.de"
+  }
+}
