@@ -9,8 +9,10 @@
  * compaction, keeping it present through a long session.
  *
  * The policy prose lives in sdd-policy.md so it can grow without touching this
- * script; JSON.stringify handles escaping the Markdown. Node so it runs everywhere
- * Claude Code runs, including Windows.
+ * script — including its applicability rules (MediaInterface repos only; see the
+ * policy's "Does this policy apply here?" section), which Claude evaluates itself
+ * against the project's git origin. JSON.stringify handles escaping the Markdown.
+ * Node so it runs everywhere Claude Code runs, including Windows.
  */
 "use strict";
 

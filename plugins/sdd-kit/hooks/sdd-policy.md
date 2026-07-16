@@ -1,8 +1,22 @@
 # Project SDD policy
 
-This project follows a Spec-Driven-Development (SDD) workflow. The rules below are
-**project-level instructions and OVERRIDE the superpowers skills where they
-conflict** — project/user instructions take precedence over skills.
+This policy describes MediaInterface's Spec-Driven-Development (SDD) workflow. The
+rules below are **project-level instructions and OVERRIDE the superpowers skills
+where they conflict** — project/user instructions take precedence over skills.
+
+## Does this policy apply here?
+
+The SDD workflow is for MediaInterface repos. When the policy first becomes
+relevant in a session — e.g. a spec has just been approved, or ADO tasks are about
+to be created — check the project's git origin (`git remote get-url origin`) if you
+do not already know it:
+
+- Origin on `ado.mediainterface.de` (any URL form) → the policy is **in force**;
+  follow it.
+- Any other origin → not automatically in force: **ask the user once** whether this
+  project should follow the SDD workflow, and follow it only on an explicit yes.
+- No git repository or no origin → the policy does not apply. Do **not** ask;
+  follow it only if the user explicitly requests the SDD workflow.
 
 ## Spec → PR before implementation
 
