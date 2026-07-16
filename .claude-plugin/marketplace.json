@@ -31,6 +31,12 @@
       "source": "./plugins/sdd-kit",
       "description": "The skill set for our Spec-Driven Development workflow — decision records, lessons learned, a spec→PR gate that opens a PR for the spec instead of writing an implementation plan, and Azure DevOps via the az CLI — curated for SDD, not a general-purpose collection; most of it has little use outside that workflow.",
       "version": "1.2.0"
+    },
+    {
+      "name": "guardian",
+      "source": "./plugins/guardian",
+      "description": "Tools for the guardians (the Hüter-Trio) to do their job — watching over the whole repository and its architecture, the Memory Bank included, so the codebase stays consistent and doesn't drift.",
+      "version": "1.0.0"
     }
   ]
 }
