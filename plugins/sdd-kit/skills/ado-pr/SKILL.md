@@ -19,9 +19,10 @@ pastes a PR URL/ID or asks to review, open, update, or comment on an Azure DevOp
 > **Shared setup first.** Before any `az` command, complete **Step 0 (connection detection)**
 > and the **Setup Check (sign-in confirmation)** in
 > [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md). That file also holds the
-> **Command Map**, **Title schema**, **Repository Mismatch Check**, **Quirks**, and
-> **Error handling & local-state safety** rules the workflows below refer to. `{org}` = `organization`,
-> `{repo}` = `repository`, `{project}` come from Step 0.
+> **Command Map**, **Title schema**, **German text** (umlauts verbatim), **Repository
+> Mismatch Check**, **Quirks**, and **Error handling & local-state safety** rules the
+> workflows below refer to. `{org}` = `organization`, `{repo}` = `repository`, `{project}`
+> come from Step 0.
 
 ---
 
@@ -89,7 +90,8 @@ forces a spec PR — see step 7).
    - **#<WorkItemId>:** the Azure DevOps work item this PR delivers, written as `#1234`.
    - **Component:** from conventional-commit scopes first, else from file paths. A spec PR has
      no code paths, so derive it from the spec subject; **if it cannot be determined, ask the user.**
-   - **Änderungsbeschreibung:** concise German summary.
+   - **Änderungsbeschreibung:** concise German summary — real umlauts/ß (`Prüfung`, never
+     `Pruefung`; shared **German text** rule, which also covers the description below).
 
    **Description (German).** Use the repo's PR template if step 6 found one; otherwise build the
    description from this **default template** (recreate it verbatim — it is our standard structure).
@@ -121,7 +123,7 @@ forces a spec PR — see step 7).
      **Erwartetes Umsetzungsrisiko** for a spec PR. If a repo template was found but has none,
      append the appropriate one.
 
-   *(Reminder: per Quirks, the emoji icon will be missing from the CLI's returned JSON — that is expected, the PR has it.)*
+   *(Reminder: per Quirks, the emoji icon — and possibly umlauts — will be mis-echoed in the CLI's returned JSON; that is expected, the PR has them. Still send title and description with the real emoji and umlauts.)*
 8. **Present to user for review:** show generated title and full description; apply requested changes; repeat until approved.
 9. **Create the PR:** `az repos pr create --repository {repo} --source-branch {source} --target-branch {target} --title "{title}" --description "{description}" --org {org} --project {project} --detect false -o json` (branch names without `refs/heads/`). Note the `pullRequestId`.
 10. **Link the work item(s) to the PR — always, for every PR type (implementation *and* spec).** This is the direct association, in addition to the `#id` in the title; the title's `#id` is not itself a link, so never skip this step (the description deliberately does not repeat the work item — it is linked here): `az repos pr work-item add --id {prId} --work-items {id} [{id2} …] --org {org} -o json`.
@@ -153,8 +155,9 @@ comment thread, or `$ARGUMENTS` starts with `comment`.
 ADO PR comments live in **threads**; each thread has one or more comments and a `status`
 (`active`, `fixed` = resolved, `closed`, `wontFix`, `byDesign`, `pending`). The az CLI has no
 first-class comment command, so use `az devops invoke` against the `git` area. POST/PATCH
-bodies are passed as a file via `--in-file` — write them with `mktemp`, and **JSON-escape**
-the comment text (quotes, newlines). If a `--resource` name is rejected, discover it with
+bodies are passed as a file via `--in-file` — write them with `mktemp` as plain UTF-8, and
+**JSON-escape** the comment text (quotes, newlines; umlauts/ß stay literal — see **German
+text** in the shared reference). If a `--resource` name is rejected, discover it with
 `az devops invoke --query "[?area=='git']"`.
 
 1. **Find the PR:** as in PR Update — current branch via `az repos pr list ...`, else ask for
