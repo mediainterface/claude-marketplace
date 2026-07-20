@@ -21,14 +21,15 @@ asks to create, find, or update an Azure DevOps work item (*Arbeitselement* — 
 > **Shared setup first.** Before any `az` command, complete **Step 0 (connection detection)**
 > and the **Setup Check (sign-in confirmation)** in
 > [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md). That file also holds the
-> **Command Map**, **Title schema**, **Quirks**, and **Error handling** rules. `{org}` = `organization`,
-> `{project}` come from Step 0.
+> **Command Map**, **Title schema**, **German text** (umlauts verbatim), **Quirks**, and
+> **Error handling** rules. `{org}` = `organization`, `{project}` come from Step 0.
 
 > **German installation — never assume English type/state names.** Our Server is German, so
 > work item **types** and **states** are localized: `Task` → **Aufgabe**, `Bug` → **Fehler**;
 > states like `New`/`Active`/`Closed` appear as **Neu**/**Aktiv**/**Geschlossen**. The exact
 > names depend on the project's process template, so **fetch them from the server first**
-> (Step 1 below) instead of guessing.
+> (Step 1 below) instead of guessing. All German text you send keeps its real characters —
+> `Prüfung`, never `Pruefung` (see **German text** in the shared reference).
 
 ---
 
@@ -67,7 +68,8 @@ Only fall back to an English guess if discovery genuinely fails — and tell the
    shared **Title schema**. Do **not** prefix the parent type, a `#<ID>`, or the component;
    work item titles are the description alone (that prefix made them long and unreadable).
    The parent is still linked in step 5 — it is just not shown in the title. Example:
-   `Wartungsdialog überarbeiten`.
+   `Wartungsdialog überarbeiten` — with the real `ü`, never `ueberarbeiten` (shared
+   **German text** rule; the same goes for the description).
 4. Create the work item with the assembled title:
    ```bash
    az boards work-item create --title "{title}" --type "{germanTypeName}" \

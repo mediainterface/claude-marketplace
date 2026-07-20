@@ -11,8 +11,9 @@ Repository Mismatch Check, Quirks, and Error-handling rules here apply to all th
 
 > **German-localized Server.** Our Azure DevOps is German, so work item types and states are
 > German (e.g. `Aufgabe`, not `Task`) — fetch them from the server rather than assuming
-> English names. The skills assume you are **already signed in**; they never authenticate for
-> you (see Setup Check step 3).
+> English names. German text keeps its real umlauts/ß — see **German text** below. The
+> skills assume you are **already signed in**; they never authenticate for you (see Setup
+> Check step 3).
 
 ## Step 0: Detect ADO Connection
 
@@ -112,12 +113,31 @@ genuinely failed.
    **Windows console-encoding (cp1252) artifact**; the echo/input behaviour may differ on
    macOS/Linux, so **verify once per platform** rather than treating it as a universal
    guarantee. Once confirmed for your platform, do **not** retry, "fix", or warn about a
-   missing emoji in the returned JSON — check the web UI if unsure.
+   missing emoji in the returned JSON — check the web UI if unsure. The same echo artifact
+   can hit umlauts/ß (`Prüfung` shown as `Pr?fung` or `PrÃ¼fung`) — equally cosmetic; never
+   change the *input* text in response (see **German text** below).
 
 2. **False compatibility warning.** The CLI may print a warning that it is not
    compatible with this Azure DevOps Server version. This is a **false positive** — the
    CLI has been fully tested against our server and every workflow works.
    Ignore the warning and continue.
+
+## German text — real characters, never transliterated
+
+All German text sent **to** ADO — titles, descriptions, comment bodies, WIQL values — is
+written with its real characters: **ä ö ü Ä Ö Ü ß** (and the title-schema emoji). It reads
+`Prüfung überarbeiten` — never `Pruefung ueberarbeiten`, `&uuml;`, or a `\u00fc` escape. This holds
+for CLI arguments (`--title`, `--description`, `--state`, …) and for JSON bodies passed via
+`--in-file`: write those temp files as plain UTF-8 and JSON-escape only what JSON requires
+(quotes, backslashes, newlines) — umlauts stay literal.
+
+- **A mangled echo is Quirk 1, not bad input.** `Pr?fung` or `PrÃ¼fung` in the CLI's
+  returned JSON means the *console* mis-rendered the value; the stored resource is correct
+  (check the web UI if unsure). Do not "protect" the next call by ASCII-fying its text.
+- **On a real encoding error** (e.g. `UnicodeEncodeError: 'charmap' codec can't encode …`),
+  fix the environment and retry the **identical** text — e.g. `PYTHONIOENCODING=utf-8`
+  (on Windows additionally `chcp 65001`), or move the text into an `--in-file` body.
+  Resending the text without umlauts is not a fix — it silently corrupts the resource.
 
 ## Title schema (PRs & work items)
 
@@ -131,7 +151,7 @@ genuinely failed.
 - **`<Component/Application>`** — the specific affected app/component, e.g. `mira-desktop`,
   `controller-app`. Derive it from context (commit scopes, file paths, the spec subject);
   **if it cannot be determined confidently, ask the user** — do not guess.
-- **`<Beschreibung>`** — a concise German summary.
+- **`<Beschreibung>`** — a concise German summary (real umlauts/ß — see **German text** above).
 
 **Work item titles** (`ado-workitem`) — just the concise German description, `<Beschreibung>`.
 **No marker, no `#<ID>`, no component prefix** — those made titles long and hard to read. The
