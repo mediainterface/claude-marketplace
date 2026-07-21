@@ -50,6 +50,8 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │       │   └── SKILL.md      # /spec-pr — open a PR for the spec, then stop (no plan/code)
 │   │       ├── ado-shared/
 │   │       │   └── REFERENCE.md  # Shared ADO setup/auth/command-map (not a skill)
+│   │       ├── memory-bank-shared/
+│   │       │   └── REFERENCE.md  # Shared Memory Bank policy (not a skill)
 │   │       ├── ado-pr/
 │   │       │   └── SKILL.md      # /ado-pr — PR review/create/update/comment via az CLI
 │   │       ├── ado-workitem/
