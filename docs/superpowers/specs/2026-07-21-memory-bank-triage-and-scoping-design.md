@@ -206,7 +206,9 @@ Minor version bump for `sdd-kit` and `guardian` in their `plugin.json` and in
 
 ## Addendum (final review, 2026-07-21)
 
-The whole-branch review found a gap in §6: `spec-pr`'s Step 5 staged only the
+The whole-branch review found a gap no numbered design section covered (§6
+generalized `ado-pr`'s spec-only *detection*, but `spec-pr`'s *staging* step
+was missed): `spec-pr`'s Step 5 staged only the
 root `docs/` (`git add docs/`), which would silently drop Memory Bank items
 created on a nested level from the spec PR. Fixed on this branch: Step 5 now
 stages the files created in its Step 3 by explicit path. The Mira follow-up
