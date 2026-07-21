@@ -146,6 +146,12 @@ scanned: docs/… (root), apps/mira-desktop/docs/…, .claude/rules
                  dataclass validation that was error-prone
             docs/decisions/0007-adopt-pydantic-v2-for-config.md
 
+  ✚ Added   2026-07-02 "Cross-feature commands via bridge store"  [Architecture · Active]
+            by Anna Roth · 2026-07-02 · deciders: Anna
+            why: "first cross-feature bridge in the renderer" — precedent for
+                 feature-to-feature commands
+            apps/mira-desktop/docs/decisions/2026-07-02-cross-feature-commands-via-bridge-store.md
+
 ## Lessons Learned
   ✎ Modified 2026-05-11 "E2E flaky with WaitForLoadState"  [Testing · Active → Resolved]
             by Anna Roth · 2026-07-02

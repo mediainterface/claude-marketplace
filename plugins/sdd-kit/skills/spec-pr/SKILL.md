@@ -94,12 +94,19 @@ Derive `<topic>` from the spec filename (the segment between the date and
 ### Step 5: Commit anything uncommitted
 
 The brainstorming skill usually already committed the spec. Stage the spec and any
-Memory Bank files and commit only if something is still pending:
+Memory Bank files and commit only if something is still pending. Memory Bank
+records can live on a nested level (`apps/<app>/docs/…`, `services/<service>/docs/…`
+— see [../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md)), so
+`git add docs/` alone would silently miss them: stage every file Step 3 created by
+its explicit path (`git add` errors on a pathspec that matches nothing, so add the
+paths you know rather than globbing).
 
 ```bash
-git add docs/
+git add docs/ <each Memory Bank file from Step 3, by explicit path>
 git diff --cached --quiet || git commit -m "📝 Spec: <topic>"
 ```
+
+If Step 3 created nothing, plain `git add docs/` is sufficient.
 
 ### Step 6: Detect the remote and open the PR
 
