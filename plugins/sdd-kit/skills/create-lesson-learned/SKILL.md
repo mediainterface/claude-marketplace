@@ -6,12 +6,16 @@ description: Creates a new Lesson Learned entry in the Memory Bank. Use this ski
 # Create Lesson Learned
 
 This skill guides through creating a Lesson Learned entry and places
-the file in the correct location. Each Lesson Learned is stored as its
-own file (analogous to decision records).
+the file on the correct Memory Bank **level** (analogous to decision
+records). Each Lesson Learned is stored as its own file.
 
 This skill is part of the Memory Bank. Conventions live as Claude Code
 Rules in `.claude/rules/` (auto-loaded). Decisions and learnings live
-under `docs/` and are referenced from the root `CLAUDE.md`.
+under `docs/decisions/` and `docs/learnings/` of their level. Levels and
+the placement rule are defined in the shared reference:
+[memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md).
+Learnings have **no significance gate** — they are deliberately
+low-threshold.
 
 ## Process
 
@@ -20,7 +24,23 @@ under `docs/` and are referenced from the root `CLAUDE.md`.
 Find the repo root directory (where `.git/` is located). All paths in
 this skill are relative to the repo root.
 
-### Step 2: Gather information
+### Step 2: Determine the level
+
+Decide where the entry lives using the **Placement rule** from the
+shared reference: *a record lives on the smallest level whose subtree
+contains everyone affected.* For a learning that is usually the place
+where the pitfall applies — e.g. `services/controller-app/` for an
+EF-Core pitfall in that service, the repo root for a tooling pitfall
+that concerns everyone.
+
+Propose the level derived from the conversation context; the user
+confirms or corrects. If the affected scope is not apparent from
+context, **ask — never guess.**
+
+`{scope}` below is the confirmed level directory (empty for the repo
+root).
+
+### Step 3: Gather information
 
 Ask the user for the following information. If answers are already apparent
 from the conversation context (e.g. because a review problem is currently
@@ -38,9 +58,9 @@ being discussed), suggest them instead of asking again.
 6. **Observed in**: References to PRs, reviews or stories where this occurred (optional)
 7. **Related conventions/decision records**: Are there existing conventions or decision records that relate to this? (optional)
 
-### Step 3: Create file
+### Step 4: Create file
 
-Create the file at `{repo-root}/docs/learnings/YYYY-MM-DD-kebab-case-title.md`.
+Create the file at `{scope}/docs/learnings/YYYY-MM-DD-kebab-case-title.md`.
 
 The filename is derived from the date and title:
 - Today's date as prefix (YYYY-MM-DD)
@@ -50,7 +70,7 @@ The filename is derived from the date and title:
 - Special characters removed
 - Title portion truncated to max 80 characters to avoid path length issues on Windows
 
-If `docs/learnings/` does not exist, create the directory.
+If `{scope}/docs/learnings/` does not exist, create the directory.
 
 Use this template:
 
@@ -84,11 +104,11 @@ observed-in: {PRs/reviews/stories, if provided}
 {References to existing files, if available}
 ```
 
-### Step 4: Update index
+### Step 5: Update index
 
-Update `{repo-root}/docs/learnings/README.md` with the new entry. If the
+Update `{scope}/docs/learnings/README.md` with the new entry. If the
 file does not exist, create it with a heading. The index lists all learnings
-with their date, title, status and category:
+of **this level** with their date, title, status and category:
 
 ```markdown
 # Learnings
@@ -99,13 +119,14 @@ with their date, title, status and category:
 | 2026-06-08 | [E2E tests flaky with WaitForLoadState](2026-06-08-e2e-tests-flaky-with-waitforloadstate.md) | Resolved | Testing |
 ```
 
-Add the new entry at the end of the table.
+Add the new entry at the end of the table. Never list entries of other
+levels here — every level maintains only its own index.
 
-### Step 5: Confirmation
+### Step 6: Confirmation
 
 Show the user:
 - The complete content of the created entry
-- The file path
+- The file path, naming the level it lives on
 - The note: "Create a PR with this change. The entry is active immediately —
   the team is trusted to capture it and to resolve it later when it becomes a
   convention or decision record. The Hüter-Trio is not added as a reviewer;
@@ -118,7 +139,7 @@ If the observation is actually a rule (e.g. "always do it this way"),
 suggest writing a convention (Claude Code Rule in `.claude/rules/`) instead.
 
 If the observation is actually a decision, suggest using
-`/create-decision` instead.
+`/create-decision` instead (note that it applies a significance gate).
 
 ## Lifecycle
 
