@@ -76,7 +76,9 @@ forces a spec PR — see step 7).
    **Spec PR vs implementation PR.** In the SDD workflow a spec and its implementation are
    **never** in the same PR. This is a **spec PR** when the user invoked `create spec`, or when
    every changed file (from step 4) is documentation/spec/ADR — i.e. `*.md` or anything under
-   `docs/` (including `docs/decisions/`) — and no source code changed. When auto-detected,
+   a `docs/` directory on any level (root `docs/`, or nested like `apps/<app>/docs/`,
+   `services/<service>/docs/`, including their `decisions/` and `learnings/`) — and no source
+   code changed. When auto-detected,
    **confirm first:** *"Only spec/ADR/doc files changed — create this as a spec PR (📝)?"* A
    mixed diff is an implementation PR.
 
