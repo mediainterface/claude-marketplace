@@ -17,8 +17,10 @@ Reports every Memory Bank change since a date so a guardian can trace **what
 changed, by whom, and why**, then decide whether everything is fine or something
 needs a closer look.
 
-- **What it covers**: Decision Records (`docs/decisions/`), Lessons Learned
-  (`docs/learnings/`), and Conventions (Claude Code Rules in `.claude/rules/`).
+- **What it covers**: Decision Records and Lessons Learned in every
+  `docs/decisions/` / `docs/learnings/` directory on any Memory Bank level
+  (repo root or nested, e.g. `apps/<app>/docs/decisions/`), and Conventions
+  (Claude Code Rules in `.claude/rules/`).
 - **How it works**: reconstructs the change timeline from **git history**
   (author, date, commit message, added/modified/deleted/renamed files) and
   enriches each touched record with its own **content** (title, category,

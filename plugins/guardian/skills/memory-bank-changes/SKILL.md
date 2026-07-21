@@ -32,9 +32,15 @@ Do **not** use it to create records — that is `create-decision` /
 
 | Artifact | Location | Index |
 |----------|----------|-------|
-| Decision Records (ADRs) | `docs/decisions/NNNN-*.md` | `docs/decisions/README.md` |
-| Lessons Learned | `docs/learnings/YYYY-MM-DD-*.md` | `docs/learnings/README.md` |
-| Conventions (Claude Code Rules) | `.claude/rules/*.md` | — |
+| Decision Records (ADRs) | every `docs/decisions/` directory, root or nested (e.g. `apps/<app>/docs/decisions/`) | one `README.md` per directory |
+| Lessons Learned | every `docs/learnings/` directory, root or nested | one `README.md` per directory |
+| Conventions (Claude Code Rules) | `.claude/rules/*.md` (root only) | — |
+
+Decisions and learnings live on Memory Bank **levels** — directory
+subtrees with their own `docs/decisions/` + `docs/learnings/`. The
+placement rule (from sdd-kit): a record lives on the smallest level whose
+subtree contains everyone affected. A repo without nested levels simply
+has everything at the root.
 
 The `README.md` index files are **not records** — exclude them from the record
 list (mention an index refresh only in passing, if at all).
@@ -60,10 +66,12 @@ window in the report header.
 ```bash
 git log --since="<WINDOW>" --date=short -M --name-status \
   --pretty=format:'@@ %h | %an | %cd | %s' \
-  -- docs/decisions docs/learnings .claude/rules
+  -- '*docs/decisions/*' '*docs/learnings/*' .claude/rules
 ```
 
-Non-existent directories in the pathspec are ignored (no error), so pass all
+The quoted wildcard pathspecs match `docs/decisions/` and `docs/learnings/`
+directories at **any depth** (root and nested levels alike; a git pathspec `*`
+also crosses `/`), and non-existent paths are ignored (no error), so pass all
 three. Each `@@` line is one commit: `hash | author | commit-date | subject`.
 The date is the **commit** date (`%cd`), which is what `--since` filters on — do
 not use the author date (`%ad`): on a squash merge it is carried over from the
@@ -99,8 +107,11 @@ Drop `README.md` index files from the record list.
 
 ### Step 5 — Present the report
 
-Group by artifact type, most recent first within each group. Keep it scannable
-(see format below).
+Group by artifact type, most recent first within each group. Derive the
+`scanned:` line from the touched paths — list each level that actually appears
+in the window (`docs/… (root)`, `apps/<app>/docs/…`, …) plus `.claude/rules`;
+records already show their full path, so no extra per-entry level label is
+needed. Keep it scannable (see format below).
 
 Give each **record** a single entry, even if several commits in the window
 touched it. Pick the primary marker by significance — `✖` Deleted > `➜` Renamed
@@ -126,7 +137,7 @@ and do not commit review files on your own initiative.
 
 ```
 Memory Bank changes since <window> — <N> commits, <M> records
-scanned: docs/decisions, docs/learnings, .claude/rules
+scanned: docs/… (root), apps/mira-desktop/docs/…, .claude/rules
 
 ## Decision Records
   ✚ Added   0007 "Adopt pydantic v2 for config"   [Architecture · Active]
@@ -162,6 +173,11 @@ Surface these so the guardian can decide if a closer look is needed:
   Surface it so the guardian can confirm the transition is warranted.
 - **Overlapping new records** — two or more new records in the window covering
   the same area, which may contradict each other.
+- **Suspected misplacement** — a repo-root (suite-level) record whose
+  content names only a single app or service, or a nested (app-level)
+  record that legislates repo-wide. Placement rule: a record lives on the
+  smallest level whose subtree contains everyone affected. Surface it so
+  the guardian can check the placement.
 
 ## Notes
 
