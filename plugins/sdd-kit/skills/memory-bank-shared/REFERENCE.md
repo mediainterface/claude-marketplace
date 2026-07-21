@@ -22,8 +22,7 @@ index.
 
 ## Placement rule
 
-> A record lives on the smallest level whose subtree contains everyone
-> affected.
+> A record lives on the smallest level whose subtree contains everyone affected.
 
 Cross-cutting / process / repo-wide baselines → repo root. Anything that
 affects a single app → that app's directory. Several sibling services →
