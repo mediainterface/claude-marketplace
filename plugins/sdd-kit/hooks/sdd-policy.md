@@ -35,6 +35,24 @@ its state (via `sdd-kit:ado-workitem`): it should be in the **Refinement** state
 it is not, **point this out to the user** so they can correct it — do not change the
 state yourself.
 
+## Memory Bank records: significance & placement
+
+Before proposing or creating a Decision Record, apply the significance
+triage: a record is warranted only if the decision has **structural
+impact** (structure, interfaces, dependencies, or quality attributes), is
+**hard to reverse**, sets a **precedent** future code should follow, or is
+**cross-cutting** (spans features, apps, or teams). Otherwise do not
+propose one — a recurring coding rule belongs in `.claude/rules/`
+(convention), an observed pitfall in `/create-lesson-learned`, and a
+one-off local design choice stays in the spec or PR.
+
+Records live on Memory Bank **levels**: place each record in the
+`docs/decisions/` (or `docs/learnings/`) of the right level. A record
+lives on the smallest level whose subtree contains everyone affected —
+the repo root only for cross-cutting matters, `apps/<app>/` or
+`services/<service>/` for single-app records. Details: the
+`sdd-kit:create-decision` skill and its shared reference.
+
 ## Implementation: plan steps → Azure DevOps tasks
 
 This part applies during implementation — after the spec PR has merged, when the
