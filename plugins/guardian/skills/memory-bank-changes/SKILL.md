@@ -66,13 +66,14 @@ window in the report header.
 ```bash
 git log --since="<WINDOW>" --date=short -M --name-status \
   --pretty=format:'@@ %h | %an | %cd | %s' \
-  -- '*docs/decisions/*' '*docs/learnings/*' .claude/rules
+  -- 'docs/decisions/*' '*/docs/decisions/*' 'docs/learnings/*' '*/docs/learnings/*' .claude/rules
 ```
 
-The quoted wildcard pathspecs match `docs/decisions/` and `docs/learnings/`
-directories at **any depth** (root and nested levels alike; a git pathspec `*`
-also crosses `/`), and non-existent paths are ignored (no error), so pass all
-three. Each `@@` line is one commit: `hash | author | commit-date | subject`.
+The quoted pathspec pairs match `docs/decisions/` and `docs/learnings/` at the
+root (`docs/…/*`) and on any nested level (`*/docs/…/*` — a git pathspec `*`
+also crosses `/`, and the leading `*/` requires a real `docs/` path segment, so
+a directory merely *ending* in `docs` does not match). Non-existent paths are
+ignored (no error), so pass all five. Each `@@` line is one commit: `hash | author | commit-date | subject`.
 The date is the **commit** date (`%cd`), which is what `--since` filters on — do
 not use the author date (`%ad`): on a squash merge it is carried over from the
 branch and can predate the window, which would print a date older than the
@@ -108,10 +109,11 @@ Drop `README.md` index files from the record list.
 ### Step 5 — Present the report
 
 Group by artifact type, most recent first within each group. Derive the
-`scanned:` line from the touched paths — list each level that actually appears
-in the window (`docs/… (root)`, `apps/<app>/docs/…`, …) plus `.claude/rules`;
-records already show their full path, so no extra per-entry level label is
-needed. Keep it scannable (see format below).
+`changes in:` line from the touched paths — it lists each location that
+actually appears in the window (`docs/… (root)`, `apps/<app>/docs/…`, …,
+`.claude/rules`), **not** everything scanned (the Step-3 pathspecs always scan
+all levels); records already show their full path, so no extra per-entry level
+label is needed. Keep it scannable (see format below).
 
 Give each **record** a single entry, even if several commits in the window
 touched it. Pick the primary marker by significance — `✖` Deleted > `➜` Renamed
@@ -137,7 +139,7 @@ and do not commit review files on your own initiative.
 
 ```
 Memory Bank changes since <window> — <N> commits, <M> records
-scanned: docs/… (root), apps/mira-desktop/docs/…, .claude/rules
+changes in: docs/… (root), apps/mira-desktop/docs/…, .claude/rules
 
 ## Decision Records
   ✚ Added   0007 "Adopt pydantic v2 for config"   [Architecture · Active]

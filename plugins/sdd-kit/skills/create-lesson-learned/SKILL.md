@@ -1,6 +1,6 @@
 ---
 name: create-lesson-learned
-description: Creates a new Lesson Learned entry in the Memory Bank. Use this skill when a recurring pattern, pitfall or insight should be captured, e.g. when Claude repeatedly makes the same mistake, when a pattern emerges in reviews, or when something was learned during debugging. Also triggers on phrases like "this keeps happening", "we should document this", "lesson learned", "AI mistake", "I've seen this for the third time now".
+description: Creates a new Lesson Learned entry in the Memory Bank, placed on the right Memory Bank level (repo root, or an app/service subtree like apps/<app>/docs/learnings/). Use this skill when a recurring pattern, pitfall or insight should be captured, e.g. when Claude repeatedly makes the same mistake, when a pattern emerges in reviews, or when something was learned during debugging. Also triggers on phrases like "this keeps happening", "we should document this", "lesson learned", "AI mistake", "I've seen this for the third time now".
 ---
 
 # Create Lesson Learned

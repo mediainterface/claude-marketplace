@@ -34,6 +34,23 @@ A record that specializes or deviates from a record on a higher level
 **links that record** in its *Context and problem* section. Never duplicate
 higher-level content on a lower level.
 
+## Before creating: check the other levels
+
+A new record starts with a search, not a template: check the proposed
+level, every level above it, and sibling apps/services for an existing
+record on the same topic. A hit on a higher level is specialized via the
+delta principle instead of restated; a hit in a sibling means the topic
+is broader than one app — promote it (see below) instead of duplicating
+it.
+
+## Promotion
+
+When a record turns out to matter beyond its level (e.g. a sibling app
+faces the same question), do not move the file. Create a new record on
+the smallest level that covers everyone now affected, and set the old
+record's status to `Superseded by <new record's filename without .md>` —
+the same supersede mechanism used for any revised decision.
+
 ## Significance triage
 
 A decision deserves a Decision Record only if **at least one** criterion

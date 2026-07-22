@@ -66,6 +66,12 @@ when several siblings below it are affected. The user confirms or
 corrects the proposal. If the affected scope is not apparent from
 context, **ask — never guess.**
 
+Before settling on the level, check the proposed level, the levels above
+it, and sibling apps/services for an existing record on the topic (see
+**Before creating: check the other levels** in the shared reference) — a
+higher-level hit is specialized via the delta principle; a sibling-level
+hit is a promotion candidate, not a duplicate.
+
 `{scope}` below is the confirmed level directory (empty for the repo
 root).
 
@@ -208,7 +214,10 @@ Show the user:
   status to `Superseded by <new record's filename without .md>`.
 - Records are never moved between levels by this skill. Migrating legacy
   records (including repos whose records all still sit at the repo root)
-  is a project of the affected repo.
+  is a project of the affected repo. Promotion to a higher level happens
+  by superseding — a new record on the higher level, the old one set to
+  `Superseded by …` (see **Promotion** in the shared reference) — never
+  by moving files.
 - Repos may still contain records with the legacy sequential naming
   (`NNNN-…`). Leave them exactly as they are — old and new names coexist
   in the same directory. Never renumber or rename existing records:

@@ -53,6 +53,10 @@ the repo root only for cross-cutting matters, `apps/<app>/` or
 `services/<service>/` for single-app records. Details: the
 `sdd-kit:create-decision` skill and its shared reference.
 
+*Maintenance note: this section is a deliberate summary — the source of truth
+is the sdd-kit shared reference (`skills/memory-bank-shared/REFERENCE.md`).
+When the Hüter-Trio changes the criteria there, sync this section.*
+
 ## Implementation: plan steps → Azure DevOps tasks
 
 This part applies during implementation — after the spec PR has merged, when the
