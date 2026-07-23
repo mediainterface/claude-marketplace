@@ -56,6 +56,9 @@ ride in the **same** PR as the spec:
 - Design decisions → invoke the `create-decision` skill (one record per decision).
 - Recurring patterns / pitfalls → invoke the `create-lesson-learned` skill.
 
+Note each created file's path from the skills' confirmation output — Step 5
+stages exactly these paths.
+
 Skip if the user declines. (`create-decision` already notes that a decision ships
 together with the spec, so bundling them here is intentional.)
 

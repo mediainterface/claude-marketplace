@@ -49,8 +49,9 @@ one-off local design choice stays in the spec or PR.
 Records live on Memory Bank **levels**: place each record in the
 `docs/decisions/` (or `docs/learnings/`) of the right level. A record
 lives on the smallest level whose subtree contains everyone affected —
-the repo root only for cross-cutting matters, `apps/<app>/` or
-`services/<service>/` for single-app records. Details: the
+the repo root only for matters spanning multiple apps/services (or
+repo-wide/process ones); `apps/<app>/` or `services/<service>/` for
+single-app records, even feature-spanning ones. Details: the
 `sdd-kit:create-decision` skill and its shared reference.
 
 *Maintenance note: this section is a deliberate summary — the source of truth

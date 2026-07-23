@@ -35,13 +35,11 @@ without enough context to judge, first ask the user to state the decision
 in one line, then apply the gate.
 
 Create a record only if **at least one** of the four criteria applies
-(structural impact · hard to reverse · precedent · cross-cutting). If
-none applies, **do not create the record**. Tell the user which criteria
-failed and route instead, per the triage table in the shared reference:
-a recurring coding rule → convention in `.claude/rules/` (explain the
-rule-file format so the user can add it manually), an observation or
-pitfall → suggest `/create-lesson-learned`, a one-off local design
-choice → it stays in the spec / PR description.
+(structural impact · hard to reverse · precedent · cross-cutting — the
+definitions and the routing table live in the shared reference, which is
+authoritative). If none applies, **do not create the record**: tell the
+user which criteria failed and route per the **Significance triage**
+table in the shared reference.
 
 The criteria are fixed and changed only by the Hüter-Trio. Do not create
 a refused record on insistence — ask the user to raise the case with the
@@ -59,9 +57,10 @@ shared reference: *a record lives on the smallest level whose subtree
 contains everyone affected.*
 
 Derive from the conversation context which apps/services are affected
-and **propose** the level: the repo root for cross-cutting, process, or
-repo-wide records; `apps/<app>/` or `services/<service>/` for records
-affecting a single app; an intermediate directory (e.g. `services/`)
+and **propose** the level: the repo root for records spanning multiple
+apps/services, process, or repo-wide records; `apps/<app>/` or
+`services/<service>/` for records affecting a single app (even ones
+spanning several of its features); an intermediate directory (e.g. `services/`)
 when several siblings below it are affected. The user confirms or
 corrects the proposal. If the affected scope is not apparent from
 context, **ask — never guess.**

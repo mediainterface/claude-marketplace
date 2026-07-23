@@ -11,8 +11,8 @@ A Memory Bank **level** is a directory subtree with its own
 `docs/decisions/` and `docs/learnings/`, each with its own `README.md`
 index.
 
-- The **repo root** is the suite level: cross-cutting decisions, process
-  decisions, repo-wide baselines.
+- The **repo root** is the suite level: decisions spanning multiple
+  apps/services, process decisions, repo-wide baselines.
 - **`apps/<app>/`** and **`services/<service>/`** are app levels: records
   that concern only that app or service.
 - There is **no hard-coded list of levels.** Any directory becomes a level
@@ -24,9 +24,12 @@ index.
 
 > A record lives on the smallest level whose subtree contains everyone affected.
 
-Cross-cutting / process / repo-wide baselines → repo root. Anything that
-affects a single app → that app's directory. Several sibling services →
-their common parent (e.g. `services/`).
+Spanning multiple apps or services / process / repo-wide baselines → repo
+root. Anything that affects a single app → that app's directory — **even
+when it spans several features inside that app** (significance criterion 4
+can be met by a feature-spanning decision; significance and placement are
+independent questions). Several sibling services → their common parent
+(e.g. `services/`).
 
 ## Delta principle
 
@@ -84,8 +87,11 @@ record — it follows the existing one.
 ## Boundaries
 
 - **Conventions stay central** in `.claude/rules/` — auto-loading only
-  works there; their scoping is the `paths:` frontmatter, not the
-  directory location.
+  works there (per the current Claude Code docs, rules are discovered
+  solely from the project root's `.claude/rules/`, recursively *within*
+  it; nested `.claude/rules/` directories are not picked up — unlike
+  nested `CLAUDE.md` files, which do load per subtree); their scoping is
+  the `paths:` frontmatter, not the directory location.
 - Skills **never move existing records** between levels. Migrating legacy
   records is a project of the affected repo, not a skill action.
 - Every level maintains **only its own index** (`README.md`); never
