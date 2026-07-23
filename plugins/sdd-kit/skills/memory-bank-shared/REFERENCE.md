@@ -86,12 +86,12 @@ record — it follows the existing one.
 
 ## Boundaries
 
-- **Conventions stay central** in `.claude/rules/` — auto-loading only
-  works there (per the current Claude Code docs, rules are discovered
-  solely from the project root's `.claude/rules/`, recursively *within*
-  it; nested `.claude/rules/` directories are not picked up — unlike
-  nested `CLAUDE.md` files, which do load per subtree); their scoping is
-  the `paths:` frontmatter, not the directory location.
+- **Conventions stay central** in the repo-root `.claude/rules/` — a
+  deliberate policy, not a technical limit: a nested `.claude/rules/`
+  would load only on demand per subtree (like a nested `CLAUDE.md`),
+  which we avoid for conventions that must be in scope suite-wide in
+  every session. Their scoping is the `paths:` frontmatter, not the
+  directory location.
 - Skills **never move existing records** between levels. Migrating legacy
   records is a project of the affected repo, not a skill action.
 - Every level maintains **only its own index** (`README.md`); never
