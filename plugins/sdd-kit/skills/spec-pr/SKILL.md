@@ -56,6 +56,9 @@ ride in the **same** PR as the spec:
 - Design decisions → invoke the `create-decision` skill (one record per decision).
 - Recurring patterns / pitfalls → invoke the `create-lesson-learned` skill.
 
+Note each created file's path from the skills' confirmation output — Step 5
+stages exactly these paths.
+
 Skip if the user declines. (`create-decision` already notes that a decision ships
 together with the spec, so bundling them here is intentional.)
 
@@ -94,10 +97,14 @@ Derive `<topic>` from the spec filename (the segment between the date and
 ### Step 5: Commit anything uncommitted
 
 The brainstorming skill usually already committed the spec. Stage the spec and any
-Memory Bank files and commit only if something is still pending:
+Memory Bank files and commit only if something is still pending. Memory Bank
+records can live on a nested level (`apps/<app>/docs/…`, `services/<service>/docs/…`
+— see [../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md)), and
+`git add` errors on a pathspec that matches nothing — so stage the spec file and
+every file Step 3 created by their explicit paths, no globs:
 
 ```bash
-git add docs/
+git add <spec file> <each Memory Bank file from Step 3, by explicit path>
 git diff --cached --quiet || git commit -m "📝 Spec: <topic>"
 ```
 

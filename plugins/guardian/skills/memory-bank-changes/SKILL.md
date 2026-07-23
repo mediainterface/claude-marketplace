@@ -32,9 +32,15 @@ Do **not** use it to create records — that is `create-decision` /
 
 | Artifact | Location | Index |
 |----------|----------|-------|
-| Decision Records (ADRs) | `docs/decisions/NNNN-*.md` | `docs/decisions/README.md` |
-| Lessons Learned | `docs/learnings/YYYY-MM-DD-*.md` | `docs/learnings/README.md` |
-| Conventions (Claude Code Rules) | `.claude/rules/*.md` | — |
+| Decision Records (ADRs) | every `docs/decisions/` directory, root or nested (e.g. `apps/<app>/docs/decisions/`) | one `README.md` per directory |
+| Lessons Learned | every `docs/learnings/` directory, root or nested | one `README.md` per directory |
+| Conventions (Claude Code Rules) | `.claude/rules/*.md` (root only) | — |
+
+Decisions and learnings live on Memory Bank **levels** — directory
+subtrees with their own `docs/decisions/` + `docs/learnings/`. The
+placement rule (from sdd-kit): a record lives on the smallest level whose
+subtree contains everyone affected. A repo without nested levels simply
+has everything at the root.
 
 The `README.md` index files are **not records** — exclude them from the record
 list (mention an index refresh only in passing, if at all).
@@ -60,11 +66,14 @@ window in the report header.
 ```bash
 git log --since="<WINDOW>" --date=short -M --name-status \
   --pretty=format:'@@ %h | %an | %cd | %s' \
-  -- docs/decisions docs/learnings .claude/rules
+  -- 'docs/decisions/*' '*/docs/decisions/*' 'docs/learnings/*' '*/docs/learnings/*' .claude/rules
 ```
 
-Non-existent directories in the pathspec are ignored (no error), so pass all
-three. Each `@@` line is one commit: `hash | author | commit-date | subject`.
+The quoted pathspec pairs match `docs/decisions/` and `docs/learnings/` at the
+root (`docs/…/*`) and on any nested level (`*/docs/…/*` — a git pathspec `*`
+also crosses `/`, and the leading `*/` requires a real `docs/` path segment, so
+a directory merely *ending* in `docs` does not match). Non-existent paths are
+ignored (no error), so pass all five. Each `@@` line is one commit: `hash | author | commit-date | subject`.
 The date is the **commit** date (`%cd`), which is what `--since` filters on — do
 not use the author date (`%ad`): on a squash merge it is carried over from the
 branch and can predate the window, which would print a date older than the
@@ -99,8 +108,12 @@ Drop `README.md` index files from the record list.
 
 ### Step 5 — Present the report
 
-Group by artifact type, most recent first within each group. Keep it scannable
-(see format below).
+Group by artifact type, most recent first within each group. Derive the
+`changes in:` line from the touched paths — it lists each location that
+actually appears in the window (`docs/… (root)`, `apps/<app>/docs/…`, …,
+`.claude/rules`), **not** everything scanned (the Step-3 pathspecs always scan
+all levels); records already show their full path, so no extra per-entry level
+label is needed. Keep it scannable (see format below).
 
 Give each **record** a single entry, even if several commits in the window
 touched it. Pick the primary marker by significance — `✖` Deleted > `➜` Renamed
@@ -126,7 +139,7 @@ and do not commit review files on your own initiative.
 
 ```
 Memory Bank changes since <window> — <N> commits, <M> records
-scanned: docs/decisions, docs/learnings, .claude/rules
+changes in: docs/… (root), apps/mira-desktop/docs/…, .claude/rules
 
 ## Decision Records
   ✚ Added   0007 "Adopt pydantic v2 for config"   [Architecture · Active]
@@ -134,6 +147,12 @@ scanned: docs/decisions, docs/learnings, .claude/rules
             why: "adopt pydantic v2 for config validation" — replaces ad-hoc
                  dataclass validation that was error-prone
             docs/decisions/0007-adopt-pydantic-v2-for-config.md
+
+  ✚ Added   2026-07-02 "Cross-feature commands via bridge store"  [Architecture · Active]
+            by Anna Roth · 2026-07-02 · deciders: Anna
+            why: "first cross-feature bridge in the renderer" — precedent for
+                 feature-to-feature commands
+            apps/mira-desktop/docs/decisions/2026-07-02-cross-feature-commands-via-bridge-store.md
 
 ## Lessons Learned
   ✎ Modified 2026-05-11 "E2E flaky with WaitForLoadState"  [Testing · Active → Resolved]
@@ -162,6 +181,11 @@ Surface these so the guardian can decide if a closer look is needed:
   Surface it so the guardian can confirm the transition is warranted.
 - **Overlapping new records** — two or more new records in the window covering
   the same area, which may contradict each other.
+- **Suspected misplacement** — a repo-root (suite-level) record whose
+  content names only a single app or service, or a nested (app-level)
+  record that legislates repo-wide. Placement rule: a record lives on the
+  smallest level whose subtree contains everyone affected. Surface it so
+  the guardian can check the placement.
 
 ## Notes
 
