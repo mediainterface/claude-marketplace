@@ -118,9 +118,8 @@ Set a work item's **Area** and **Iteration** with `--area`/`--iteration` (on cre
 update); both are project-relative, backslash-separated (e.g. `{project}\{team}`), and
 the **project root** is just `{project}` (the first path segment, no team).
 
-To place a child under the **same team as its parent** (e.g. sdd-kit's
-implementation-tasks flow), read the parent's paths and reuse them — you already fetch
-the parent for the title:
+To place a child under the **same team as its parent**, read the parent's paths and
+reuse them — you already fetch the parent for the title:
 ```bash
 az boards work-item show --id {parentId} --org {org} -o json   # System.AreaPath, System.IterationPath
 ```
