@@ -7,9 +7,9 @@ where they conflict** — project/user instructions take precedence over skills.
 ## Does this policy apply here?
 
 The SDD workflow is for MediaInterface repos. When the policy first becomes
-relevant in a session — e.g. a spec has just been approved, or ADO tasks are about
-to be created — check the project's git origin (`git remote get-url origin`) if you
-do not already know it:
+relevant in a session — e.g. a spec has just been approved, or a Memory Bank record
+is about to be proposed — check the project's git origin (`git remote get-url
+origin`) if you do not already know it:
 
 - Origin on `ado.mediainterface.de` (any URL form) → the policy is **in force**;
   follow it.
@@ -58,41 +58,16 @@ single-app records, even feature-spanning ones. Details: the
 is the sdd-kit shared reference (`skills/memory-bank-shared/REFERENCE.md`).
 When the Hüter-Trio changes the criteria there, sync this section.*
 
-## Implementation: plan steps → Azure DevOps tasks
+## Implementation: user story state
 
 This part applies during implementation — after the spec PR has merged, when the
 plan is actually written and executed.
 
-When an implementation plan is created for a spec **and a user story is referenced**
-(an existing Azure DevOps user story, mentioned by ID):
+When a user story is referenced (an existing Azure DevOps user story, mentioned by
+ID), **check its state**: during implementation it should be in the
+**Implementation** state; if it is not, **point this out to the user** so they can
+correct it — do not change the story's state yourself.
 
-- **Check the user story's state first.** During implementation it should be in the
-  **Implementation** state; if it is not, **point this out to the user** so they can
-  correct it — do not change the story's state yourself (you manage the *tasks'*
-  states, not the story's).
-- **After the plan is written and approved, confirm before creating anything.**
-  Fetch the referenced user story and show the user its **ID and title** — so a wrong
-  work item is caught before any tasks are created — the list of tasks you would
-  create from the plan's todo list, and the **Area/Iteration paths** the tasks will
-  inherit (the user story's own paths). **Explicitly ask whether to create them, and
-  let the user adjust the paths.** Proceed only on an explicit yes; if the user
-  declines or names a different story, adjust or skip accordingly.
-- **On confirmation**, create one Azure DevOps **task** (*Aufgabe*) for each item on
-  the plan's todo list using the `sdd-kit:ado-workitem` skill, each as a **child of
-  that user story** (parent relation). Set each task's **Area Path and Iteration Path
-  to the referenced user story's own paths** — read them from the user story — unless
-  the user adjusted them at the confirmation step. Titles and descriptions follow that
-  skill's conventions — human-readable **German**, the title being just the concise
-  description (per the shared title schema), with type and state names fetched from the
-  server (never assumed).
-- **During implementation, drive each task through its lifecycle** via `ado-workitem`,
-  mirroring the plan step it represents: when you start working on the step, set its
-  task to the server's *active* state (e.g. *Aktiv*); when the step is complete, set
-  it to the server's *closed* state (e.g. *Geschlossen*). Fetch the exact localized
-  state names from the server rather than guessing.
-- **When the whole user story is finished** (all its tasks are closed), **reset the
-  Area Path and Iteration Path of the tasks you created** back to the project root
-  (the project name — the first segment of the path, no team), via `ado-workitem`.
-  Leave the user story itself untouched.
-
-If no user story is referenced, implement the plan normally (skip this part).
+Do **not** create Azure DevOps tasks for the plan's todo items — neither
+automatically nor by offering it. Plan steps are tracked in the plan alone; they
+add no value as work items for human readers.
