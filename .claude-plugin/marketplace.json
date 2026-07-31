@@ -29,8 +29,8 @@
     {
       "name": "sdd-kit",
       "source": "./plugins/sdd-kit",
-      "description": "The tools for our Spec-Driven Development workflow — decision records, lessons learned, a spec→PR gate, and Azure DevOps skills via the az CLI.",
-      "version": "1.5.0"
+      "description": "The tools for our Spec-Driven Development workflow — decision records, lessons learned, a spec→PR gate, a deep PR review, and Azure DevOps skills via the az CLI.",
+      "version": "1.6.0"
     },
     {
       "name": "guardian",
