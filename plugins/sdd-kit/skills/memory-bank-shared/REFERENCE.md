@@ -102,14 +102,16 @@ deliberately low-threshold.
 
 ### Examples
 
-**No record** — formally tickable, still local: global hotkeys are suspended
-while a UI recorder is recording. Claimed *structural impact* (the feature
-adds two IPC channels) and *precedent* (future recorders should behave the
-same). Neither survives the evidence question: the channels follow the app's
-established feature-slice pattern, so they apply an existing decision instead
-of changing one, and there is exactly **one** recorder — the second place was
-speculation, not a place. The behavior sits at one spot and a revert is one
-line → a comment at the code.
+**No record** — formally tickable, still local: a settings field records the
+key combination the user presses in order to assign a hotkey, and while it
+records, the app's global hotkeys are suspended so they don't fire instead of
+being captured. Claimed *structural impact* (the feature adds two IPC
+channels) and *precedent* (future key-capture fields should suspend them the
+same way). Neither survives the evidence question: the channels follow the
+app's established feature-slice pattern, so they apply an existing decision
+instead of changing one, and there is exactly **one** such field today — the
+second place was speculation, not a place. The suspend/resume sits at one spot
+and a revert is one line → a comment at the code.
 
 **Record** — cross-feature communication runs through an owner-side bridge
 store. *Structural impact*: it replaces the direct store imports features
