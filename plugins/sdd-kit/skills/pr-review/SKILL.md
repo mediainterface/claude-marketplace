@@ -474,6 +474,9 @@ The language contract:
 - A missing-ADR finding for a one-off local choice → the significance triage comes first
   (structural impact / hard to reverse / precedent / cross-cutting). Without a criterion there is
   no finding; a coding rule goes to `.claude/rules/`, a pitfall to `create-lesson-learned`.
+- About to ask for a spec or plan to be deleted in a PR whose diff is nothing but spec and doc
+  files → that is a **spec PR**, and the spec is what it exists to submit. The deletion belongs in
+  the PR that implements the story, never here. Phase C should have skipped the check entirely.
 - The test verdict is „X Tests ergänzt, sieht gut aus" → you counted instead of judging. For
   each new test, name what would have to break in the production code to turn it red.
 - Applying test rules you know from elsewhere („E2E gehört auf …", „das ist ein Unit-Test") that

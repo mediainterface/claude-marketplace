@@ -100,10 +100,10 @@ Do **not** create Azure DevOps tasks for the plan's todo items — neither
 automatically nor by offering it. Plan steps are tracked in the plan alone; they
 add no value as work items for human readers.
 
-**Delete the spec and the plan at the human code review.** The story's design spec and
-implementation plan leave the repository when its implementation goes to **code
-review** — at the latest after the first review round. This is a step of its own,
-tied to nothing else in the workflow.
+**Delete the spec and the plan in the implementation PR, at its human code review.**
+The story's design spec and implementation plan leave the repository when its
+implementation goes to **code review** — at the latest after the first review round.
+This is a step of its own, tied to nothing else in the workflow.
 
 **Which review is meant — settle this before deleting anything.** "Code review" here
 means the **human** review of the story's **implementation** pull request, and
@@ -112,8 +112,14 @@ nothing else:
 - **Not your own reading of the code.** You review constantly while implementing, and
   none of it is the trigger — neither a `/code-review` nor an `sdd-kit:pr-review` run
   you started yourself.
-- **Never in a spec PR.** There the spec *is* the content under review; deleting it
-  there removes the very thing the pull request exists for.
+- **Never in a spec PR — only in the PR that implements the story.** This is the
+  confusion to expect, because a spec PR matches the pattern you are looking for from
+  the outside: a pull request in review with a spec file in it. It is the opposite
+  situation. A spec PR *adds* the spec and exists to get it reviewed; deleting it
+  there empties the pull request. Two ways to tell them apart, and either is enough:
+  the implementation PR **changes production code** (a diff of nothing but spec and
+  doc files is never the right PR), and by the time you implement, the spec PR has
+  long been merged — you cannot still be standing in it.
 - **A review round is complete when every required reviewer has looked at this code
   once** — which is not the same as "holds a vote right now". Azure DevOps clears
   votes on a new push, so a reviewer who reviewed and then got reset shows no vote at
@@ -136,6 +142,7 @@ carrying the deletion out is your job — say what you are removing, then do it:
    normally only confirms.
 2. **Then delete.** `git rm` the story's spec and plan — superpowers writes them to
    `docs/superpowers/specs/` and `docs/superpowers/plans/` — and commit the deletion
-   into the branch that is under review.
+   into the branch of the **implementation PR** under review. Never into a spec PR's
+   branch; if the PR you are in changes no production code, it is the wrong one.
 3. **Never** delete Memory Bank records or conventions along with them. Those are the
    durable trace and stay.
