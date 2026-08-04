@@ -74,13 +74,19 @@ one-off local design choice inline in the code as its own reason. The
 spec and the PR description are **not** a storage location: both are
 transient.
 
-A criterion counts only with **named evidence** — which existing pattern
-changes, the second place that exists **today**, the concrete
-features/apps/teams, what a revert costs — and you name it to the user when
-you affirm it. Even with a criterion ticked, behavior that sits at one spot,
-in one feature, and is cheap to revert gets an **inline reason in the code**,
-not a record. This applies where the record is first proposed, a spec's *Memory
-Bank* section included.
+A criterion counts only with **named evidence**, and you name it to the user
+when you affirm it:
+
+- **Structural impact** — which existing pattern *changes*. One that follows
+  the project's established pattern applies a decision, it does not make one.
+- **Hard to reverse** — what a revert costs.
+- **Precedent** — the second place that exists **today**.
+- **Cross-cutting** — the concrete features, apps, or teams.
+
+Even with a criterion ticked, behavior that sits at one spot, in one feature,
+and is cheap to revert gets an **inline reason in the code**, not a record.
+This applies where the record is first proposed, a spec's *Memory Bank*
+section included.
 
 Records live on Memory Bank **levels**: place each record in the
 `docs/decisions/` (or `docs/learnings/`) of the right level. A record

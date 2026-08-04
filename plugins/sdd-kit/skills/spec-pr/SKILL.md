@@ -79,12 +79,16 @@ the significance triage in
 [../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md) still decides
 what becomes a record.
 
-Run that triage **here**, with its evidence named: the criterion plus the pattern that
-changes · the second place existing **today** · the concrete features/apps/teams · the
-revert cost. Then the **locality counter-check** — one spot, one feature, cheap revert
-→ no record, the reason goes inline into the code. A record the spec's own *Memory
-Bank* section already writes out unfiltered turns `create-decision`'s gate into a
-rubber stamp.
+Run that triage **here**, and name the evidence with the criterion:
+
+- **Structural impact** — which existing pattern *changes*.
+- **Hard to reverse** — what a revert costs.
+- **Precedent** — the second place that exists **today**.
+- **Cross-cutting** — the concrete features/apps/teams.
+
+Then the **locality counter-check** — one spot, one feature, cheap revert → no record,
+the reason goes inline into the code. A record the spec's own *Memory Bank* section
+already writes out unfiltered turns `create-decision`'s gate into a rubber stamp.
 
 Records and lessons created here ride in the **same** PR as the spec — note each
 created file's path from the skills' confirmation output, because Step 5 stages
