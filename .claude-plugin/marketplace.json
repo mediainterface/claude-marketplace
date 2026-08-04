@@ -24,13 +24,13 @@
       "name": "claude-md-improver",
       "source": "./plugins/claude-md-improver",
       "description": "PreToolUse hook that keeps CLAUDE.md files in sync with staged changes before each commit",
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     {
       "name": "sdd-kit",
       "source": "./plugins/sdd-kit",
       "description": "The tools for our Spec-Driven Development workflow — decision records, lessons learned, a spec→PR gate, a deep PR review, and Azure DevOps skills via the az CLI.",
-      "version": "1.7.1"
+      "version": "1.7.2"
     },
     {
       "name": "guardian",
