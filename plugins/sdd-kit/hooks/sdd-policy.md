@@ -102,7 +102,25 @@ add no value as work items for human readers.
 **Delete the spec and the plan at the code review.** The story's design spec and
 implementation plan leave the repository when its implementation goes to **code
 review** — at the latest after the first review round. This is a step of its own,
-tied to nothing else in the workflow:
+tied to nothing else in the workflow.
+
+**Which review is meant — settle this before deleting anything.** "Code review" here
+means the **human** review of the story's **implementation** pull request, and
+nothing else:
+
+- **Not your own reading of the code.** You review constantly while implementing, and
+  none of it is the trigger — neither a `/code-review` nor an `sdd-kit:pr-review` run
+  you started yourself.
+- **Never in a spec PR.** There the spec *is* the content under review; deleting it
+  there removes the very thing the pull request exists for.
+- **A review round is complete when every required reviewer has reviewed the PR
+  once** — in Azure DevOps, when every reviewer marked `isRequired` has voted. Not
+  when you have looked at it.
+
+Before that, leave both files alone, even when the plan is fully worked off: the
+reviewers read the spec alongside the change in the first round, which is exactly why
+the deadline sits *after* that round and not at PR creation. Once the round is done,
+carrying the deletion out is your job — say what you are removing, then do it:
 
 1. **Counter-check first.** Is everything that is needed beyond the story and the
    spec captured outside them — inline in the code as its own reason, in the user

@@ -49,7 +49,9 @@ it does not re-implement `az`. **REQUIRED SUB-SKILLS:**
 2. Run the shared reference's **Step 0** (connection detection) + **Setup Check** (sign-in
    confirmation). If not signed in, stop and show the sign-in instructions.
 3. Fetch PR metadata (`sdd-kit:ado-pr` review step): `sourceRefName`, `targetRefName`, `title`,
-   `description`, `status`, linked work items, `repository.name`, `lastMergeSourceCommit`.
+   `description`, `status`, linked work items, `repository.name`, `lastMergeSourceCommit`, and
+   `reviewers` (with `isRequired` and `vote` — dimension 5 needs them to tell whether the PR is
+   past its first review round).
    Run the **Repository Mismatch Check** — if the PR is in a different repo than the current one,
    stop unless the user confirms (the worktree and diff would otherwise use the wrong codebase).
 4. Fetch existing PR comment threads (skip system-only threads). Keep them — Phase C dedupes
@@ -80,10 +82,14 @@ process or strategy document, a testing section in a
 CLAUDE.md / CONTRIBUTING, the conventions of the existing test suite). Dimensions 6 and 7 layer
 that on top of their own checks; where the repo documents nothing, those checks still run.
 Split the diffstat into test paths and production paths here — dimension 7 needs the ratio, and
-it goes into the report's status header either way. Finally, check whether the branch still
-carries the story's **design spec or implementation plan** (`docs/superpowers/specs/`,
-`docs/superpowers/plans/` — wherever this repo keeps them): they are transient and this review is
-where they go. Hand their paths and content to dimension 5.
+it goes into the report's status header either way. Finally — **unless this PR is itself a spec
+PR** (📝 marker in the title, or only spec/doc files changed; the same detection `/ado-pr` uses in
+its PR-creation step 7) — check whether the branch still carries the story's **design spec or
+implementation plan** (`docs/superpowers/specs/`, `docs/superpowers/plans/` — wherever this repo
+keeps them), and hand their paths and content to dimension 5 — together with whether the PR is
+**past its first review round** (every reviewer marked `isRequired` in Phase A has voted; this
+review run is not itself a round). **On a spec PR, skip this and say nothing about it:** there the
+spec is the content under review, and asking for its deletion would remove what the PR exists for.
 
 **Dispatch one subagent per dimension**, using a **read-only agent type** (`Explore`, or any
 agent whose tool set excludes `Edit`/`Write`). This is what actually enforces "review only":
@@ -165,8 +171,9 @@ returns findings in the schema below. **Subagents post nothing.**
      siblings do it.
    - **Spec and plan are transient — and this review is where they go.** A design spec and an
      implementation plan belong to one story, not to the repository: they are deleted at the
-     story's code review, at the latest after the first round. If Phase C found them still in the
-     branch, two checks, in this order:
+     human code review of the story's **implementation**, at the latest after the first round.
+     Runs only when Phase C handed over spec or plan files — on a **spec PR** it handed over
+     nothing and this check does not exist. Then two checks, in this order:
      1. **Read them and look for durable content.** Per piece of reasoning: is it needed beyond
         this story? Anything that is — a constraint, the grounds for a decision, a rule — must
         already exist **outside** the spec and the plan: inline in the code as its own reason, in
@@ -174,8 +181,8 @@ returns findings in the schema below. **Subagents post nothing.**
         is a 🟡 finding, anchored at the code it concerns, asking for the inline reason (or for a
         record, if it clears the triage above).
      2. **Then the deletion itself.** Spec and plan files still present in the branch are one 🟢
-        finding anchored at the file, asking for `git rm` in this PR — 🟡 once the PR is past its
-        first review round, because that was the deadline.
+        finding anchored at the file, asking for `git rm` in this PR — 🟡 when Phase C reports the
+        PR as past its first review round, because that was the deadline.
 
    No decision records in the repo → report the ADR part of the dimension as not applicable, don't
    silently skip it. The spec/plan check runs regardless.

@@ -26,10 +26,11 @@ efforts.
 > also invoke it manually at any time.
 
 > **The spec is a transient artifact.** It is reviewed and merged, it guides the
-> implementation — and it is **deleted again at the story's code review**, at the
-> latest after the first review round (the implementation plan goes with it). Nothing
-> that is needed later may live only in the spec, which is what Step 3 checks before
-> the PR is opened.
+> implementation — and it is **deleted again at the human code review of the
+> implementation PR**, at the latest after the first review round (the implementation
+> plan goes with it). Not in *this* PR: here the spec is the content under review.
+> Nothing that is needed later may live only in the spec, which is what Step 3 checks
+> before the PR is opened.
 
 ## When NOT to use it
 
@@ -53,7 +54,7 @@ exists, say so and stop — there is nothing to open a PR for.
 
 Tell the user briefly: this opens a PR for `<spec path>` and then stops — **no
 implementation plan and no code** will be written now. Say as well that the spec is a
-working artifact for this story and is deleted again at the code review of the
+working artifact for this story and is deleted again at the human code review of the
 implementation — which is why Step 3 first checks what has to be captured elsewhere.
 Proceed unless they object.
 
@@ -168,8 +169,8 @@ Report the PR URL and ID, then **stop**. State explicitly:
 - The spec is now up for review and must be **merged** before implementation begins.
 - No implementation plan and no code were written — by design.
 - The spec is a working artifact, not documentation: it is **deleted again at the
-  code review of the implementation**, together with the plan. What has to outlive it
-  was captured in Step 3.
+  human code review of the implementation**, together with the plan — never in this
+  PR. What has to outlive it was captured in Step 3.
 - Do **not** invoke `writing-plans`. Implementation is a separate, later effort
   (e.g. driven from work items via the `ado-*` skills) once the spec is merged.
 

@@ -75,7 +75,8 @@ If none applies, **no Decision Record** is created. Route instead:
 | One-off local design choice | Inline in the code, as its own reason — no record |
 
 **The spec is not a storage location.** A design spec and an implementation
-plan are transient — they are deleted at the story's code review — and a PR
+plan are transient — they are deleted at the human code review of the
+story's implementation — and a PR
 description is only read while its PR is open. So a local design choice that
 still needs a durable trace belongs **inline in the code it explains**, never
 in the spec alone. Anything that is needed beyond the story and does clear the
