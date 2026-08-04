@@ -94,16 +94,21 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 
 ### Markdown line length — 100 characters
 
-Every Markdown file in this repo — `CLAUDE.md` on any level, `README.md`, the skills'
-`SKILL.md` and `REFERENCE.md`, the policy prose — is hard-wrapped at **100 characters**, at
-word boundaries. It is what makes a side-by-side diff readable: without it, appending one
+Every Markdown line written or edited here is hard-wrapped at **100 characters**, at word
+boundaries — `CLAUDE.md` on any level, the skills' `SKILL.md` and `REFERENCE.md`, the policy
+prose, the READMEs. It is what makes a side-by-side diff readable: without it, appending one
 clause to a paragraph shows up as a rewritten 3000-character line and the review cannot see
 what changed.
 
 Table rows, fenced code blocks, frontmatter values and single long URLs stay unwrapped —
-breaking those breaks the rendering. Wrap the paragraphs you edit anyway; never reflow a
-file wholesale in a change that also has content, because the reformat then buries it. The
-same rule is in the `sdd-kit` session policy for generated documents, and the
+breaking those breaks the rendering. Wrap the paragraphs you edit anyway; never reflow a file
+wholesale in a change that also carries content, because the reformat then buries it. So the
+older files come along gradually: `CLAUDE.md` was wrapped in one deliberate formatting-only
+commit, while several `SKILL.md` and `README.md` files still hold long lines and get wrapped
+paragraph by paragraph as they are touched. The vendored `humanizer` skill is upstream (MIT,
+`blader/humanizer`) and stays comparable to it — never reformat that one.
+
+The same rule is in the `sdd-kit` session policy for generated documents, and the
 `claude-md-improver` hook applies it when it edits a `CLAUDE.md`.
 
 ## Plugins
