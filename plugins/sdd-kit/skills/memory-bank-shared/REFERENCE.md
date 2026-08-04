@@ -72,7 +72,14 @@ If none applies, **no Decision Record** is created. Route instead:
 |---|---|
 | Recurring "how we write code" rule | Convention in `.claude/rules/` (written manually: short rule + example + optional `paths:` frontmatter) |
 | Observation / pitfall | `/create-lesson-learned` |
-| One-off local design choice | Stays in the spec / PR description — no record |
+| One-off local design choice | Inline in the code, as its own reason — no record |
+
+**The spec is not a storage location.** A design spec and an implementation
+plan are transient — they are deleted at the story's code review — and a PR
+description is only read while its PR is open. So a local design choice that
+still needs a durable trace belongs **inline in the code it explains**, never
+in the spec alone. Anything that is needed beyond the story and does clear the
+triage becomes a record before the spec goes away.
 
 The criteria are fixed and changed only by the Hüter-Trio (like the
 category list). Lessons Learned have **no** significance gate — they are

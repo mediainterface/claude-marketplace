@@ -25,6 +25,12 @@ efforts.
 > A SessionStart hook in this plugin injects the policy that routes here; you can
 > also invoke it manually at any time.
 
+> **The spec is a transient artifact.** It is reviewed and merged, it guides the
+> implementation — and it is **deleted again at the story's code review**, at the
+> latest after the first review round (the implementation plan goes with it). Nothing
+> that is needed later may live only in the spec, which is what Step 3 checks before
+> the PR is opened.
+
 ## When NOT to use it
 
 If the user **explicitly** asks for an implementation plan or to start coding, do
@@ -46,21 +52,40 @@ exists, say so and stop — there is nothing to open a PR for.
 ### Step 2: Restate the scope (once)
 
 Tell the user briefly: this opens a PR for `<spec path>` and then stops — **no
-implementation plan and no code** will be written now. Proceed unless they object.
+implementation plan and no code** will be written now. Say as well that the spec is a
+working artifact for this story and is deleted again at the code review of the
+implementation — which is why Step 3 first checks what has to be captured elsewhere.
+Proceed unless they object.
 
-### Step 3: Offer to capture Memory Bank items
+### Step 3: Capture what has to outlive the spec
 
-Ask whether any decisions or lessons from the brainstorm should be recorded so they
-ride in the **same** PR as the spec:
+Because the spec is deleted at that code review, go through it with the user before it
+goes up for review: for every piece of reasoning, constraint, and rule in it, ask
+whether it is needed **beyond this story** — and if it is, get it out of the spec.
+Each item has exactly one durable home:
 
-- Design decisions → invoke the `create-decision` skill (one record per decision).
-- Recurring patterns / pitfalls → invoke the `create-lesson-learned` skill.
+| What it is | Where it belongs |
+|---|---|
+| The reason a piece of code is the way it is | Inline in the code, as its own reason — noted now, written with the implementation |
+| Requirement, acceptance criterion, scope boundary | The work item (user story) |
+| Recurring "how we write code" rule | A convention in `.claude/rules/` |
+| Significant decision (structural, hard to reverse, precedent, cross-cutting) | A Decision Record → invoke the `create-decision` skill (one record per decision) |
+| Recurring pattern or pitfall | A Lesson Learned → invoke the `create-lesson-learned` skill |
 
-Note each created file's path from the skills' confirmation output — Step 5
-stages exactly these paths.
+Whatever matters only while this story is being built stays in the spec and goes away
+with it. That is the point — this check is not a reason to inflate the Memory Bank;
+the significance triage in
+[../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md) still decides
+what becomes a record.
 
-Skip if the user declines. (`create-decision` already notes that a decision ships
-together with the spec, so bundling them here is intentional.)
+Records and lessons created here ride in the **same** PR as the spec — note each
+created file's path from the skills' confirmation output, because Step 5 stages
+exactly these paths. (`create-decision` already notes that a decision ships together
+with the spec, so bundling them here is intentional.) A `.claude/rules/` convention
+can go into this PR too. Items destined for a code comment cannot be written yet —
+list them for the user so they reach the implementation.
+
+Skip whatever the user declines.
 
 ### Step 4: Put the work on a branch
 
@@ -142,6 +167,9 @@ Report the PR URL and ID, then **stop**. State explicitly:
 
 - The spec is now up for review and must be **merged** before implementation begins.
 - No implementation plan and no code were written — by design.
+- The spec is a working artifact, not documentation: it is **deleted again at the
+  code review of the implementation**, together with the plan. What has to outlive it
+  was captured in Step 3.
 - Do **not** invoke `writing-plans`. Implementation is a separate, later effort
   (e.g. driven from work items via the `ado-*` skills) once the spec is merged.
 

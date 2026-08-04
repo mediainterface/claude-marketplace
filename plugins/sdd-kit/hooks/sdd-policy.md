@@ -30,6 +30,31 @@ The implementation plan (`writing-plans`) happens only **after** the spec PR is
 merged, as a separate later effort. Proceed to `writing-plans` now **only** if the
 user explicitly asks for an implementation plan in this session.
 
+**Specs and plans are transient — capture durable context before the spec PR.** A
+design spec and an implementation plan are working artifacts of one story, not
+documentation: they are deleted again at the story's code review (see
+"Implementation" below). The superpowers skills keep writing them to
+`docs/superpowers/` and committing them — that stays as it is; this policy overrides
+only how long they live.
+
+So while the spec is being written, look for everything in it that is needed
+**beyond** this user story and this spec — the grounds for a decision, a constraint,
+a rule — and make sure it is captured **outside** the spec. Each such item has
+exactly one durable home:
+
+- **Inline in the code**, as its own reason next to what it explains (written with
+  the implementation) — the default for anything that only makes sense there.
+- **In the user story** — requirement, acceptance criterion, scope boundary.
+- **In a convention** under `.claude/rules/` — a recurring "how we write code" rule.
+- **In the Memory Bank** as a Decision Record or Lesson Learned — subject to the
+  significance triage below.
+
+Whatever matters only while this story is being built stays in the spec and goes away
+with it; that is intended, and no reason to inflate the Memory Bank. But anything
+needed later that lives **only** in the spec is lost when the spec is deleted — raise
+it with the user **before** the spec PR is opened. The check at code review only
+confirms this one.
+
 **Ticket state.** If a work item / ticket is referenced during spec creation, check
 its state (via `sdd-kit:ado-workitem`): it should be in the **Refinement** state. If
 it is not, **point this out to the user** so they can correct it — do not change the
@@ -44,7 +69,9 @@ impact** (structure, interfaces, dependencies, or quality attributes), is
 **cross-cutting** (spans features, apps, or teams). Otherwise do not
 propose one — a recurring coding rule belongs in `.claude/rules/`
 (convention), an observed pitfall in `/create-lesson-learned`, and a
-one-off local design choice stays in the spec or PR.
+one-off local design choice inline in the code as its own reason. The
+spec and the PR description are **not** a storage location: both are
+transient.
 
 Records live on Memory Bank **levels**: place each record in the
 `docs/decisions/` (or `docs/learnings/`) of the right level. A record
@@ -71,3 +98,20 @@ correct it — do not change the story's state yourself.
 Do **not** create Azure DevOps tasks for the plan's todo items — neither
 automatically nor by offering it. Plan steps are tracked in the plan alone; they
 add no value as work items for human readers.
+
+**Delete the spec and the plan at the code review.** The story's design spec and
+implementation plan leave the repository when its implementation goes to **code
+review** — at the latest after the first review round. This is a step of its own,
+tied to nothing else in the workflow:
+
+1. **Counter-check first.** Is everything that is needed beyond the story and the
+   spec captured outside them — inline in the code as its own reason, in the user
+   story, in a `.claude/rules/` convention, or in the Memory Bank? Anything still
+   living only in the spec or the plan gets captured now. This check was already made
+   while the spec was written (see "Spec → PR before implementation"), so here it
+   normally only confirms.
+2. **Then delete.** `git rm` the story's spec and plan — superpowers writes them to
+   `docs/superpowers/specs/` and `docs/superpowers/plans/` — and commit the deletion
+   into the branch that is under review.
+3. **Never** delete Memory Bank records or conventions along with them. Those are the
+   durable trace and stay.

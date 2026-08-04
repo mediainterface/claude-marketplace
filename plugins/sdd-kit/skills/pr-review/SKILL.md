@@ -6,7 +6,9 @@ description: >-
   smells, dead code and drift, duplicate or divergent implementations across the wider
   codebase, test quality in both directions (tests that cannot fail if the behavior breaks, and
   tests that are redundant or over-broad), and decision records (ADRs) — violations of active
-  ones, code following superseded ones, and decisions missing a record. The branch is checked out in an
+  ones, code following superseded ones, and decisions missing a record. Also checks whether the
+  story's design spec and implementation plan are deleted here, and whether anything still needed
+  was left only in them. The branch is checked out in an
   isolated worktree; findings are reported for your
   triage and only posted after you approve them. For a deep look — not the quick working-tree
   /code-review.
@@ -78,7 +80,10 @@ process or strategy document, a testing section in a
 CLAUDE.md / CONTRIBUTING, the conventions of the existing test suite). Dimensions 6 and 7 layer
 that on top of their own checks; where the repo documents nothing, those checks still run.
 Split the diffstat into test paths and production paths here — dimension 7 needs the ratio, and
-it goes into the report's status header either way.
+it goes into the report's status header either way. Finally, check whether the branch still
+carries the story's **design spec or implementation plan** (`docs/superpowers/specs/`,
+`docs/superpowers/plans/` — wherever this repo keeps them): they are transient and this review is
+where they go. Hand their paths and content to dimension 5.
 
 **Dispatch one subagent per dimension**, using a **read-only agent type** (`Explore`, or any
 agent whose tool set excludes `Edit`/`Write`). This is what actually enforces "review only":
@@ -129,7 +134,8 @@ returns findings in the schema below. **Subagents post nothing.**
    errors, race conditions), over-complexity, naming that misleads. Skip style a linter already
    enforces. Tests are **not** this dimension's job — they are dimension 6, so the two don't
    report the same gap twice.
-5. **ADR compliance — runs on every review**, not only when the change "looks architectural".
+5. **ADR compliance & durable context — runs on every review**, not only when the change "looks
+   architectural".
    If the repo keeps decision records, read every record whose topic touches the changed code —
    from **every Memory Bank level** above those paths (the app's or service's own
    `docs/decisions/` *and* the repo root's), and in **all statuses**, because the status decides
@@ -157,9 +163,22 @@ returns findings in the schema below. **Subagents post nothing.**
      for a single-app decision, the root's only for one spanning apps or services).
      `sdd-kit:create-decision` can then draft it. Usually 🟢, 🟡 if the decision contradicts how
      siblings do it.
+   - **Spec and plan are transient — and this review is where they go.** A design spec and an
+     implementation plan belong to one story, not to the repository: they are deleted at the
+     story's code review, at the latest after the first round. If Phase C found them still in the
+     branch, two checks, in this order:
+     1. **Read them and look for durable content.** Per piece of reasoning: is it needed beyond
+        this story? Anything that is — a constraint, the grounds for a decision, a rule — must
+        already exist **outside** the spec and the plan: inline in the code as its own reason, in
+        the work item, in `.claude/rules/`, or as a record. Something needed that lives only there
+        is a 🟡 finding, anchored at the code it concerns, asking for the inline reason (or for a
+        record, if it clears the triage above).
+     2. **Then the deletion itself.** Spec and plan files still present in the branch are one 🟢
+        finding anchored at the file, asking for `git rm` in this PR — 🟡 once the PR is past its
+        first review round, because that was the deadline.
 
-   No decision records in the repo → report the dimension as not applicable, don't silently
-   skip it.
+   No decision records in the repo → report the ADR part of the dimension as not applicable, don't
+   silently skip it. The spec/plan check runs regardless.
 6. **Test protection — does the suite actually secure the new behavior?** Runs on every review
    whose PR touches code. Where tests are generated alongside the code, they are green from the
    first run — and green proves nothing. A test written *from* the implementation confirms what

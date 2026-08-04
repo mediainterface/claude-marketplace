@@ -1,6 +1,6 @@
 ---
 name: create-decision
-description: Creates a new Decision Record in the Memory Bank for significant decisions — technology or structure choices, security/quality baselines, precedent-setting patterns, or cross-cutting changes to ways of working. Use during spec creation or whenever such a decision is made. Triggers on phrases like "decision record", "we decided to", "write a decision", "document the decision", "why did we choose X over Y", or "ADR". Not every decision qualifies — the skill triages significance first and routes implementation details to conventions, learnings, or the spec instead.
+description: Creates a new Decision Record in the Memory Bank for significant decisions — technology or structure choices, security/quality baselines, precedent-setting patterns, or cross-cutting changes to ways of working. Use during spec creation or whenever such a decision is made. Triggers on phrases like "decision record", "we decided to", "write a decision", "document the decision", "why did we choose X over Y", or "ADR". Not every decision qualifies — the skill triages significance first and routes implementation details to conventions, learnings, or an inline reason in the code instead.
 ---
 
 # Create Decision Record
