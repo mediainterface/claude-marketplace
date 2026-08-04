@@ -32,8 +32,9 @@ user explicitly asks for an implementation plan in this session.
 
 **Specs and plans are transient — capture durable context before the spec PR.** A
 design spec and an implementation plan are working artifacts of one story, not
-documentation: they are deleted again at the story's code review (see
-"Implementation" below). The superpowers skills keep writing them to
+documentation: they are deleted again at the human code review of the story's
+implementation (see "Implementation" below for which review that is, and which it is
+not). The superpowers skills keep writing them to
 `docs/superpowers/` and committing them — that stays as it is; this policy overrides
 only how long they live.
 
@@ -99,7 +100,7 @@ Do **not** create Azure DevOps tasks for the plan's todo items — neither
 automatically nor by offering it. Plan steps are tracked in the plan alone; they
 add no value as work items for human readers.
 
-**Delete the spec and the plan at the code review.** The story's design spec and
+**Delete the spec and the plan at the human code review.** The story's design spec and
 implementation plan leave the repository when its implementation goes to **code
 review** — at the latest after the first review round. This is a step of its own,
 tied to nothing else in the workflow.
