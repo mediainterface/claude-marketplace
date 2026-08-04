@@ -98,9 +98,11 @@ When the Hüter-Trio changes the criteria there, sync this section.*
 
 Every Markdown **file** this workflow generates or edits in the repo — the spec, the
 implementation plan, Decision Records, Lessons Learned, Claude Code Rules in
-`.claude/rules/`, their `README.md` indexes — is hard-wrapped at **100 characters**.
-Endless lines are unreadable in a side-by-side diff, and that is exactly where these
-documents get reviewed.
+`.claude/rules/`, their `README.md` indexes, and every **`CLAUDE.md`** on any level — is
+hard-wrapped at **100 characters**. Endless lines are unreadable in a side-by-side diff,
+and that is exactly where these documents get reviewed. A `CLAUDE.md` is the worst
+offender, because it grows by appending to existing paragraphs: a one-clause addition
+shows up as a rewritten 3000-character line, and the diff hides what changed.
 
 - Wrap at word boundaries only — never split a word, a link, or an inline code span.
 - Indent a list item's continuation lines to the item's text.
