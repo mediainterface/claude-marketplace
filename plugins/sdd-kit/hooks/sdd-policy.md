@@ -114,9 +114,14 @@ nothing else:
   you started yourself.
 - **Never in a spec PR.** There the spec *is* the content under review; deleting it
   there removes the very thing the pull request exists for.
-- **A review round is complete when every required reviewer has reviewed the PR
-  once** — in Azure DevOps, when every reviewer marked `isRequired` has voted. Not
-  when you have looked at it.
+- **A review round is complete when every required reviewer has looked at this code
+  once** — which is not the same as "holds a vote right now". Azure DevOps clears
+  votes on a new push, so a reviewer who reviewed and then got reset shows no vote at
+  all; that review still happened. What you need is **evidence that each required
+  reviewer has seen the code once**: a vote they hold now, a vote they held earlier
+  (the PR's system threads keep that history), or comment threads they opened
+  themselves. No evidence for one of them → the round is not through. Your own pass
+  over the code is never evidence.
 
 Before that, leave both files alone, even when the plan is fully worked off: the
 reviewers read the spec alongside the change in the first round, which is exactly why

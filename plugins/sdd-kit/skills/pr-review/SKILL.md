@@ -50,12 +50,15 @@ it does not re-implement `az`. **REQUIRED SUB-SKILLS:**
    confirmation). If not signed in, stop and show the sign-in instructions.
 3. Fetch PR metadata (`sdd-kit:ado-pr` review step): `sourceRefName`, `targetRefName`, `title`,
    `description`, `status`, linked work items, `repository.name`, `lastMergeSourceCommit`, and
-   `reviewers` (with `isRequired` and `vote` — dimension 5 needs them to tell whether the PR is
-   past its first review round).
+   `reviewers` (with `isRequired` and `vote` — Phase C combines these with the thread history to
+   tell whether a human review has already happened; the current vote alone does not say).
    Run the **Repository Mismatch Check** — if the PR is in a different repo than the current one,
    stop unless the user confirms (the worktree and diff would otherwise use the wrong codebase).
-4. Fetch existing PR comment threads (skip system-only threads). Keep them — Phase C dedupes
-   against points already raised so you never repeat a human reviewer.
+4. Fetch existing PR comment threads. Keep them — Phase C dedupes against points already raised
+   so you never repeat a human reviewer. **Keep the system threads as well** (`commentType:
+   "system"`, carrying a `CodeReviewThreadType` property): they hold the PR's history, the
+   reviewers' earlier votes among it, which is how Phase C tells whether a human review has
+   already happened. They are excluded from the dedupe, not from the fetch.
 
 ### Phase B — Isolate the branch in a worktree
 Strip `refs/heads/` from both branch names, then from the repo root:
@@ -86,10 +89,17 @@ it goes into the report's status header either way. Finally — **unless this PR
 PR** (📝 marker in the title, or only spec/doc files changed; the same detection `/ado-pr` uses in
 its PR-creation step 7) — check whether the branch still carries the story's **design spec or
 implementation plan** (`docs/superpowers/specs/`, `docs/superpowers/plans/` — wherever this repo
-keeps them), and hand their paths and content to dimension 5 — together with whether the PR is
-**past its first review round** (every reviewer marked `isRequired` in Phase A has voted; this
-review run is not itself a round). **On a spec PR, skip this and say nothing about it:** there the
-spec is the content under review, and asking for its deletion would remove what the PR exists for.
+keeps them), and hand their paths and content to dimension 5. **On a spec PR, skip this and say
+nothing about it:** there the spec is the content under review, and asking for its deletion would
+remove what the PR exists for.
+
+Hand dimension 5 one more fact with it: is this PR **past its first review round** — has every
+required reviewer seen this code at least once? Judge that from evidence, not from the current
+tally: Azure DevOps clears votes on a new push, so a reviewer who reviewed and was then reset
+shows no vote while their review did happen. Count all three signals — the vote a required
+reviewer holds now, votes recorded earlier in the system threads from Phase A, and threads that
+reviewer opened themselves. Missing all three for one required reviewer means the round is not
+through. This review run is never one of the signals.
 
 **Dispatch one subagent per dimension**, using a **read-only agent type** (`Explore`, or any
 agent whose tool set excludes `Edit`/`Write`). This is what actually enforces "review only":
