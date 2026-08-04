@@ -6,7 +6,9 @@ description: >-
   smells, dead code and drift, duplicate or divergent implementations across the wider
   codebase, test quality in both directions (tests that cannot fail if the behavior breaks, and
   tests that are redundant or over-broad), and decision records (ADRs) — violations of active
-  ones, code following superseded ones, and decisions missing a record. The branch is checked out in an
+  ones, code following superseded ones, and decisions missing a record. Also checks whether the
+  story's design spec and implementation plan are deleted here, and whether anything still needed
+  was left only in them. The branch is checked out in an
   isolated worktree; findings are reported for your
   triage and only posted after you approve them. For a deep look — not the quick working-tree
   /code-review.
@@ -47,11 +49,16 @@ it does not re-implement `az`. **REQUIRED SUB-SKILLS:**
 2. Run the shared reference's **Step 0** (connection detection) + **Setup Check** (sign-in
    confirmation). If not signed in, stop and show the sign-in instructions.
 3. Fetch PR metadata (`sdd-kit:ado-pr` review step): `sourceRefName`, `targetRefName`, `title`,
-   `description`, `status`, linked work items, `repository.name`, `lastMergeSourceCommit`.
+   `description`, `status`, linked work items, `repository.name`, `lastMergeSourceCommit`, and
+   `reviewers` (with `isRequired` and `vote` — Phase C combines these with the thread history to
+   tell whether a human review has already happened; the current vote alone does not say).
    Run the **Repository Mismatch Check** — if the PR is in a different repo than the current one,
    stop unless the user confirms (the worktree and diff would otherwise use the wrong codebase).
-4. Fetch existing PR comment threads (skip system-only threads). Keep them — Phase C dedupes
-   against points already raised so you never repeat a human reviewer.
+4. Fetch existing PR comment threads. Keep them — Phase C dedupes against points already raised
+   so you never repeat a human reviewer. **Keep the system threads as well** (`commentType:
+   "system"`, carrying a `CodeReviewThreadType` property): they hold the PR's history, the
+   reviewers' earlier votes among it, which is how Phase C tells whether a human review has
+   already happened. They are excluded from the dedupe, not from the fetch.
 
 ### Phase B — Isolate the branch in a worktree
 Strip `refs/heads/` from both branch names, then from the repo root:
@@ -78,7 +85,21 @@ process or strategy document, a testing section in a
 CLAUDE.md / CONTRIBUTING, the conventions of the existing test suite). Dimensions 6 and 7 layer
 that on top of their own checks; where the repo documents nothing, those checks still run.
 Split the diffstat into test paths and production paths here — dimension 7 needs the ratio, and
-it goes into the report's status header either way.
+it goes into the report's status header either way. Finally — **unless this PR is itself a spec
+PR** (📝 marker in the title, or only spec/doc files changed; the same detection `/ado-pr` uses in
+its PR-creation step 7) — check whether the branch still carries the story's **design spec or
+implementation plan** (`docs/superpowers/specs/`, `docs/superpowers/plans/` — wherever this repo
+keeps them), and hand their paths and content to dimension 5. **On a spec PR, skip this and say
+nothing about it:** there the spec is the content under review, and asking for its deletion would
+remove what the PR exists for.
+
+Hand dimension 5 one more fact with it: is this PR **past its first review round** — has every
+required reviewer seen this code at least once? Judge that from evidence, not from the current
+tally: Azure DevOps clears votes on a new push, so a reviewer who reviewed and was then reset
+shows no vote while their review did happen. Count all three signals — the vote a required
+reviewer holds now, votes recorded earlier in the system threads from Phase A, and threads that
+reviewer opened themselves. Missing all three for one required reviewer means the round is not
+through. This review run is never one of the signals.
 
 **Dispatch one subagent per dimension**, using a **read-only agent type** (`Explore`, or any
 agent whose tool set excludes `Edit`/`Write`). This is what actually enforces "review only":
@@ -129,7 +150,8 @@ returns findings in the schema below. **Subagents post nothing.**
    errors, race conditions), over-complexity, naming that misleads. Skip style a linter already
    enforces. Tests are **not** this dimension's job — they are dimension 6, so the two don't
    report the same gap twice.
-5. **ADR compliance — runs on every review**, not only when the change "looks architectural".
+5. **ADR compliance & durable context — runs on every review**, not only when the change "looks
+   architectural".
    If the repo keeps decision records, read every record whose topic touches the changed code —
    from **every Memory Bank level** above those paths (the app's or service's own
    `docs/decisions/` *and* the repo root's), and in **all statuses**, because the status decides
@@ -156,16 +178,30 @@ returns findings in the schema below. **Subagents post nothing.**
      the established feature/route pattern applies a decision, it doesn't make one), the second
      place that exists **today**, the concrete features/apps/teams, the revert cost. And the
      **locality counter-check** applies even when a criterion held: one spot, one feature, cheap
-     revert → **no ADR finding**, at most a 🟢 asking for a comment at the code.
+     revert → **no ADR finding**, at most a 🟢 asking for an inline reason in the code.
      Only when a criterion is met, propose the ADR:
      suggest a title, the one-sentence decision it should capture, and the **level** it belongs
      on (the smallest level whose subtree covers everyone affected — the app's `docs/decisions/`
      for a single-app decision, the root's only for one spanning apps or services).
      `sdd-kit:create-decision` can then draft it. Usually 🟢, 🟡 if the decision contradicts how
      siblings do it.
+   - **Spec and plan are transient — and this review is where they go.** A design spec and an
+     implementation plan belong to one story, not to the repository: they are deleted at the
+     human code review of the story's **implementation**, at the latest after the first round.
+     Runs only when Phase C handed over spec or plan files — on a **spec PR** it handed over
+     nothing and this check does not exist. Then two checks, in this order:
+     1. **Read them and look for durable content.** Per piece of reasoning: is it needed beyond
+        this story? Anything that is — a constraint, the grounds for a decision, a rule — must
+        already exist **outside** the spec and the plan: inline in the code as its own reason, in
+        the work item, in `.claude/rules/`, or as a record. Something needed that lives only there
+        is a 🟡 finding, anchored at the code it concerns, asking for the inline reason (or for a
+        record, if it clears the triage above).
+     2. **Then the deletion itself.** Spec and plan files still present in the branch are one 🟢
+        finding anchored at the file, asking for `git rm` in this PR — 🟡 when Phase C reports the
+        PR as past its first review round, because that was the deadline.
 
-   No decision records in the repo → report the dimension as not applicable, don't silently
-   skip it.
+   No decision records in the repo → report the ADR part of the dimension as not applicable, don't
+   silently skip it. The spec/plan check runs regardless.
 6. **Test protection — does the suite actually secure the new behavior?** Runs on every review
    whose PR touches code. Where tests are generated alongside the code, they are green from the
    first run — and green proves nothing. A test written *from* the implementation confirms what
@@ -448,7 +484,11 @@ The language contract:
   → name the pattern that changes and the second place that exists **today**, or the criterion
   does not hold. A speculative second place is not a place.
 - An ADR demanded for behavior that sits at one spot in one feature and reverts in a line → the
-  locality counter-check beats a formally ticked criterion. That case wants a code comment.
+  locality counter-check beats a formally ticked criterion. That case wants an inline reason at
+  the code.
+- About to ask for a spec or plan to be deleted in a PR whose diff is nothing but spec and doc
+  files → that is a **spec PR**, and the spec is what it exists to submit. The deletion belongs in
+  the PR that implements the story, never here. Phase C should have skipped the check entirely.
 - The test verdict is „X Tests ergänzt, sieht gut aus" → you counted instead of judging. For
   each new test, name what would have to break in the production code to turn it red.
 - Applying test rules you know from elsewhere („E2E gehört auf …", „das ist ein Unit-Test") that
@@ -492,7 +532,7 @@ The language contract:
 | Only the root `docs/decisions/` read, nested levels ignored | Records live on Memory Bank levels — glob every `docs/decisions/` above the changed paths (`apps/*/`, `services/*/`, root). |
 | A missing ADR claimed for a one-off local choice | Apply the significance triage first; below the bar it is a convention, a lesson learned, or nothing. |
 | A criterion affirmed on a formality („legt IPC-Kanäle an" = Interfaces, „künftige Fälle" = Präzedenz) | Each criterion needs evidence from this codebase: the pattern that changes, the second place existing **today**, the concrete features/apps/teams, the revert cost. No evidence, no criterion. |
-| ADR demanded although the behavior sits at one spot and reverts in a line | The locality counter-check overrides a ticked criterion — one spot, one feature, cheap revert → a comment at the code, no record. |
+| ADR demanded although the behavior sits at one spot and reverts in a line | The locality counter-check overrides a ticked criterion — one spot, one feature, cheap revert → an inline reason in the code, no record. |
 | Green tests taken as proof, tests only counted | Ask per test: would it fail if the behavior were wrong? Name the production-code change that turns it red. |
 | A test that mirrors the code (mock-call assertions, tautologies, `toBeDefined()`) waved through | It cannot fail by construction and reads as coverage forever — at least 🟡, with the sabotage that stays green in the suggestion. |
 | Bugfix merged without a test reproducing the bug | Ask for the regression test at the lowest level where the bug is reproducible. |

@@ -83,9 +83,9 @@ criterion is **not** met, however plausible it reads:
 
 This applies **even when a criterion was answered yes**: if the behavior
 sits in **one place**, is confined to **one feature**, and a revert is
-**cheap**, there is **no record** — the reasoning belongs in a comment at
-the code. The four criteria are or-ed; this counter-check is not, it
-overrides a formally ticked criterion.
+**cheap**, there is **no record** — the reasoning belongs **inline in the
+code**, as its own reason. The four criteria are or-ed; this counter-check
+is not, it overrides a formally ticked criterion.
 
 If none applies — or the counter-check bites — **no Decision Record** is
 created. Route instead:
@@ -94,7 +94,15 @@ created. Route instead:
 |---|---|
 | Recurring "how we write code" rule | Convention in `.claude/rules/` (written manually: short rule + example + optional `paths:` frontmatter) |
 | Observation / pitfall | `/create-lesson-learned` |
-| One-off local design choice | Stays in the spec / PR description — no record |
+| One-off local design choice | Inline in the code, as its own reason — no record |
+
+**The spec is not a storage location.** A design spec and an implementation
+plan are transient — they are deleted at the human code review of the
+story's implementation — and a PR
+description is only read while its PR is open. So a local design choice that
+still needs a durable trace belongs **inline in the code it explains**, never
+in the spec alone. Anything that is needed beyond the story and does clear the
+triage becomes a record before the spec goes away.
 
 The criteria are fixed and changed only by the Hüter-Trio (like the
 category list). Lessons Learned have **no** significance gate — they are
@@ -111,7 +119,7 @@ same way). Neither survives the evidence question: the channels follow the
 app's established feature-slice pattern, so they apply an existing decision
 instead of changing one, and there is exactly **one** such field today — the
 second place was speculation, not a place. The suspend/resume sits at one spot
-and a revert is one line → a comment at the code.
+and a revert is one line → an inline reason in the code.
 
 **Record** — cross-feature communication runs through an owner-side bridge
 store. *Structural impact*: it replaces the direct store imports features

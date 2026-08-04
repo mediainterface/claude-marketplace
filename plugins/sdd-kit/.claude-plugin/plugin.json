@@ -1,6 +1,6 @@
 {
   "name": "sdd-kit",
-  "version": "1.6.0",
+  "version": "1.7.1",
   "description": "The tools for MediaInterface's Spec-Driven Development (SDD) workflow: /create-decision and /create-lesson-learned capture decisions and lessons in the Memory Bank, /spec-pr opens a PR for an approved spec instead of writing an implementation plan (applied automatically in repos on ado.mediainterface.de via a SessionStart hook), /pr-review runs a deep triage-first review of an ADO pull request, and /ado-pr, /ado-workitem and /ado-pipeline handle Azure DevOps via the az CLI.",
   "author": {
     "name": "MIRA Hueter-Trio",

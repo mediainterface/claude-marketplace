@@ -1,6 +1,6 @@
 ---
 name: create-decision
-description: Creates a new Decision Record in the Memory Bank for significant decisions — technology or structure choices, security/quality baselines, precedent-setting patterns, or cross-cutting changes to ways of working. Use during spec creation or whenever such a decision is made. Triggers on phrases like "decision record", "we decided to", "write a decision", "document the decision", "why did we choose X over Y", or "ADR". Not every decision qualifies — the skill triages significance first and routes implementation details to conventions, learnings, or the spec instead.
+description: Creates a new Decision Record in the Memory Bank for significant decisions — technology or structure choices, security/quality baselines, precedent-setting patterns, or cross-cutting changes to ways of working. Use during spec creation or whenever such a decision is made. Triggers on phrases like "decision record", "we decided to", "write a decision", "document the decision", "why did we choose X over Y", or "ADR". Not every decision qualifies — the skill triages significance first and routes implementation details to conventions, learnings, or an inline reason in the code instead.
 ---
 
 # Create Decision Record
@@ -50,7 +50,7 @@ evidence that has to be spoken usually falls apart while you speak it.
 
 Then run the **Locality counter-check** even when a criterion held: behavior
 at one spot, confined to one feature, cheap to revert → **no record**. Say
-so, suggest a comment at the code, and stop.
+so, suggest an inline reason in the code, and stop.
 
 The criteria are fixed and changed only by the Hüter-Trio. Do not create
 a refused record on insistence — ask the user to raise the case with the
