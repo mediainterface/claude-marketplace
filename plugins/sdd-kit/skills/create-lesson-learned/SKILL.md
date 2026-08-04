@@ -72,6 +72,10 @@ The filename is derived from the date and title:
 
 If `{scope}/docs/learnings/` does not exist, create the directory.
 
+Hard-wrap the entry's prose at **100 characters** at word boundaries
+(**Line length** in the shared reference) — the entry is reviewed in a
+side-by-side diff.
+
 Use this template:
 
 ```markdown

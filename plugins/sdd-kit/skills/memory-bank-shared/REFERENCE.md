@@ -133,6 +133,18 @@ communication via an owner-side bridge store", not "the toolbar↔editor
 store"). The second application of an established pattern gets no new
 record — it follows the existing one.
 
+## Line length
+
+Every file these skills write — records, learnings, and the `README.md`
+indexes — is hard-wrapped at **100 characters**, at word boundaries.
+Endless lines force horizontal scrolling in the one place these files are
+actually read: the side-by-side diff of a review.
+
+Not wrapped: table rows (the indexes), fenced code blocks, frontmatter
+values, and a single long URL. Never reflow an existing record wholesale —
+wrap the paragraphs you edit anyway, so the diff shows the change instead
+of the reformat.
+
 ## Boundaries
 
 - **Conventions stay central** in the repo-root `.claude/rules/` — a

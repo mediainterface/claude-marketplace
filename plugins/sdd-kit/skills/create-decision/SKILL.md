@@ -127,6 +127,10 @@ If the record specializes or deviates from a record on a higher level,
 link that record in the **Context and problem** section (**Delta
 principle** in the shared reference) — do not repeat its content.
 
+Hard-wrap the record's prose at **100 characters** at word boundaries
+(**Line length** in the shared reference) — the record is reviewed in a
+side-by-side diff.
+
 Use this template:
 
 ```markdown

@@ -139,6 +139,17 @@ for CLI arguments (`--title`, `--description`, `--state`, …) and for JSON bodi
   (on Windows additionally `chcp 65001`), or move the text into an `--in-file` body.
   Resending the text without umlauts is not a fix — it silently corrupts the resource.
 
+## Line breaks — never hard-wrap ADO text
+
+Titles, descriptions, and comment bodies sent **to** ADO are not wrapped at a fixed
+column. ADO's Markdown commonly renders a single newline as a line break, so a
+hard-wrapped paragraph arrives as a column of ragged short lines. Keep each paragraph on
+one line and separate paragraphs with a blank line; lists, tables, and code fences work
+as usual.
+
+The 100-character wrap rule applies to Markdown **files** in the repo — specs, plans,
+decision records, learnings — not to text typed into an ADO field.
+
 ## Title schema (PRs & work items)
 
 **PR titles** (`ado-pr`) — `<Marker> #<WorkItemId> <Component/Application> - <Beschreibung>`:
