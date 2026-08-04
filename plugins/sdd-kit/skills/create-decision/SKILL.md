@@ -41,6 +41,17 @@ authoritative). If none applies, **do not create the record**: tell the
 user which criteria failed and route per the **Significance triage**
 table in the shared reference.
 
+**Say the evidence out loud.** For every criterion you affirm, name the
+criterion *and* its evidence to the user in one line before going on — the
+pattern that changes, the second place that exists **today**, the concrete
+features/apps/teams, what a revert costs (see **Evidence required** in the
+shared reference). An unnamed criterion does not count, and a piece of
+evidence that has to be spoken usually falls apart while you speak it.
+
+Then run the **Locality counter-check** even when a criterion held: behavior
+at one spot, confined to one feature, cheap to revert → **no record**. Say
+so, suggest an inline reason in the code, and stop.
+
 The criteria are fixed and changed only by the Hüter-Trio. Do not create
 a refused record on insistence — ask the user to raise the case with the
 Hüter-Trio instead.
@@ -115,6 +126,10 @@ day), make the title more specific instead of overwriting.
 If the record specializes or deviates from a record on a higher level,
 link that record in the **Context and problem** section (**Delta
 principle** in the shared reference) — do not repeat its content.
+
+Hard-wrap the record's prose at **100 characters** at word boundaries
+(**Line length** in the shared reference) — the record is reviewed in a
+side-by-side diff.
 
 Use this template:
 

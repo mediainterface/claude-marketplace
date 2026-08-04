@@ -66,7 +66,29 @@ applies:
    follow.
 4. **Cross-cutting** — it spans features, apps, or teams.
 
-If none applies, **no Decision Record** is created. Route instead:
+### Evidence required
+
+A criterion is met only when its evidence can be **named** — in one line,
+concretely, from this codebase. Without a nameable piece of evidence the
+criterion is **not** met, however plausible it reads:
+
+| Criterion | Name this |
+|---|---|
+| Structural impact | which **existing pattern changes**. An interface that follows the project's established pattern (a feature slice, the usual IPC/route layout) *applies* an existing decision — it does not make a new one. |
+| Hard to reverse | what a **revert costs** (files, migrations, released data, other teams). |
+| Precedent | the **second place that exists today** which would have to follow the rule, or whom the rule binds. "If there are ever several" does not count. |
+| Cross-cutting | the concrete **features / apps / teams**. |
+
+### Locality counter-check
+
+This applies **even when a criterion was answered yes**: if the behavior
+sits in **one place**, is confined to **one feature**, and a revert is
+**cheap**, there is **no record** — the reasoning belongs **inline in the
+code**, as its own reason. The four criteria are or-ed; this counter-check
+is not, it overrides a formally ticked criterion.
+
+If none applies — or the counter-check bites — **no Decision Record** is
+created. Route instead:
 
 | What it actually is | Route |
 |---|---|
@@ -86,11 +108,50 @@ The criteria are fixed and changed only by the Hüter-Trio (like the
 category list). Lessons Learned have **no** significance gate — they are
 deliberately low-threshold.
 
-**Generalize.** When a decision passes as a precedent, record the
+### Examples
+
+**No record** — formally tickable, still local: a settings field records the
+key combination the user presses in order to assign a hotkey, and while it
+records, the app's global hotkeys are suspended so they don't fire instead of
+being captured. Claimed *structural impact* (the feature adds two IPC
+channels) and *precedent* (future key-capture fields should suspend them the
+same way). Neither survives the evidence question: the channels follow the
+app's established feature-slice pattern, so they apply an existing decision
+instead of changing one, and there is exactly **one** such field today — the
+second place was speculation, not a place. The suspend/resume sits at one spot
+and a revert is one line → an inline reason in the code.
+
+**Record** — cross-feature communication runs through an owner-side bridge
+store. *Structural impact*: it replaces the direct store imports features
+used before. *Precedent*: toolbar↔editor and session-list↔player both exist
+today and both have to follow it.
+
+### Where the triage runs
+
+The triage runs where a record is **first proposed** — including a spec's
+*Memory Bank* section, not only when `/create-decision` creates the file. A
+spec proposal states the criterion **with its evidence**; a record already
+written out in a spec makes the later gate a rubber stamp.
+
+### Generalize
+
+When a decision passes as a precedent, record the
 generalizable pattern, not the single instance ("cross-feature
 communication via an owner-side bridge store", not "the toolbar↔editor
 store"). The second application of an established pattern gets no new
 record — it follows the existing one.
+
+## Line length
+
+Every file these skills write — records, learnings, and the `README.md`
+indexes — is hard-wrapped at **100 characters**, at word boundaries.
+Endless lines force horizontal scrolling in the one place these files are
+actually read: the side-by-side diff of a review.
+
+Not wrapped: table rows (the indexes), fenced code blocks, frontmatter
+values, and a single long URL. Never reflow an existing record wholesale —
+wrap the paragraphs you edit anyway, so the diff shows the change instead
+of the reformat.
 
 ## Boundaries
 

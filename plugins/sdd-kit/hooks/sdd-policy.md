@@ -74,6 +74,14 @@ one-off local design choice inline in the code as its own reason. The
 spec and the PR description are **not** a storage location: both are
 transient.
 
+A criterion counts only with **named evidence** — which existing pattern
+changes, the second place that exists **today**, the concrete
+features/apps/teams, what a revert costs — and you name it to the user when
+you affirm it. Even with a criterion ticked, behavior that sits at one spot,
+in one feature, and is cheap to revert gets an **inline reason in the code**,
+not a record. This applies where the record is first proposed, a spec's *Memory
+Bank* section included.
+
 Records live on Memory Bank **levels**: place each record in the
 `docs/decisions/` (or `docs/learnings/`) of the right level. A record
 lives on the smallest level whose subtree contains everyone affected —
@@ -85,6 +93,27 @@ single-app records, even feature-spanning ones. Details: the
 *Maintenance note: this section is a deliberate summary — the source of truth
 is the sdd-kit shared reference (`skills/memory-bank-shared/REFERENCE.md`).
 When the Hüter-Trio changes the criteria there, sync this section.*
+
+## Generated Markdown: wrap prose at 100 characters
+
+Every Markdown **file** this workflow generates or edits in the repo — the spec, the
+implementation plan, Decision Records, Lessons Learned, Claude Code Rules in
+`.claude/rules/`, their `README.md` indexes — is hard-wrapped at **100 characters**.
+Endless lines are unreadable in a side-by-side diff, and that is exactly where these
+documents get reviewed.
+
+- Wrap at word boundaries only — never split a word, a link, or an inline code span.
+- Indent a list item's continuation lines to the item's text.
+- **Not wrapped:** table rows, fenced code blocks, frontmatter values, and a single long
+  URL — breaking those breaks the rendering.
+- **Never reflow an existing file wholesale** to satisfy this. Wrap the paragraphs you are
+  editing anyway; a reformat-only diff buries the actual change.
+
+This covers files in the repo. Text typed into a **web UI field** — an ADO or GitHub PR
+title or description, a PR comment, a work item description — is *not* hard-wrapped: those
+renderers commonly turn a single newline into a line break, so wrapping arrives as a column
+of ragged short lines. There, keep each paragraph on one line and separate paragraphs with
+a blank line.
 
 ## Implementation: user story state
 
