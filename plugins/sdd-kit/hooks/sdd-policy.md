@@ -46,6 +46,14 @@ propose one — a recurring coding rule belongs in `.claude/rules/`
 (convention), an observed pitfall in `/create-lesson-learned`, and a
 one-off local design choice stays in the spec or PR.
 
+A criterion counts only with **named evidence** — which existing pattern
+changes, the second place that exists **today**, the concrete
+features/apps/teams, what a revert costs — and you name it to the user when
+you affirm it. Even with a criterion ticked, behavior that sits at one spot,
+in one feature, and is cheap to revert gets a **comment at the code**, not a
+record. This applies where the record is first proposed, a spec's *Memory
+Bank* section included.
+
 Records live on Memory Bank **levels**: place each record in the
 `docs/decisions/` (or `docs/learnings/`) of the right level. A record
 lives on the smallest level whose subtree contains everyone affected —

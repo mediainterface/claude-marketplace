@@ -56,6 +56,14 @@ ride in the **same** PR as the spec:
 - Design decisions → invoke the `create-decision` skill (one record per decision).
 - Recurring patterns / pitfalls → invoke the `create-lesson-learned` skill.
 
+A decision passes the **significance triage here**, not later: name the criterion
+**and its evidence** (the pattern that changes · the second place existing **today** ·
+the concrete features/apps/teams · the revert cost), then the **locality
+counter-check** — one spot, one feature, cheap revert → no record, a comment at the
+code (see [../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md)).
+This is also the triage for a record the spec's own *Memory Bank* section proposes:
+written out unfiltered there, it turns `create-decision`'s gate into a rubber stamp.
+
 Note each created file's path from the skills' confirmation output — Step 5
 stages exactly these paths.
 
