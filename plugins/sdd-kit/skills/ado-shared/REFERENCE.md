@@ -175,6 +175,40 @@ title.
 (Per Quirks, an emoji in a returned PR title may be missing from the CLI's JSON — expected;
 the resource has it.)
 
+## Spec PR vs. implementation PR
+
+In the SDD workflow a spec and its implementation are **never** in the same pull request, so
+every PR is one of the two kinds. `ado-pr` picks the kind when it **creates** a PR; `pr-review`
+determines it for an **existing** PR and reviews it accordingly (a spec has no tests, no
+production code, and no drift — reviewing it against code dimensions finds nothing and costs a
+full run). This section is the single definition both use.
+
+**Two signals:**
+
+- **The changed-file set** — a PR is spec-only when **every** changed file is documentation:
+  `*.md`, or anything under a `docs/` directory on **any** level (root `docs/`, nested
+  `apps/<app>/docs/`, `services/<service>/docs/`, including their `decisions/` and
+  `learnings/`). A single changed source file makes it an implementation PR.
+- **The title marker** — a leading 📝 (see **Title schema** above) records that the PR was
+  *created* as a spec PR.
+
+**The changed-file set decides; the marker only corroborates.** The marker states an intention
+at creation time, the diff is what the PR actually became — and per **Quirks** the CLI may
+return a title with the emoji stripped, so a missing 📝 in JSON is not evidence of anything.
+Never let an absent marker outvote a documentation-only diff.
+
+| Changed files | Title | Kind |
+|---|---|---|
+| documentation only | 📝 | **Spec PR** |
+| documentation only | no marker | **Spec PR** — either the emoji was stripped from the JSON, or the PR was not created through `ado-pr`. Neither is a reason to doubt the diff. |
+| contains source code | 📝 | **Implementation PR** — the marker is stale or the PR grew past its spec. Review it as an implementation PR and report the contradiction. |
+| documentation **and** source code | any | **Implementation PR** — and the mixed diff itself breaks the "never in the same PR" rule, so report it rather than only classifying it. |
+
+**Where the two callers differ.** When *creating* a PR, an auto-detected spec PR is
+**confirmed with the user** before the 📝 goes into the title. When *reviewing* an existing PR
+there is nothing left to confirm — the diff already decided. Classify, proceed, and state the
+kind plus the signal that proves it in the report instead of asking.
+
 ## Command Map (REST endpoint → az command)
 
 `{org}` = `organization`, `{project}`, `{repo}` = `repository` from Step 0. Request JSON
