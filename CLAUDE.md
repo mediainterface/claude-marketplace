@@ -287,10 +287,17 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   made spec reviews needlessly expensive. The classification uses the plugin-wide detection in
   `skills/ado-shared/REFERENCE.md` and, unlike `/ado-pr` at creation time, confirms nothing with the
   user — the diff already decided. A 📝 title with source code in the diff is reviewed as an
-  implementation PR, and a **mixed diff (spec *and* code) is itself a 🟡 finding**, since the SDD
-  workflow never carries both in one PR (and the spec's deletion is then not demanded either — you
-  do not ask for a file the same PR adds). It checks the PR branch out in an **isolated worktree**
-  (`.claude/worktrees/pr-review-<id>`, never the user's checkout — needed for both kinds), then
+  implementation PR (the stale marker is worth a line to the author, not a finding). A **mixed diff
+  — docs *and* code — is explicitly not a violation:** a small change (a bug fix, a contained
+  adjustment) legitimately carries its doc update along, and splitting it costs more overhead than
+  a separate spec review is worth, so it is classified as an implementation PR and not indicted.
+  Its doc half is still reviewed — Phase C0 hands the changed doc/spec files to dimension 3 („does
+  the documentation describe what the code in this PR actually does?", the drift check nothing else
+  performs) and dimension 5 (records, durable context), never as deletion candidates, because you
+  do not ask for a file the same PR adds. Only a spec describing **substantially more** than the PR
+  delivers earns a 🟢, and about scope rather than form: the separate spec PR would have bought
+  feedback before the implementation existed. It checks the PR branch out in an **isolated
+  worktree** (`.claude/worktrees/pr-review-<id>`, never the user's checkout — needed for both), then
   dispatches **one read-only subagent per dimension** (`Explore`-type, explicit `model: sonnet` — a
   skill's `allowed-tools` is not inherited, so the read-only guarantee has to live in the subagent's
   own tool set). **Implementation PR (C-I) — seven dimensions:** security,

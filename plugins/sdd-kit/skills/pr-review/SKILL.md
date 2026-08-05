@@ -89,12 +89,20 @@ Classify with the shared definition — **Spec PR vs. implementation PR** in
   **Quirks**, the CLI may hand back a title with the emoji stripped, so a missing 📝 is not
   evidence of anything. A documentation-only diff is a spec PR with or without the marker.
 - **📝 in the title but source code in the diff** → review as an **implementation PR** (the
-  broader set misses nothing) and put the contradiction in the status header.
-- **A mixed diff — spec *and* source code** → **implementation PR**, and the mixture is itself a
-  🟡 finding: the SDD workflow never carries a spec and its implementation in one PR. Anchor it
-  at the spec file. Do **not** also demand the spec's deletion when this PR is the one *adding*
-  it (status `A` in `--name-status`) — asking to delete a file the same PR introduces is noise;
-  the mixture is the finding.
+  broader set misses nothing) and note in the status header that the title no longer matches the
+  PR, so the author can fix the title.
+- **A mixed diff — spec or docs *and* source code** → **implementation PR**, and **not a
+  finding**. A small change (a bug fix, a contained adjustment) carrying its doc update along is
+  the ordinary shape; splitting it would cost more than a separate spec review is worth. Two
+  consequences instead of a complaint:
+  - **Do not demand the deletion** of a spec the same PR is *adding* (status `A` in
+    `--name-status`) — you do not ask for a file the PR exists to introduce.
+  - **The doc part still gets reviewed**, alongside the code — see Phase C0's mixed-PR note.
+    Classifying it as an implementation PR must not mean the spec half goes unread.
+  Only one thing about the mixture is worth a finding, and it is about scope, not form: when the
+  spec describes **substantially more** than this PR delivers, the separate spec PR would have
+  bought review feedback before the implementation existed, and that is now gone. That is 🟢 —
+  a question about how the next one is cut, not a defect in this one.
 - **Nothing here is confirmed with the user.** Unlike `/ado-pr` at creation time, the diff has
   already decided. Classify, say which kind you got and which signal proves it, and continue.
 
@@ -150,6 +158,17 @@ inherit the project's own conventions. Then the two inputs both sets need:
   Missing all three for one required reviewer means the round is not through. This review run is
   never one of the signals.
 
+**Mixed PR only (documentation *and* code) — the doc half gets reviewed too.** Phase A.5
+classified it as an implementation PR, so C-I runs; a second full C-S pass would be out of
+proportion to the small change this shape usually is. Hand the changed doc and spec files to the
+two dimensions that already ask the right questions instead:
+- **Dimension 3** gets them for one added check: **does the documentation describe what the code
+  in this PR actually does?** A doc update that drifts from the change shipping next to it is the
+  most valuable finding this shape offers, and no other dimension looks for it.
+- **Dimension 5** gets them as **content** — does anything in them contradict an active record,
+  and is reasoning that must outlive the story captured outside them? Never as deletion
+  candidates: a file this PR adds is not one (Phase A.5).
+
 **Spec PR only** — two more inputs:
 - **The spec itself**, read in full: the `*-design.md` (or whatever this repo names it) the PR
   adds, plus anything riding along in the same PR — Memory Bank records, a `.claude/rules/`
@@ -198,7 +217,11 @@ Runs when Phase A.5 classified this as an implementation PR. Skip this whole set
    (duplicate/parallel feature); a pattern that departs from its siblings without reason; dead
    code the PR adds or leaves behind (unreferenced exports, unreachable branches, orphaned
    files); and copy-paste that should reuse an existing utility. This is why the whole branch is
-   checked out, not just the diff. Two checks that always run here:
+   checked out, not just the diff. Two checks that always run here — plus one when Phase C0 handed
+   over changed doc or spec files (a **mixed PR**): **does that documentation describe what the
+   code in this PR actually does?** A doc or spec updated next to the code it describes, drifting
+   from it in the same commit range, is drift of the plainest kind, and no other dimension looks
+   for it. Anchor it at the documentation line that no longer holds.
    - **Component-library usage (UI changes).** In a codebase that uses a component library
      (e.g. shadcn/ui in `apps/mira-desktop`), new UI must actually use the library's components.
      Flag hand-rolled markup/CSS that replicates an existing or available library component; a
@@ -257,9 +280,9 @@ Runs when Phase A.5 classified this as an implementation PR. Skip this whole set
      implementation plan belong to one story, not to the repository: they are deleted at the
      human code review of the story's **implementation**, at the latest after the first round.
      Runs only when Phase C0 handed over spec or plan files. On a **spec PR** this dimension set
-     never runs at all, and in a **mixed PR that adds the spec** (Phase A.5 already made the
-     mixture a finding) the deletion is not demanded either — you do not ask for a file the same
-     PR introduces. Then two checks, in this order:
+     never runs at all; in a **mixed PR** the spec or doc files this PR *adds* are content to
+     check, never deletion candidates — you do not ask for a file the same PR introduces. Then
+     two checks, in this order:
      1. **Read them and look for durable content.** Per piece of reasoning: is it needed beyond
         this story? Anything that is — a constraint, the grounds for a decision, a rule — must
         already exist **outside** the spec and the plan: inline in the code as its own reason, in
@@ -268,7 +291,8 @@ Runs when Phase A.5 classified this as an implementation PR. Skip this whole set
         record, if it clears the triage above).
      2. **Then the deletion itself.** Spec and plan files still present in the branch are one 🟢
         finding anchored at the file, asking for `git rm` in this PR — 🟡 when Phase C0 reports the
-        PR as past its first review round, because that was the deadline.
+        PR as past its first review round, because that was the deadline. This covers files the
+        branch **carries in** from an earlier merged spec PR, never ones this PR adds itself.
 
    No decision records in the repo → report the ADR part of the dimension as not applicable, don't
    silently skip it. The spec/plan check runs regardless.
@@ -681,9 +705,13 @@ The language contract:
 - Concluded "no 📝, so implementation PR" while the diff is documentation only → per **Quirks** the
   CLI may return the title with its emoji stripped, so a missing marker proves nothing. The
   changed-file set decides.
-- A mixed diff (spec **and** source code) classified and otherwise waved through → the mixture
-  itself breaks "never in the same PR" and is a 🟡 finding at the spec file. Classifying it is not
-  reporting it.
+- A mixed diff (docs **and** source code) reported as a rule violation → it is not one. A small
+  change carrying its doc update along is the ordinary shape, and splitting it costs more than the
+  separate spec review is worth. Classify it as an implementation PR and move on; only a spec
+  describing substantially more than this PR delivers is worth a 🟢 about how the next one is cut.
+- A mixed PR reviewed as if the doc half were not there → C-I runs, but Phase C0 hands the changed
+  doc and spec files to dimensions 3 and 5. „Ist ein Implementations-PR" is not a reason to leave
+  the documentation unread.
 - The spec review ran without the linked work item → S3 has nothing to compare against, and
   inventing the acceptance criteria the story should have had is worse than reporting their
   absence. Fetch the item via `sdd-kit:ado-workitem`, or report that none is linked.
@@ -753,7 +781,8 @@ The language contract:
 | Severity emoji repeated in front of every finding | The `####` group heading carries it; on the entries it is redundant noise. Findings start with `**[N]**`. |
 | A spec PR reviewed with the seven code dimensions | Phase A.5 classifies first — a documentation-only diff routes to the C-S set. The code dimensions can only report that code and tests do not exist yet, at the price of a full explorer fleet. |
 | PR kind decided on the 📝 marker alone | The changed-file set decides; per **Quirks** the CLI may strip the emoji from the title it returns, so a missing marker is not evidence. |
-| A mixed spec + code diff classified but not reported | The mixture breaks "never in the same PR" — one 🟡 at the spec file. And never demand deletion of a spec the same PR is adding. |
+| A mixed docs + code diff reported as a rule violation | It is not one — a small change legitimately carries its doc update along, and splitting it costs more than the separate spec review is worth. Classify as an implementation PR; 🟢 only when the spec describes substantially more than the PR delivers. |
+| A mixed PR's doc half left unreviewed because the PR counted as "implementation" | Phase C0 hands the changed doc/spec files to dimension 3 (does the documentation match what the code does?) and dimension 5 (records, durable context) — never as deletion candidates. |
 | Spec reviewed without the linked work item | S3 then has nothing to compare against. Fetch it via `sdd-kit:ado-workitem`; if none is linked or it carries no acceptance criteria, report that instead of inventing criteria. |
 | Spec compared against the story in one direction only | Both directions: acceptance criteria the spec does not address (🔴/🟡) **and** spec content the story never asked for (scope creep, 🟡). |
 | Spec's test plan waved through, or judged by another repo's policy | S4 measures planned level, forbidden test classes, and required artefacts against **this** repo's process — and reports when the repo documents none. |

@@ -177,11 +177,18 @@ the resource has it.)
 
 ## Spec PR vs. implementation PR
 
-In the SDD workflow a spec and its implementation are **never** in the same pull request, so
-every PR is one of the two kinds. `ado-pr` picks the kind when it **creates** a PR; `pr-review`
-determines it for an **existing** PR and reviews it accordingly (a spec has no tests, no
-production code, and no drift — reviewing it against code dimensions finds nothing and costs a
-full run). This section is the single definition both use.
+On the SDD workflow's normal path a story's spec gets its own pull request and is merged before
+the implementation starts, so most PRs are plainly one kind or the other — and `pr-review`
+reviews the two very differently (a spec has no tests, no production code, and no drift;
+measuring it against the code dimensions finds nothing and costs a full run). `ado-pr` picks the
+kind when it **creates** a PR, `pr-review` determines it for an **existing** one. This section is
+the single definition both use.
+
+**A mixed PR is not a rule violation.** Small changes — a bug fix, a contained adjustment —
+legitimately carry their spec or documentation update next to the code; splitting those in two
+costs more overhead than a separate spec review is worth. What the workflow's own spec PR buys is
+feedback **before** the implementation exists, and that is only worth having when there is a
+substantial implementation left to steer. So a mixed diff is classified, not indicted.
 
 **Two signals:**
 
@@ -197,12 +204,15 @@ at creation time, the diff is what the PR actually became — and per **Quirks**
 return a title with the emoji stripped, so a missing 📝 in JSON is not evidence of anything.
 Never let an absent marker outvote a documentation-only diff.
 
-| Changed files | Title | Kind |
-|---|---|---|
-| documentation only | 📝 | **Spec PR** |
-| documentation only | no marker | **Spec PR** — either the emoji was stripped from the JSON, or the PR was not created through `ado-pr`. Neither is a reason to doubt the diff. |
-| contains source code | 📝 | **Implementation PR** — the marker is stale or the PR grew past its spec. Review it as an implementation PR and report the contradiction. |
-| documentation **and** source code | any | **Implementation PR** — and the mixed diff itself breaks the "never in the same PR" rule, so report it rather than only classifying it. |
+| Changed files | Kind |
+|---|---|
+| documentation only | **Spec PR** — with or without the 📝. A missing marker means the emoji was stripped from the JSON or the PR was not created through `ado-pr`; neither is a reason to doubt the diff. |
+| documentation **and** source code | **Implementation PR** — the ordinary shape of a small change that brings its doc update along. Review the code with the code dimensions and the doc part alongside it. |
+| source code only | **Implementation PR.** |
+
+A **📝 in the title of a PR that changes source code** is worth one line to the author — the
+title no longer describes the PR and reviewers read the marker as "no code here" — but it is a
+title to correct, not a breach to report.
 
 **Where the two callers differ.** When *creating* a PR, an auto-detected spec PR is
 **confirmed with the user** before the 📝 goes into the title. When *reviewing* an existing PR
