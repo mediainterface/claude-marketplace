@@ -257,9 +257,16 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   DevOps via the Azure CLI (`az` + azure-devops extension), split into `/ado-pr` (PR
   review/create/update/comment), `/ado-workitem` (work item create/show/query/update), and
   `/ado-pipeline` (pipeline-failure analysis + changelog), for the newest Azure DevOps Server
-  version. Shared connection detection, sign-in check, command map, title schema, quirks, and
-  error-handling live in `skills/ado-shared/REFERENCE.md` — a non-skill file the three SKILL.md
-  files link to by relative path. The title schema gives PR titles the shape
+  version. Shared connection detection, sign-in check, command map, title schema, the **spec-PR vs.
+  implementation-PR detection**, quirks, and error-handling live in
+  `skills/ado-shared/REFERENCE.md` — a non-skill file the three ADO SKILL.md files (and
+  `/pr-review`) link to by relative path. The kind detection lives there rather than in `/ado-pr`
+  because two skills need the same answer for opposite purposes: `/ado-pr` picks the kind when it
+  *creates* a PR (and confirms it with the user, or takes `create spec` as an order), `/pr-review`
+  determines it for an *existing* PR to choose the review. The changed-file set decides
+  (documentation only — `*.md` or anything under a `docs/` directory on any level → spec PR); the 📝
+  title marker only corroborates, because per **Quirks** the CLI may hand back a title with its
+  emoji stripped, so a missing marker is never evidence. The title schema gives PR titles the shape
   `<Marker> #<WorkItemId> <Component/Application> - <Beschreibung>` (change-category emoji incl. 📝
   for spec-only PRs), while work item titles are just the concise German description (the parent
   type/ID/component prefix was dropped as too long). They assume the user is already signed in via
@@ -273,21 +280,60 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   as ragged short lines. The MCP-based `azure-devops` plugin stays for the older Server version.
 - **Skill** (`plugins/sdd-kit/skills/pr-review/SKILL.md`): `/pr-review <PR_ID_OR_URL>` — the deep,
   **triage-first** review of an Azure DevOps PR (the counterpart to the quick working-tree
-  `/code-review`). It checks the PR branch out in an **isolated worktree**
-  (`.claude/worktrees/pr-review-<id>`, never the user's checkout), then dispatches **one read-only
-  subagent per dimension** (`Explore`-type, explicit `model: sonnet` — a skill's `allowed-tools` is
-  not inherited, so the read-only guarantee has to live in the subagent's own tool set): security,
+  `/code-review`). **Phase A.5 decides which of two reviews runs before anything else happens:** a
+  spec PR and an implementation PR get **separate dimension sets**, not one set with exclusions,
+  because a spec has no code, no tests and nothing to drift — putting the code dimensions on a
+  Markdown diff spends a full explorer fleet reporting that none of it exists yet, which is what
+  made spec reviews needlessly expensive. The classification uses the plugin-wide detection in
+  `skills/ado-shared/REFERENCE.md` and, unlike `/ado-pr` at creation time, confirms nothing with the
+  user — the diff already decided. A 📝 title with source code in the diff is reviewed as an
+  implementation PR (the stale marker is worth a line to the author, not a finding). A **mixed diff
+  — docs *and* code — is explicitly not a violation:** a small change (a bug fix, a contained
+  adjustment) legitimately carries its doc update along, and splitting it costs more overhead than
+  a separate spec review is worth, so it is classified as an implementation PR and not indicted.
+  Its doc half is still reviewed — Phase C0 hands the changed doc/spec files to dimension 3 („does
+  the documentation describe what the code in this PR actually does?", the drift check nothing else
+  performs) and dimension 5 (records, durable context), never as deletion candidates, because you
+  do not ask for a file the same PR adds. Only a spec describing **substantially more** than the PR
+  delivers earns a 🟢, and about scope rather than form: the separate spec PR would have bought
+  feedback before the implementation existed. It checks the PR branch out in an **isolated
+  worktree** (`.claude/worktrees/pr-review-<id>`, never the user's checkout — needed for both), then
+  dispatches **one read-only subagent per dimension** (`Explore`-type, explicit `model: sonnet` — a
+  skill's `allowed-tools` is not inherited, so the read-only guarantee has to live in the subagent's
+  own tool set). **Implementation PR (C-I) — seven dimensions:** security,
   CI/pipeline status, consistency & drift (duplicate/divergent implementations, dead code,
   component-library usage, `.sln` platform configs), code smells & correctness, **ADR compliance**,
   **test protection** (would the test fail if the behavior were wrong?), and **test surplus** (what
   could be deleted?) — the last two deliberately as *separate* dispatches, because one reviewer
-  holding both jobs always reports the gap and drops the surplus. Two hard rules: review and posting
+  holding both jobs always reports the gap and drops the surplus. **Spec PR (C-S) — its own set:**
+  S1 Memory Bank (does the spec contradict an active record, build on a superseded one, take a
+  decision that needs a record once the significance triage has run, or trap reasoning that must
+  outlive the spec — the last cheap moment for that, since the spec dies at the implementation's
+  code review), S2 consistency with the code that exists (does the plan duplicate something already
+  there, name modules that no longer exist, depart from the conventions of the directory it lands
+  in — the only spec dimension that really searches the codebase), **S3 the spec against the linked
+  work item** in both directions (acceptance criteria the spec does not address, and spec content
+  the story never asked for — its own dispatch, because a reviewer holding S3 and S5 at once always
+  drops the comparison against the external source, the same failure mode that splits dimensions 6
+  and 7), **S4 the planned test approach against the repo's test process** (level, forbidden test
+  classes, required artefacts — the legitimate remainder of dimensions 6 and 7 at spec time, judged
+  against *this* repo's documented process or reported as undocumented, never against a policy
+  imported from elsewhere), S5 implementability (internal contradictions, open decisions the
+  implementation would have to invent, missing non-goals), and S6 security by design, dispatched
+  **only** when the spec touches a trust boundary. The work item's content comes from
+  `/ado-workitem`'s *show* workflow, which is why that skill joins `/ado-pr` and `/ado-pipeline` as
+  a required sub-skill. Two hard rules: review and posting
   are separate phases (the review is read-only and ends in a report), and the user's checkout is
   never touched. Findings are reported as a **numbered list** grouped 🔴/🟡/🟢, each entry starting
   with `**[N]**` and never `N.` (the terminal Markdown renderer would add its own counter and
-  restart it), with a non-postable **status header** for CI results and the test-to-production line
-  ratio, and are posted only for the numbers the user names, via `/ado-pr`'s *PR Comments* workflow,
-  anchored at `file:line`. Comments follow an **ELI5 recipe** — German, informal „du", everyday
+  restart it), with a non-postable **status header** carrying the PR kind plus the signal proving
+  it, the CI results, and then either the test-to-production line ratio (implementation PR) or the
+  spec's path, the linked work item with its state — the policy expects **Refinement** at spec time,
+  reported never changed — and every dimension that was *not* dispatched, so the reader can tell
+  „geprüft, nichts gefunden" from „nicht geprüft" (spec PR). Findings are posted only for the
+  numbers the user names, via `/ado-pr`'s *PR Comments* workflow, anchored at `file:line` — on a
+  spec PR at the line of the spec that carries the claim. Comments follow an **ELI5 recipe** —
+  German, informal „du", everyday
   words, at most three sentences — binding from the moment a subagent writes a finding, not only at
   posting time. The ADR dimension reads decision records from **every Memory Bank level** above the
   changed paths and applies the shared **significance triage** before proposing a missing record — a
@@ -299,8 +345,9 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   signals per `isRequired` reviewer — current vote, earlier vote in the system threads, own comment
   threads — since a reset vote does not undo a review that happened; a `/pr-review` run is never one
   of the signals). Phase A therefore keeps the system threads instead of dropping them, excluding
-  them from the dedupe only. On a **spec PR** the check is skipped in Phase C and never reaches the
-  dimension; the ADO plumbing comes from `/ado-pr` and `/ado-pipeline`,
+  them from the dedupe only. On a **spec PR** the whole C-I set never runs, so that check cannot
+  arise at all — S1 asks the durable-context half of it instead, at the point where it is still
+  cheap to act on. The ADO plumbing comes from `/ado-pr`, `/ado-pipeline`, and `/ado-workitem`, with
   `skills/ado-shared/REFERENCE.md` and `skills/memory-bank-shared/REFERENCE.md` by relative path.
 - **Requires** the `az` CLI with the `azure-devops` extension installed and the user signed in via
   `az devops login` for the `/ado-pr`, `/ado-workitem`, `/ado-pipeline`, and `/pr-review` skills.

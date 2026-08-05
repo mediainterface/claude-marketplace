@@ -73,14 +73,13 @@ forces a spec PR — see step 7).
 6. **Check for a PR template:** Glob for `.azuredevops/pull_request_template.md` in the repo root; if found, read it and use it as the description structure. If none is found, use the **default template** in step 7.
 7. **Determine the PR kind, then generate title and description.**
 
-   **Spec PR vs implementation PR.** In the SDD workflow a spec and its implementation are
-   **never** in the same PR. This is a **spec PR** when the user invoked `create spec`, or when
-   every changed file (from step 4) is documentation/spec/ADR — i.e. `*.md` or anything under
-   a `docs/` directory on any level (root `docs/`, or nested like `apps/<app>/docs/`,
-   `services/<service>/docs/`, including their `decisions/` and `learnings/`) — and no source
-   code changed. When auto-detected,
-   **confirm first:** *"Only spec/ADR/doc files changed — create this as a spec PR (📝)?"* A
-   mixed diff is an implementation PR.
+   **Spec PR vs. implementation PR.** The two kinds and the signals that tell them apart are
+   defined once for the whole plugin — **Spec PR vs. implementation PR** in
+   [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md). Apply it to the changed-file list
+   from step 4. Two things are specific to *creating* a PR:
+   - `create spec` in `$ARGUMENTS` forces a spec PR outright, whatever the diff looks like.
+   - An auto-detected spec PR is **confirmed first** — *"Only spec/ADR/doc files changed —
+     create this as a spec PR (📝)?"* — before the 📝 goes into the title.
 
    **Title** — shared schema `<Marker> #<WorkItemId> Component - Änderungsbeschreibung`
    (see **Title schema** in the shared reference):

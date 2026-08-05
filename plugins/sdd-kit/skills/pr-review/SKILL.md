@@ -8,7 +8,10 @@ description: >-
   tests that are redundant or over-broad), and decision records (ADRs) — violations of active
   ones, code following superseded ones, and decisions missing a record. Also checks whether the
   story's design spec and implementation plan are deleted here, and whether anything still needed
-  was left only in them. The branch is checked out in an
+  was left only in them. A spec PR gets its own, much smaller review instead — the spec against
+  its work item, against the decision records and the existing code, and its planned test
+  approach against the repo's test process — because a spec has no code, no tests, and nothing
+  to drift. The branch is checked out in an
   isolated worktree; findings are reported for your
   triage and only posted after you approve them. For a deep look — not the quick working-tree
   /code-review.
@@ -28,8 +31,11 @@ it does not re-implement `az`. **REQUIRED SUB-SKILLS:**
 - **`sdd-kit:ado-pr`** — PR metadata, local diff, comment threads (its *PR Comments* workflow is
   the only way this skill posts anything).
 - **`sdd-kit:ado-pipeline`** — root-cause analysis for a failed PR build.
+- **`sdd-kit:ado-workitem`** — the linked work item's content (title, description, acceptance
+  criteria, state) via its *show* workflow. The spec-PR review compares the spec against it.
 - The ADO connection detection (**Step 0**), **Setup Check** (sign-in confirmation),
-  **Repository Mismatch Check**, **Quirks**, and **German text** rules in
+  **Repository Mismatch Check**, **Spec PR vs. implementation PR** (the kind detection Phase A.5
+  applies), **Quirks**, and **German text** rules in
   [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md) apply — complete Step 0 and the
   Setup Check once before any `az` command.
 
@@ -50,67 +56,144 @@ it does not re-implement `az`. **REQUIRED SUB-SKILLS:**
    confirmation). If not signed in, stop and show the sign-in instructions.
 3. Fetch PR metadata (`sdd-kit:ado-pr` review step): `sourceRefName`, `targetRefName`, `title`,
    `description`, `status`, linked work items, `repository.name`, `lastMergeSourceCommit`, and
-   `reviewers` (with `isRequired` and `vote` — Phase C combines these with the thread history to
+   `reviewers` (with `isRequired` and `vote` — Phase C0 combines these with the thread history to
    tell whether a human review has already happened; the current vote alone does not say).
    Run the **Repository Mismatch Check** — if the PR is in a different repo than the current one,
    stop unless the user confirms (the worktree and diff would otherwise use the wrong codebase).
-4. Fetch existing PR comment threads. Keep them — Phase C dedupes against points already raised
+4. Fetch existing PR comment threads. Keep them — Phase D dedupes against points already raised
    so you never repeat a human reviewer. **Keep the system threads as well** (`commentType:
    "system"`, carrying a `CodeReviewThreadType` property): they hold the PR's history, the
-   reviewers' earlier votes among it, which is how Phase C tells whether a human review has
+   reviewers' earlier votes among it, which is how Phase C0 tells whether a human review has
    already happened. They are excluded from the dedupe, not from the fetch.
 
-### Phase B — Isolate the branch in a worktree
-Strip `refs/heads/` from both branch names, then from the repo root:
+### Phase A.5 — Determine the PR kind (this decides which review runs)
+A **spec PR** and an **implementation PR** get different dimension sets in Phase C, so settle
+the kind here — before the worktree, before any subagent. This is also where most of the run's
+cost is decided: a spec has no tests, no production code, and nothing to drift, so putting the
+code dimensions on a Markdown diff finds nothing and burns a full explorer fleet.
+
+Strip `refs/heads/` from both branch names, then get the changed-file list — no worktree needed
+yet:
 ```bash
 git fetch origin {sourceBranch} {targetBranch}
-git worktree add --detach .claude/worktrees/pr-review-{id} origin/{sourceBranch}
+git diff --name-only origin/{targetBranch}...origin/{sourceBranch}
 ```
-- **Deleted source branch** (fetch fails): use `lastMergeSourceCommit.commitId` —
-  `git fetch origin {commitId}` then `git worktree add --detach .../pr-review-{id} {commitId}`.
+- **Deleted source branch** (the fetch fails): use `lastMergeSourceCommit.commitId` from Phase A
+  — `git fetch origin {commitId}`, then diff against `{commitId}`. Whichever ref you end up
+  using is `{sourceRef}` for Phase B — do not fetch a second time there.
+
+Classify with the shared definition — **Spec PR vs. implementation PR** in
+[../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md). Four things decide it in practice:
+
+- **The changed-file set decides; the 📝 title marker only corroborates.** Per the reference's
+  **Quirks**, the CLI may hand back a title with the emoji stripped, so a missing 📝 is not
+  evidence of anything. A documentation-only diff is a spec PR with or without the marker.
+- **📝 in the title but source code in the diff** → review as an **implementation PR** (the
+  broader set misses nothing) and note in the status header that the title no longer matches the
+  PR, so the author can fix the title.
+- **A mixed diff — spec or docs *and* source code** → **implementation PR**, and **not a
+  finding**. A small change (a bug fix, a contained adjustment) carrying its doc update along is
+  the ordinary shape; splitting it would cost more than a separate spec review is worth. Two
+  consequences instead of a complaint:
+  - **Do not demand the deletion** of a spec the same PR is *adding* (status `A` in
+    `--name-status`) — you do not ask for a file the PR exists to introduce.
+  - **The doc part still gets reviewed**, alongside the code — see Phase C0's mixed-PR note.
+    Classifying it as an implementation PR must not mean the spec half goes unread.
+  Only one thing about the mixture is worth a finding, and it is about scope, not form: when the
+  spec describes **substantially more** than this PR delivers, the separate spec PR would have
+  bought review feedback before the implementation existed, and that is now gone. That is 🟢 —
+  a question about how the next one is cut, not a defect in this one.
+- **Nothing here is confirmed with the user.** Unlike `/ado-pr` at creation time, the diff has
+  already decided. Classify, say which kind you got and which signal proves it, and continue.
+
+### Phase B — Isolate the branch in a worktree
+Phase A.5 has already fetched, so from the repo root:
+```bash
+git worktree add --detach .claude/worktrees/pr-review-{id} {sourceRef}
+```
+`{sourceRef}` is `origin/{sourceBranch}`, or the `lastMergeSourceCommit.commitId` when the
+source branch was gone.
 - The diff range for every dimension is `origin/{targetBranch}...HEAD` **inside the worktree**.
 - If `git worktree add` fails, report the exact error and stop. Do not fall back to an in-place
   checkout of the user's working directory.
+- The worktree is needed for **both** kinds: a spec review reads the spec at the branch's state
+  and searches the surrounding codebase to check the spec against it.
 
 ### Phase C — Multi-dimension review via subagents
+
+**Two dimension sets, and Phase A.5 already picked the one that runs:** **C-I** for an
+implementation PR, **C-S** for a spec PR. They are separate sets, not one set with exclusions —
+a spec is judged on its own questions, not on the code questions minus the impossible ones.
+
+#### Phase C0 — Shared preparation (both kinds)
 From inside the worktree, compute the diff (`--name-status`, `--stat`, full diff, commit log
 against the target) and read the CLAUDE.md files near the changed directories so the subagents
-inherit the project's own conventions. Also list the repo's decision records if present —
-dimension 5 needs them, on every review. Records live on **Memory Bank levels**: glob for
-**every** `docs/decisions/` directory, not just the repo root's (`docs/decisions/`,
-`apps/*/docs/decisions/`, `services/*/docs/decisions/`, …), and keep the ones whose level covers
-the changed paths — a record in `apps/<app>/docs/decisions/` binds changes inside that app, a
-root record binds everything. Then look for whatever this repo documents about testing (a test
-process or strategy document, a testing section in a
-CLAUDE.md / CONTRIBUTING, the conventions of the existing test suite). Dimensions 6 and 7 layer
-that on top of their own checks; where the repo documents nothing, those checks still run.
-Split the diffstat into test paths and production paths here — dimension 7 needs the ratio, and
-it goes into the report's status header either way. Finally — **unless this PR is itself a spec
-PR** (📝 marker in the title, or only spec/doc files changed; the same detection `/ado-pr` uses in
-its PR-creation step 7) — check whether the branch still carries the story's **design spec or
-implementation plan** (`docs/superpowers/specs/`, `docs/superpowers/plans/` — wherever this repo
-keeps them), and hand their paths and content to dimension 5. **On a spec PR, skip this and say
-nothing about it:** there the spec is the content under review, and asking for its deletion would
-remove what the PR exists for.
+inherit the project's own conventions. Then the two inputs both sets need:
 
-Hand dimension 5 one more fact with it: is this PR **past its first review round** — has every
-required reviewer seen this code at least once? Judge that from evidence, not from the current
-tally: Azure DevOps clears votes on a new push, so a reviewer who reviewed and was then reset
-shows no vote while their review did happen. Count all three signals — the vote a required
-reviewer holds now, votes recorded earlier in the system threads from Phase A, and threads that
-reviewer opened themselves. Missing all three for one required reviewer means the round is not
-through. This review run is never one of the signals.
+- **The repo's decision records**, if present — the ADR checks (dimension 5 / S1) need them on
+  every review of either kind. Records live on **Memory Bank levels**: glob for **every**
+  `docs/decisions/` directory, not just the repo root's (`docs/decisions/`,
+  `apps/*/docs/decisions/`, `services/*/docs/decisions/`, …), and keep the ones whose level
+  covers the changed paths — a record in `apps/<app>/docs/decisions/` binds changes inside that
+  app, a root record binds everything. On a spec PR the relevant paths are the ones the spec
+  **proposes to touch**, not the path the spec file itself sits at.
+- **Whatever this repo documents about testing** — a test process or strategy document, a testing
+  section in a CLAUDE.md / CONTRIBUTING, otherwise the conventions of the existing test suite.
+  Dimensions 6 and 7 layer it on top of their own checks; on a spec PR it is the yardstick S4
+  measures against. Where the repo documents nothing, the checks still run and the report says so
+  instead of inventing a standard.
 
+**Implementation PR only** — three more inputs:
+- **Split the diffstat** into test paths and production paths. Dimension 7 needs the ratio, and
+  it goes into the report's status header either way.
+- **The story's spec and plan, if the branch still carries them** (`docs/superpowers/specs/`,
+  `docs/superpowers/plans/` — wherever this repo keeps them): hand their paths and content to
+  dimension 5. This asks about files **present in the worktree**, not files in the diff — a
+  merged spec PR put them there, so they will not show up in this PR's changed-file list.
+- **Is this PR past its first review round** — has every required reviewer seen this code at
+  least once? Judge that from evidence, not from the current tally: Azure DevOps clears votes on
+  a new push, so a reviewer who reviewed and was then reset shows no vote while their review did
+  happen. Count all three signals — the vote a required reviewer holds now, votes recorded
+  earlier in the system threads from Phase A, and threads that reviewer opened themselves.
+  Missing all three for one required reviewer means the round is not through. This review run is
+  never one of the signals.
+
+**Mixed PR only (documentation *and* code) — the doc half gets reviewed too.** Phase A.5
+classified it as an implementation PR, so C-I runs; a second full C-S pass would be out of
+proportion to the small change this shape usually is. Hand the changed doc and spec files to the
+two dimensions that already ask the right questions instead:
+- **Dimension 3** gets them for one added check: **does the documentation describe what the code
+  in this PR actually does?** A doc update that drifts from the change shipping next to it is the
+  most valuable finding this shape offers, and no other dimension looks for it.
+- **Dimension 5** gets them as **content** — does anything in them contradict an active record,
+  and is reasoning that must outlive the story captured outside them? Never as deletion
+  candidates: a file this PR adds is not one (Phase A.5).
+
+**Spec PR only** — two more inputs:
+- **The spec itself**, read in full: the `*-design.md` (or whatever this repo names it) the PR
+  adds, plus anything riding along in the same PR — Memory Bank records, a `.claude/rules/`
+  convention (`/spec-pr` bundles those deliberately, so they are part of what is under review).
+- **The linked work item's content.** Take the work-item IDs from Phase A and fetch the item
+  through `sdd-kit:ado-workitem`'s *show* workflow: title, description, **acceptance criteria**,
+  and state. The server is German-localized — read the field names from the server instead of
+  assuming them (shared reference, **German text**). A PR without a linked work item, or one
+  whose work item has no acceptance criteria, is itself a result: it goes into the status header
+  and S3 reports what it could not compare against.
+
+#### Dispatch rules (both kinds)
 **Dispatch one subagent per dimension**, using a **read-only agent type** (`Explore`, or any
 agent whose tool set excludes `Edit`/`Write`). This is what actually enforces "review only":
 a skill's `allowed-tools` is **not** inherited by its subagents, so the read-only guarantee has
 to live in each subagent's own tool set — a general-purpose subagent could edit files.
-**Dispatch every dimension with an explicit `model: sonnet`.** A review spawns ~7 explorers at
-roughly 100k tokens each; inheriting the session's model makes that disproportionately
-expensive, and Sonnet handles the dimension analysis. Escalate to the session model only when
-the user explicitly asks for a deeper pass. They run
+**Dispatch every dimension with an explicit `model: sonnet`.** An implementation review spawns
+~7 explorers at roughly 100k tokens each; inheriting the session's model makes that
+disproportionately expensive, and Sonnet handles the dimension analysis. Escalate to the session
+model only when the user explicitly asks for a deeper pass. They run
 in parallel; each is told the worktree path, the diff range, and the changed-file list, and
 returns findings in the schema below. **Subagents post nothing.**
+
+#### Phase C-I — Implementation PR: the seven code dimensions
+Runs when Phase A.5 classified this as an implementation PR. Skip this whole set on a spec PR.
 
 1. **Security** — injection, XSS, secrets/tokens in logs or config, authn/authz gaps, unsafe
    deserialization, SSRF, OWASP-style issues. Check the trust boundaries the change touches, not
@@ -134,7 +217,11 @@ returns findings in the schema below. **Subagents post nothing.**
    (duplicate/parallel feature); a pattern that departs from its siblings without reason; dead
    code the PR adds or leaves behind (unreferenced exports, unreachable branches, orphaned
    files); and copy-paste that should reuse an existing utility. This is why the whole branch is
-   checked out, not just the diff. Two checks that always run here:
+   checked out, not just the diff. Two checks that always run here — plus one when Phase C0 handed
+   over changed doc or spec files (a **mixed PR**): **does that documentation describe what the
+   code in this PR actually does?** A doc or spec updated next to the code it describes, drifting
+   from it in the same commit range, is drift of the plainest kind, and no other dimension looks
+   for it. Anchor it at the documentation line that no longer holds.
    - **Component-library usage (UI changes).** In a codebase that uses a component library
      (e.g. shadcn/ui in `apps/mira-desktop`), new UI must actually use the library's components.
      Flag hand-rolled markup/CSS that replicates an existing or available library component; a
@@ -192,8 +279,10 @@ returns findings in the schema below. **Subagents post nothing.**
    - **Spec and plan are transient — and this review is where they go.** A design spec and an
      implementation plan belong to one story, not to the repository: they are deleted at the
      human code review of the story's **implementation**, at the latest after the first round.
-     Runs only when Phase C handed over spec or plan files — on a **spec PR** it handed over
-     nothing and this check does not exist. Then two checks, in this order:
+     Runs only when Phase C0 handed over spec or plan files. On a **spec PR** this dimension set
+     never runs at all; in a **mixed PR** the spec or doc files this PR *adds* are content to
+     check, never deletion candidates — you do not ask for a file the same PR introduces. Then
+     two checks, in this order:
      1. **Read them and look for durable content.** Per piece of reasoning: is it needed beyond
         this story? Anything that is — a constraint, the grounds for a decision, a rule — must
         already exist **outside** the spec and the plan: inline in the code as its own reason, in
@@ -201,8 +290,9 @@ returns findings in the schema below. **Subagents post nothing.**
         is a 🟡 finding, anchored at the code it concerns, asking for the inline reason (or for a
         record, if it clears the triage above).
      2. **Then the deletion itself.** Spec and plan files still present in the branch are one 🟢
-        finding anchored at the file, asking for `git rm` in this PR — 🟡 when Phase C reports the
-        PR as past its first review round, because that was the deadline.
+        finding anchored at the file, asking for `git rm` in this PR — 🟡 when Phase C0 reports the
+        PR as past its first review round, because that was the deadline. This covers files the
+        branch **carries in** from an earlier merged spec PR, never ones this PR adds itself.
 
    No decision records in the repo → report the ADR part of the dimension as not applicable, don't
    silently skip it. The spec/plan check runs regardless.
@@ -318,20 +408,127 @@ returns findings in the schema below. **Subagents post nothing.**
    just because nothing is broken. A whole test file that checks nothing the suite doesn't
    already check is one 🟡 finding, not twenty 🟢 ones.
 
+#### Phase C-S — Spec PR: the spec dimensions
+Runs when Phase A.5 classified this as a spec PR. **The seven code dimensions above do not run
+here.** There is no production code, no test, and nothing to drift, so they would spend a full
+explorer fleet reporting the absence of things that cannot exist yet. What is worth reviewing
+about a spec is whether it matches the story it serves, the decisions already taken, the code it
+will land in, and the process that will judge it — while changing it still costs nothing.
+
+Only S2 really searches the codebase, which is what makes this set cheap. Dispatch S1–S5, and S6
+only when it applies.
+
+**S1 — Memory Bank: conflicts and missing records.** The counterpart of dimension 5, applied to
+what the spec **proposes** instead of to code that exists.
+- **Does the spec contradict an active record?** Read every record from Phase C0 whose topic
+  touches what the spec proposes, in **all statuses**. Contradicting an `Active` record is at
+  least 🟡, usually 🔴 — the way out is to follow it or supersede it first, and here that is still
+  cheap.
+- **Does the spec build on a non-active record?** A spec adopting the pattern of a `Superseded`,
+  `Deprecated`, or `Declined` decision plans against an outdated one. Point to what applies now.
+- **Does the spec take a decision that needs a record?** Run the **significance triage** from
+  [../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md) with its evidence
+  named from this codebase — the existing pattern that changes, the second place that exists
+  **today**, the concrete features/apps/teams, the revert cost — then the **locality
+  counter-check**: one spot, one feature, cheap revert → no record, an inline reason in the code.
+  A record the spec's own *Memory Bank* section already writes out gets the same triage as one
+  that is merely proposed, including the records riding along in this PR (`/spec-pr` bundles
+  them deliberately, so they are under review here too).
+- **Is durable reasoning trapped in the spec?** This is the last cheap moment to ask. The spec is
+  deleted at the implementation's code review, so everything needed beyond this story needs a
+  home outside it — inline in the code as its own reason, in the work item, in `.claude/rules/`,
+  or as a record (the routing table in `/spec-pr` Step 3). Something needed that lives only in
+  the spec is 🟡, with the durable home named. In the implementation review the same check only
+  confirms; here it still changes something.
+
+**S2 — Consistency with the code that already exists.** The drift dimension turned around:
+instead of "does this code duplicate something", ask "does this plan duplicate, contradict, or
+misdescribe what is already there". The one dimension in this set that genuinely searches the
+codebase — give it the room dimension 3 would have had.
+- **Does the spec propose something the codebase already has?** Search for an existing equivalent
+  of every component, hook, endpoint, helper, table, or config key it introduces. Finding one is
+  🟡: reuse it, or state why a second implementation is wanted — decided before it is written.
+- **Do the things the spec names actually exist?** Paths, modules, components, services, config
+  keys it refers to. A spec resting on a module that was renamed or removed plans a change nobody
+  can carry out — 🟡, and free to fix now.
+- **Does the plan fit the conventions of the place it lands in?** The CLAUDE.md files of the
+  affected directories, the patterns of the sibling code, and the component library where the
+  repo has one — hand-rolled UI where the library has the component is dimension 3's rule,
+  applied before the markup is written.
+
+**S3 — Spec against the story (the linked work item).** Compare in **both** directions, using the
+work item from Phase C0. Its own dispatch, separate from S5 on purpose: a reviewer holding both
+jobs weighs the spec-internal gap higher and the comparison against the external source quietly
+drops out — the same reason dimensions 6 and 7 are split.
+- **Every requirement and acceptance criterion of the story has a counterpart in the spec.** One
+  the spec does not address at all is 🔴, a thinly covered one 🟡. Name the criterion in the
+  story's own words so the author can find it.
+- **Everything the spec plans is actually asked for by the story.** What is not is scope creep —
+  🟡, asking whether it belongs in a story of its own rather than assuming it does.
+- **No contradiction.** The story rules something out that the spec plans in, or the spec solves a
+  different problem than the story states → 🔴.
+- **What you could not compare against is reported, never guessed.** No linked work item, no
+  acceptance criteria, or a story too thin to compare against: say that plainly (status header
+  plus one 🟡 at the spec file) instead of inventing the criteria the story should have had.
+- The story's **state** goes in the status header, not into a finding: at spec time the SDD policy
+  expects **Refinement**. Report a deviation; never change the state yourself.
+
+**S4 — Planned test approach against the repo's test process.** The legitimate remainder of
+dimensions 6 and 7 at spec time. „Would this test fail if the behavior were wrong" cannot be
+asked — no test exists — but whether what is planned will satisfy the process that later judges
+it can, and that is far cheaper to settle here than in the implementation review.
+- **Does the spec say anything at all about how the result gets verified?** Silence in a repo
+  whose process demands a test depth per change is 🟡.
+- **Does the planned level match what the process prescribes for this kind of change?** Use this
+  repo's own level names from Phase C0. An end-to-end run for a matrix the process puts on unit
+  level — or a unit test where it requires an integration one — is 🟡, and this is the only moment
+  it moves for free.
+- **Does the spec plan a test class this repo forbids?** Where a repo bans a category (some ban
+  per-feature i18n or snapshot tests), planning one is a finding **before** it is written.
+- **Does the process require artefacts the spec does not plan?** A test concept, test cases on the
+  work item, acceptance tests — whatever this repo actually asks for.
+- **If the repo documents no test process:** say so in the report and judge against the existing
+  suite's conventions. Do **not** import a policy from a codebase you happen to know — levels,
+  tooling, and naming differ per repo. Identical to dimension 6's rule, and just as binding here.
+
+**S5 — Is the spec implementable?** Its self-consistency, independent of the story.
+- **Contradictions inside the spec** — two sections describing incompatible behavior.
+- **Decisions left open** that the implementation would have to invent: error behavior, edge and
+  boundary cases, empty and failure states, migration of existing data, concurrent access.
+- **Missing non-goals**, where the scope would otherwise be read more widely than intended.
+- **Prose too vague to build from** — „wird passend behandelt", „nach Bedarf": name the spot and
+  ask the concrete question.
+Severity by consequence: something the implementation would have to guess at is 🟡, a real
+contradiction 🔴, a stylistic gap 🟢.
+
+**S6 — Security by design (dispatch only if it applies).** Only when the spec touches a trust
+boundary: authentication, authorization, external input, secrets or tokens, personal data, a new
+network path or dependency. The question is whether the **design** has a hole — a check on the
+wrong side of the boundary, a token somewhere that gets logged, a missing authorization step —
+never whether the Markdown has one. Touches no trust boundary → skip the dispatch and say so in
+one line rather than dispatching an explorer to find nothing.
+
 **Finding schema** (each subagent returns a list of these):
-A finding is **something that needs a comment on a line of code**. Anything the PR page already
-displays by itself (check results, test failures, build logs) is status, not a finding, and never
-enters this list.
+A finding is **something that needs a comment on a line** — of code on an implementation PR, of
+the spec on a spec PR. Anything the PR page already displays by itself (check results, test
+failures, build logs) is status, not a finding, and never enters this list.
 
 ```
 severity : 🔴 Blocker | 🟡 Sollte | 🟢 Optional
 file     : path from repo root
 line     : line number (or range)
 dimension: security | consistency | smell | adr | test | test-surplus
+             | spec-story | spec-tests | spec-quality
 summary  : one line — the concrete issue
 why      : one sentence — why it matters, ONLY if not obvious from the line
 suggestion: the concrete fix or a genuine question
 ```
+
+The spec dimensions reuse the existing values where the topic is the same — S1 reports `adr`,
+S2 `consistency`, S6 `security` — and the three new ones belong to S3 (`spec-story`), S4
+(`spec-tests`), and S5 (`spec-quality`). A spec finding anchors at the line **of the spec** that
+carries the claim, so it can be posted like any other; only a finding about something entirely
+missing from the spec anchors at the heading it should have followed.
 
 `summary`, `why`, and `suggestion` are written in the simple language of the recipe below
 ("How findings and comments are written") **from the start** — put that requirement into every
@@ -346,16 +543,24 @@ inline list** grouped as 🔴 / 🟡 / 🟢, each with `file:line`, the summary,
 Where dimension 6 and dimension 7 land on the same test, merge them into **one** finding at the
 higher severity and say both things in it („prüft nichts, was … nicht schon prüft — und würde
 auch bei falschem Verhalten grün bleiben"). Never drop the surplus half while merging: it is the
-half only one dimension was looking for.
+half only one dimension was looking for. On a spec PR the same applies where S3 and S5 land on
+the same passage — an open decision that is also an unaddressed acceptance criterion is one
+finding at the higher severity, and it keeps the story reference.
 
 The report has **two clearly separated parts**:
-- **Status header** (not numbered, not postable): the CI/pipeline line — which required checks
-  are green, red, or missing, plus the one-line root cause for each failed build — and the
-  change's **test-to-production line ratio** (e.g. „303 Testzeilen / 183 Produktivzeilen"). The
-  ratio is context for the reader, never a finding on its own.
+- **Status header** (not numbered, not postable). Always: the **PR kind** from Phase A.5 with the
+  signal that proves it, and the CI/pipeline line — which required checks are green, red, or
+  missing, plus the one-line root cause for each failed build. Then, depending on the kind:
+  - **Implementation PR:** the change's **test-to-production line ratio** (e.g. „303 Testzeilen /
+    183 Produktivzeilen"). Context for the reader, never a finding on its own.
+  - **Spec PR:** the spec's path; the linked work item with its **state** — the SDD policy expects
+    **Refinement** at spec time, so report a deviation here and never change it — or the fact that
+    no work item is linked at all; and every dimension that was **not** dispatched (S6 on a spec
+    with no trust boundary), so the reader can tell "checked, nothing found" from "not checked".
+    A marker-versus-diff contradiction from Phase A.5 belongs here too.
 - **Numbered findings** (the only postable part): every entry here must be worth a comment on a
-  line of code. "Post all" has to be a sensible answer — so if an entry only restates something
-  the PR page already shows, it belongs in the status header instead.
+  line — of code, or of the spec. "Post all" has to be a sensible answer — so if an entry only
+  restates something the PR page already shows, it belongs in the status header instead.
 
 #### Report layout — the numbers must survive the Markdown renderer
 
@@ -492,7 +697,29 @@ The language contract:
   the code.
 - About to ask for a spec or plan to be deleted in a PR whose diff is nothing but spec and doc
   files → that is a **spec PR**, and the spec is what it exists to submit. The deletion belongs in
-  the PR that implements the story, never here. Phase C should have skipped the check entirely.
+  the PR that implements the story, never here. Phase A.5 should have routed to C-S, where the
+  check does not exist.
+- A security, smell, drift, test-protection, or test-surplus explorer dispatched on a
+  documentation-only diff → those are the C-I dimensions. On a spec PR they burn a full fleet to
+  report that code and tests are absent, which is the whole reason Phase A.5 exists. Dispatch C-S.
+- Concluded "no 📝, so implementation PR" while the diff is documentation only → per **Quirks** the
+  CLI may return the title with its emoji stripped, so a missing marker proves nothing. The
+  changed-file set decides.
+- A mixed diff (docs **and** source code) reported as a rule violation → it is not one. A small
+  change carrying its doc update along is the ordinary shape, and splitting it costs more than the
+  separate spec review is worth. Classify it as an implementation PR and move on; only a spec
+  describing substantially more than this PR delivers is worth a 🟢 about how the next one is cut.
+- A mixed PR reviewed as if the doc half were not there → C-I runs, but Phase C0 hands the changed
+  doc and spec files to dimensions 3 and 5. „Ist ein Implementations-PR" is not a reason to leave
+  the documentation unread.
+- The spec review ran without the linked work item → S3 has nothing to compare against, and
+  inventing the acceptance criteria the story should have had is worse than reporting their
+  absence. Fetch the item via `sdd-kit:ado-workitem`, or report that none is linked.
+- S3 and S5 dispatched as one subagent → the spec-internal gap always wins over the comparison
+  against the story, exactly as it does for dimensions 6 and 7. Two dispatches.
+- A spec's test plan judged against a test process you know from another repo → S4 measures
+  against **this** repo's documented process, or against the existing suite's conventions while
+  saying the repo documents none.
 - The test verdict is „X Tests ergänzt, sieht gut aus" → you counted instead of judging. For
   each new test, name what would have to break in the production code to turn it red.
 - Applying test rules you know from elsewhere („E2E gehört auf …", „das ist ein Unit-Test") that
@@ -552,3 +779,11 @@ The language contract:
 | Dimension subagents dispatched without an explicit model | They inherit the session's model — pass `model: sonnet` on every dispatch; escalate only on explicit user request. |
 | Doubled numbers („1. 1."), a severity group listed twice, the same number under two severities | Findings numbered with `N.` at line start — the terminal Markdown renderer re-numbers them and restarts after every bullet list. Use `**[N]**`, one `####` heading per severity, numbering continuous 1..N. |
 | Severity emoji repeated in front of every finding | The `####` group heading carries it; on the entries it is redundant noise. Findings start with `**[N]**`. |
+| A spec PR reviewed with the seven code dimensions | Phase A.5 classifies first — a documentation-only diff routes to the C-S set. The code dimensions can only report that code and tests do not exist yet, at the price of a full explorer fleet. |
+| PR kind decided on the 📝 marker alone | The changed-file set decides; per **Quirks** the CLI may strip the emoji from the title it returns, so a missing marker is not evidence. |
+| A mixed docs + code diff reported as a rule violation | It is not one — a small change legitimately carries its doc update along, and splitting it costs more than the separate spec review is worth. Classify as an implementation PR; 🟢 only when the spec describes substantially more than the PR delivers. |
+| A mixed PR's doc half left unreviewed because the PR counted as "implementation" | Phase C0 hands the changed doc/spec files to dimension 3 (does the documentation match what the code does?) and dimension 5 (records, durable context) — never as deletion candidates. |
+| Spec reviewed without the linked work item | S3 then has nothing to compare against. Fetch it via `sdd-kit:ado-workitem`; if none is linked or it carries no acceptance criteria, report that instead of inventing criteria. |
+| Spec compared against the story in one direction only | Both directions: acceptance criteria the spec does not address (🔴/🟡) **and** spec content the story never asked for (scope creep, 🟡). |
+| Spec's test plan waved through, or judged by another repo's policy | S4 measures planned level, forbidden test classes, and required artefacts against **this** repo's process — and reports when the repo documents none. |
+| An S6 explorer dispatched for a spec that touches no trust boundary | Skip the dispatch and say so in one line — the conditional dispatch is the point. |
