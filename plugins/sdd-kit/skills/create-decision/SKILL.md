@@ -42,11 +42,16 @@ user which criteria failed and route per the **Significance triage**
 table in the shared reference.
 
 **Say the evidence out loud.** For every criterion you affirm, name the
-criterion *and* its evidence to the user in one line before going on — the
-pattern that changes, the second place that exists **today**, the concrete
-features/apps/teams, what a revert costs (see **Evidence required** in the
-shared reference). An unnamed criterion does not count, and a piece of
-evidence that has to be spoken usually falls apart while you speak it.
+criterion *and* its evidence to the user in one line before going on (see
+**Evidence required** in the shared reference):
+
+- **Structural impact** — which existing pattern *changes*.
+- **Hard to reverse** — what a revert costs.
+- **Precedent** — the second place that exists **today**.
+- **Cross-cutting** — the concrete features/apps/teams.
+
+An unnamed criterion does not count, and a piece of evidence that has to be
+spoken usually falls apart while you speak it.
 
 Then run the **Locality counter-check** even when a criterion held: behavior
 at one spot, confined to one feature, cheap to revert → **no record**. Say

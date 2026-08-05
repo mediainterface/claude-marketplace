@@ -174,11 +174,15 @@ returns findings in the schema below. **Subagents post nothing.**
      [../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md)): a one-off local
      choice is **no finding**, a recurring coding rule belongs in `.claude/rules/`, an observed
      pitfall in `sdd-kit:create-lesson-learned`. A criterion counts only with **evidence you can
-     name from this codebase** — the existing pattern the change replaces (an interface following
-     the established feature/route pattern applies a decision, it doesn't make one), the second
-     place that exists **today**, the concrete features/apps/teams, the revert cost. And the
-     **locality counter-check** applies even when a criterion held: one spot, one feature, cheap
-     revert → **no ADR finding**, at most a 🟢 asking for an inline reason in the code.
+     name from this codebase**:
+     - **Structural impact** — the existing pattern the change *replaces*. One that follows the
+       established feature/route pattern applies a decision, it doesn't make one.
+     - **Hard to reverse** — what a revert costs.
+     - **Precedent** — the second place that exists **today**.
+     - **Cross-cutting** — the concrete features/apps/teams.
+
+     The **locality counter-check** applies even when a criterion held: one spot, one feature,
+     cheap revert → **no ADR finding**, at most a 🟢 asking for an inline reason in the code.
      Only when a criterion is met, propose the ADR:
      suggest a title, the one-sentence decision it should capture, and the **level** it belongs
      on (the smallest level whose subtree covers everyone affected — the app's `docs/decisions/`
