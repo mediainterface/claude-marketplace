@@ -15,6 +15,19 @@ The plugin provides a single skill that acts as a writing editor. Give it AI-gen
 3. Run a self-audit pass to catch remaining tells
 4. Optionally match your personal writing voice from a sample
 
+## When it activates
+
+Ask for it by name (`/humanizer`) at any time. Beyond that, the skill's `description` frontmatter
+tells Claude when to reach for it on its own:
+
+- You ask to humanize, de-AI or naturalize a text, or ask why something "sounds like AI".
+- You complain about a specific tell — em dashes, "it's not just X, it's Y", the rule-of-three
+  cadence.
+- Proactively, before handing over longer prose written for human readers: documentation, README,
+  release notes, blog post, announcement, email, PR or work item description.
+
+It deliberately stays out of code, code comments, log output and short chat replies.
+
 ## Pattern categories
 
 - Content patterns (significance inflation, promotional language, vague attributions)
