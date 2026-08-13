@@ -1,6 +1,6 @@
 {
   "name": "humanizer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Remove AI writing patterns to make text sound more natural and human",
   "author": { "name": "blader" },
   "license": "MIT",

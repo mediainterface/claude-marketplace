@@ -133,7 +133,15 @@ Writing editor skill that identifies and removes AI writing patterns. Based on
 Skill-only plugin (no MCP server).
 
 - **Skill** (`plugins/humanizer/skills/humanizer/SKILL.md`): Detects 29 AI writing pattern
-  categories and rewrites text to sound natural.
+  categories and rewrites text to sound natural. The vendored file arrived **without YAML
+  frontmatter**, so Claude Code could never select it on its own — you had to name the skill. The
+  `name` + `description` frontmatter is therefore our one deliberate deviation from upstream (the
+  body stays untouched, see *Markdown line length* above): the description carries the explicit
+  triggers (asked to humanize / de-AI a text, "sounds like AI", a complaint about em dashes or
+  "it's not just X, it's Y"), the proactive case (longer prose written for human readers —
+  documentation, README, release notes, PR or work item descriptions), and just as importantly what
+  it does **not** cover — code, code comments, log output, short chat replies — because a skill
+  worded this broadly otherwise fires on every sentence Claude writes.
 - **Source**: [github.com/blader/humanizer](https://github.com/blader/humanizer)
 - **No external dependencies or env vars required.**
 
