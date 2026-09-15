@@ -56,9 +56,12 @@ the same supersede mechanism used for any revised decision.
 
 ## Significance triage
 
-The criteria and exclusions below come from
-`docs/processes/memory-bank/memory-bank.md` §4.2 — that document is
-authoritative; this section mirrors it so the skills can apply it.
+This section is the **single source of truth** for the gate. The Memory Bank
+process document (`docs/processes/memory-bank/memory-bank.md`) points at this
+skill instead of repeating the criteria — deliberately, so they are not
+maintained in two places and cannot drift apart. Changes to the criteria or
+the exclusions are the **Hüter-Trio's** call and land as a change to this
+file.
 
 A decision deserves a Decision Record only if **at least one** criterion
 applies **and no exclusion** does:
@@ -149,12 +152,11 @@ them. What it does is hand the case to the user and **stop**:
 Waiting is cheap — the inline reason already carries the "why" — while a
 record written to avoid the wait is binding and needs a second record to undo.
 
-The criteria and the exclusions are fixed by memory-bank.md §4.2 (like the
-category list) and changed only there. Two further things go the same route:
-**declining** a proposed record, and **deleting or merging** existing records,
-are **team decisions** per the same section — never something a skill does on
-its own. Lessons Learned have **no** significance gate; they are deliberately
-low-threshold.
+The criteria and the exclusions are fixed (like the category list) and changed
+only by the Hüter-Trio, here in this file. Two further things are **team
+decisions**: **declining** a proposed record, and **deleting or merging**
+existing records — never something a skill does on its own. Lessons Learned
+have **no** significance gate; they are deliberately low-threshold.
 
 ### Form rules for a record
 

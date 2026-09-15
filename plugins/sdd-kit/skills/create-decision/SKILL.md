@@ -39,8 +39,8 @@ Create a record only if **at least one** of the five criteria applies
 **and no exclusion** does (hard to reverse · eases future decisions ·
 product decision to be protected · breaks an existing pattern ·
 cross-cutting — the definitions, the exclusions and the routing table live
-in the shared reference, which mirrors `memory-bank.md` §4.2 and is
-authoritative). If no criterion applies, **do not create the record**: tell
+in the shared reference, which is the single source of truth for the gate).
+If no criterion applies, **do not create the record**: tell
 the user which criteria failed and route per the **Significance triage**
 table in the shared reference.
 
@@ -91,10 +91,10 @@ Do not offer to write the record "provisionally" and revert it later: it is
 binding the moment it exists and can only be undone by a second record
 superseding it.
 
-The criteria and exclusions come from `memory-bank.md` §4.2 and are changed
-only there. Do not create a record the gate refused on insistence —
-**declining** a record is a team decision per the same section, so ask the
-user to take the case to the team.
+The criteria and exclusions are changed only by the Hüter-Trio, in the shared
+reference. Do not create a record the gate refused on insistence —
+**declining** a record is a team decision, so ask the user to take the case to
+the team.
 
 When the gate passes because the decision **eases future decisions** or is
 **cross-cutting**, document the generalizable pattern, not the single
@@ -281,9 +281,8 @@ Show the user:
 - A revised decision is **superseded**, never amended and never deleted by
   this skill: create a new decision record and set the old record's status to
   `Superseded by <new record's filename without .md>`. Deleting or merging
-  existing records is possible, but as a **team decision** per
-  `memory-bank.md` §4.2 — not a skill action, and not on a single user's
-  request.
+  existing records is possible, but as a **team decision** — not a skill
+  action, and not on a single user's request.
 - Records are never moved between levels by this skill. Migrating legacy
   records (including repos whose records all still sit at the repo root)
   is a project of the affected repo. Promotion to a higher level happens
@@ -295,5 +294,5 @@ Show the user:
   in the same directory. Never renumber or rename existing records:
   renaming is what causes stale references.
 - When the user asks about available categories: the list is fixed and can
-  only be extended in `memory-bank.md` §4.2. The same holds for the five
-  significance criteria and the three exclusions.
+  only be extended by the Hüter-Trio, in the shared reference. The same holds
+  for the five significance criteria and the three exclusions.
