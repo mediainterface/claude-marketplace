@@ -64,17 +64,32 @@ state yourself.
 ## Memory Bank records: significance & placement
 
 Before proposing or creating a Decision Record, apply the significance
-triage: a record is warranted only if **at least one** criterion applies
-and **no exclusion** does. Criteria: **hard to reverse** and expensive to
-change (stack, load-bearing library, stored data format, build/distribution
-mechanism), **eases the team's future decisions** (a rule the next feature
-applies without re-deciding), a **product decision to be protected** from
-silent rollback, **breaks an existing pattern**, or **cross-cutting** (shapes
-several features durably, and different implementations would behave
-differently for the user). Exclusions: it concerns only one feature with no
-effect on others; it changes nothing about appearance, stability, behavior or
-dev experience; it is a detail touching the whole app that is neither a
-product decision nor hard to revise.
+triage: a record is warranted only if **at least one** criterion applies and
+**no exclusion** does.
+
+A criterion counts only with **named evidence**, and you name it to the user
+when you affirm it — the evidence each one needs is in brackets:
+
+- **Hard to reverse** and expensive to change — the stack, a load-bearing
+  library, a stored data format, the build or distribution mechanism. *(What
+  a revert costs, and which of the four it is.)*
+- **Eases the team's future decisions** — a rule the next feature applies
+  without deciding the question again. *(The next case the rule decides.)*
+- **Product decision to be protected** from being silently rolled back.
+  *(What the user notices, and who would roll it back unknowingly.)*
+- **Breaks an existing pattern.** *(Which pattern. One that follows the
+  project's established pattern applies a decision, it does not break one.)*
+- **Cross-cutting** — it shapes several features durably, and different
+  implementations would behave differently for the user. *(The concrete
+  features, apps, or teams.)*
+
+Exclusions, each of which overrides a ticked criterion:
+
+- It concerns **only one feature** and has no effect on others.
+- It changes nothing about **appearance, stability, behavior, or developer
+  experience**.
+- It is a **detail that touches the whole app** but is neither a product
+  decision nor hard to revise.
 
 Otherwise do not propose one — a recurring coding rule belongs in
 `.claude/rules/` (convention), an observed pitfall in
@@ -83,32 +98,24 @@ that level, and a one-off local design choice inline in the code as its own
 reason. The spec and the PR description are **not** a storage location: both
 are transient.
 
-A criterion counts only with **named evidence**, and you name it to the user
-when you affirm it:
-
-- **Hard to reverse** — what a revert costs, and which of stack / library /
-  data format / build mechanism it is.
-- **Eases future decisions** — the next case the rule decides without
-  re-deciding.
-- **Product decision** — what the user notices, and who would roll it back
-  unknowingly.
-- **Breaks a pattern** — which existing pattern it breaks. One that follows
-  the project's established pattern applies a decision, it does not break one.
-- **Cross-cutting** — the concrete features, apps, or teams.
-
-An exclusion overrides a ticked criterion: behavior that sits at one spot, in
-one feature, gets an **inline reason in the code**, not a record. This applies
-where the record is first proposed, a spec's *Memory Bank* section included.
+Behavior that an exclusion catches — sitting at one spot, in one feature —
+gets an **inline reason in the code**, not a record. All of this applies where
+the record is **first proposed**, a spec's *Memory Bank* section included.
 **Declining** a record, and deleting or merging existing ones, are team
 decisions — never done on the spot.
 
-A record that does pass also holds its form: **under 80 lines**, no
-amendments, no spec content (measurements, thresholds, rule catalogs,
-mechanics), no links to work items, PRs, specs or plans, no justification
-prose, and it stands on its own. Body sections: *Context and problem* (one
-paragraph), *Considered options*, *Decision* (chosen option plus bullets with
-the reasoning and the rejected alternatives), *Consequences* — no "Decision
-drivers" and no per-option pros-and-cons list.
+A record that does pass also holds its form:
+
+- **Under 80 lines** (the file, not the line width).
+- **No amendments** — a changed decision is superseded by a new record.
+- **No spec content** — no measurements, thresholds, rule catalogs, mechanics.
+- **No links** to work items, PRs, specs, or plans.
+- **No justification prose**, and the record stands on its own.
+
+Body sections: *Context and problem* (one paragraph), *Considered options*,
+*Decision* (chosen option plus bullets with the reasoning and the rejected
+alternatives), *Consequences* — no "Decision drivers" and no per-option
+pros-and-cons list.
 
 Records live on Memory Bank **levels**: place each record in the
 `docs/decisions/` (or `docs/learnings/`) of the right level. A record
