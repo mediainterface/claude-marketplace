@@ -274,7 +274,10 @@ Runs when Phase A.5 classified this as an implementation PR. Skip this whole set
      The three **exclusions** apply even when a criterion held — one feature without effect on
      others, nothing changed about appearance/stability/behavior/dev experience, a whole-app
      detail that is neither a product decision nor hard to revise → **no ADR finding**, at most
-     a 🟢 asking for an inline reason in the code.
+     a 🟢 asking for an inline reason in the code. Undecidable even after the evidence is
+     named — evidence and exclusion both fitting — is a 🟢 that names both sides and suggests
+     putting the case to the Hüter-Trio, never a demanded record: the author would write one
+     that a second record has to supersede.
      Only when a criterion is met, propose the ADR:
      suggest a title, the one-sentence decision it should capture, and the **level** it belongs
      on (the smallest level whose subtree covers everyone affected — the app's `docs/decisions/`

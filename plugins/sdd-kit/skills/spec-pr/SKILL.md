@@ -91,8 +91,14 @@ Run that triage **here**, and name the evidence with the criterion:
 Then the three **exclusions**, any of which overrides a ticked criterion — one feature
 without effect on others, nothing changed about appearance/stability/behavior/dev
 experience, a whole-app detail that is neither a product decision nor hard to revise →
-no record, the reason goes inline into the code. A record the spec's own *Memory Bank* section
-already writes out unfiltered turns `create-decision`'s gate into a rubber stamp.
+no record, the reason goes inline into the code.
+
+If it stays undecidable after the evidence is named, the spec PR does **not** carry a
+record: note the open question for the user to put to the Hüter-Trio, keep the reasoning
+inline in the code, and move on. A record guessed at now is binding on merge.
+
+A record the spec's own *Memory Bank* section already writes out unfiltered turns
+`create-decision`'s gate into a rubber stamp.
 
 Records and lessons created here ride in the **same** PR as the spec — note each
 created file's path from the skills' confirmation output, because Step 5 stages

@@ -68,6 +68,17 @@ behavior or dev experience; a detail touching the whole app that is neither a
 product decision nor hard to revise. Any of them → **no record**. Say which
 one bit, suggest an inline reason in the code, and stop.
 
+**When the gate stays unclear, stop and involve the Hüter-Trio** (see **When
+the gate is genuinely unclear** in the shared reference). This is not the
+escape hatch for a weak case — a criterion without nameable evidence is
+simply not met, and that is a "no record". It is for the case that stays
+undecidable *after* the evidence was named: the evidence holds but an
+exclusion seems to fit too, or the criterion rests on something nobody has
+committed to yet. Then create **nothing**: name the case and the evidence on
+both sides, ask the user to put it to the Hüter-Trio, and keep the reasoning
+inline in the code until they decide. A record written on a hunch is binding
+at once and can only be undone by a second record superseding it.
+
 The criteria and exclusions come from `memory-bank.md` §4.2 and are changed
 only there. Do not create a record the gate refused on insistence —
 **declining** a record is a team decision per the same section, so ask the

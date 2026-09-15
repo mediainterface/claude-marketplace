@@ -115,11 +115,33 @@ still needs a durable trace belongs **inline in the code it explains**, never
 in the spec alone. Anything that is needed beyond the story and does clear the
 triage becomes a record before the spec goes away.
 
+### When the gate is genuinely unclear: ask the Hüter first
+
+A record is **binding the moment it exists**, and undoing one costs a second
+record that supersedes it — an entry in the Memory Bank that only documents
+that the first one should not have been written. So an uncertain record is
+more expensive than a late one.
+
+The gate itself decides most cases: a criterion whose evidence cannot be
+named is **not met**, and the routing table above then applies. Do **not**
+escalate a weak case — that is simply a "no record", with the reason inline in
+the code.
+
+Escalate only when the outcome is genuinely undecidable **after** the evidence
+has been named — the evidence holds but an exclusion seems to fit too, or the
+criterion depends on a plan nobody has committed to yet (the "second app"
+being discussed but not started). In that case: **do not create the record and
+do not decide it away.** Name the case and the evidence on both sides to the
+user, and ask them to put it to the Hüter-Trio — they own the criteria and
+decide this kind of case. Meanwhile the reasoning goes inline into the code,
+where it is durable and costs nothing to move into a record later.
+
 The criteria and the exclusions are fixed by memory-bank.md §4.2 (like the
-category list) and changed only there. **Declining** a proposed record, and
-**deleting or merging** existing records, are **team decisions** per the same
-section — never something a skill does on its own. Lessons Learned have **no**
-significance gate; they are deliberately low-threshold.
+category list) and changed only there. Two further things go the same route:
+**declining** a proposed record, and **deleting or merging** existing records,
+are **team decisions** per the same section — never something a skill does on
+its own. Lessons Learned have **no** significance gate; they are deliberately
+low-threshold.
 
 ### Form rules for a record
 

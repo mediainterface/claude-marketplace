@@ -204,7 +204,15 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   overrides a formally ticked criterion. The reference carries a negative and a positive example of
   exactly that. The triage runs where a record is **first proposed** — a spec's *Memory Bank*
   section included, so `/create-decision`'s gate never degrades into a rubber stamp for a
-  pre-written record. Past the gate the skill checks the finished record against the **form rules**
+  pre-written record. A gate outcome that stays **unclear after the evidence was named** — the
+  evidence holds and an exclusion seems to fit too, or the criterion rests on a plan nobody has
+  committed to — is not decided by the skill at all: it creates nothing, names both sides, and
+  asks the user to put the case to the Hüter-Trio while the reasoning stays inline in the code.
+  Deliberately not an escape hatch for a weak case (no nameable evidence is simply no record):
+  the escalation exists because a record binds the moment it exists and can only be undone by a
+  second record superseding it, so an uncertain one costs more than a late one. The same rule
+  runs through `hooks/sdd-policy.md`, `/spec-pr` Step 3, and `/pr-review` (where it makes a 🟢
+  naming both sides instead of a demanded record). Past the gate the skill checks the finished record against the **form rules**
   (under 80 lines, no amendments, no spec content — measurements, thresholds, rule catalogs,
   mechanics —, no links to work items/PRs/specs/plans, no justification prose, stands on its own)
   and reports each rule as pass or fail, because a record that carries spec content is the failure
