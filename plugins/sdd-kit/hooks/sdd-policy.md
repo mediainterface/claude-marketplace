@@ -138,11 +138,6 @@ repo-wide/process ones); `apps/<app>/` or `services/<service>/` for
 single-app records, even feature-spanning ones. Details: the
 `sdd-kit:create-decision` skill and its shared reference.
 
-*Maintenance note: this section is a deliberate summary. The source of truth
-is the sdd-kit shared reference (`skills/memory-bank-shared/REFERENCE.md`) —
-the Memory Bank process document references that skill rather than repeating
-the criteria. When the Hüter-Trio changes them there, sync this section.*
-
 ## Generated Markdown: wrap prose at 100 characters
 
 Every Markdown **file** this workflow generates or edits in the repo — the spec, the

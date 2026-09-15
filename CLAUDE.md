@@ -278,10 +278,15 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   PR, with a round complete once every `isRequired` reviewer has seen the code once — evidenced by a
   current vote, an earlier one from the PR's system threads, or a thread they opened, because ADO
   clears votes on every new push. The policy prose also carries a compact **Memory Bank records:
-  significance & placement** section — the four significance criteria plus the
-  smallest-covering-level placement rule, each criterion only counting with **named evidence** and a
-  locality counter-check that overrides a ticked one — so record proposals are filtered at session
-  level, before any skill is invoked. A further cross-cutting section, **Generated Markdown: wrap
+  significance & placement** section — the five significance criteria and the three exclusions
+  plus the smallest-covering-level placement rule, each criterion only counting with **named
+  evidence** and any exclusion overriding a ticked one, an unclear outcome handed to the user for
+  the Hüter-Trio rather than decided — so record proposals are filtered at session level, before
+  any skill is invoked. That section is a deliberate **summary** of
+  `skills/memory-bank-shared/REFERENCE.md` and has to be synced when the Trio changes the gate
+  there; the note saying so used to sit in the policy prose itself, which meant shipping a
+  maintenance instruction into every session's context for no runtime benefit. A further
+  cross-cutting section, **Generated Markdown: wrap
   prose at 100 characters**, sets the line length for every Markdown *file* the workflow writes —
   the superpowers spec and plan included, and every `CLAUDE.md` on any level, which is why it lives
   in the session-level policy rather than in a skill: hard-wrap at 100 at word boundaries,
