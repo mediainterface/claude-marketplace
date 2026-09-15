@@ -94,8 +94,11 @@ experience, a whole-app detail that is neither a product decision nor hard to re
 no record, the reason goes inline into the code.
 
 If it stays undecidable after the evidence is named, the spec PR does **not** carry a
-record: note the open question for the user to put to the Hüter-Trio, keep the reasoning
-inline in the code, and move on. A record guessed at now is binding on merge.
+record — but it does go up: the open question blocks the record, not the spec. State the
+decision and the evidence for and against so the user can forward it, ask them to put it
+to the Hüter-Trio, and say that the record follows separately once the answer is in (you
+cannot reach the Hüter-Trio yourself). The reasoning stays inline in the code meanwhile.
+A record guessed at now is binding on merge.
 
 A record the spec's own *Memory Bank* section already writes out unfiltered turns
 `create-decision`'s gate into a rubber stamp.

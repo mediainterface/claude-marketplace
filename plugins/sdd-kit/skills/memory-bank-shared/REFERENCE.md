@@ -131,10 +131,23 @@ Escalate only when the outcome is genuinely undecidable **after** the evidence
 has been named — the evidence holds but an exclusion seems to fit too, or the
 criterion depends on a plan nobody has committed to yet (the "second app"
 being discussed but not started). In that case: **do not create the record and
-do not decide it away.** Name the case and the evidence on both sides to the
-user, and ask them to put it to the Hüter-Trio — they own the criteria and
-decide this kind of case. Meanwhile the reasoning goes inline into the code,
-where it is durable and costs nothing to move into a record later.
+do not decide it away.**
+
+A skill **cannot involve the Hüter-Trio itself** — it has no way to reach
+them. What it does is hand the case to the user and **stop**:
+
+1. Name the decision, the criterion, and the evidence on **both** sides — what
+   speaks for the record and what speaks against it — in a few lines the user
+   can forward as they are.
+2. Ask the user to put exactly that question to the Hüter-Trio.
+3. **Stop there.** The run ends: no record, no partial file, no "I'll write it
+   and we can revert it". Say plainly that the skill is paused until the answer
+   is in, and that it can be invoked again then.
+4. The reasoning stays inline in the code in the meantime, where it is durable
+   and costs nothing to move into a record later.
+
+Waiting is cheap — the inline reason already carries the "why" — while a
+record written to avoid the wait is binding and needs a second record to undo.
 
 The criteria and the exclusions are fixed by memory-bank.md §4.2 (like the
 category list) and changed only there. Two further things go the same route:

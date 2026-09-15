@@ -104,15 +104,18 @@ the record is **first proposed**, a spec's *Memory Bank* section included.
 **Declining** a record, and deleting or merging existing ones, are team
 decisions — never done on the spot.
 
-**If the gate stays unclear, do not decide it — involve the Hüter-Trio.** A
-weak case is not that: a criterion without nameable evidence is simply not met
-and gets no record. But when it stays undecidable after the evidence is named
-— the evidence holds and an exclusion seems to fit too, or the criterion rests
-on a plan nobody has committed to — create nothing. Name the case and the
-evidence on both sides to the user, ask them to put it to the Hüter-Trio, and
-keep the reasoning inline in the code until then. A record is binding the
-moment it exists and can only be undone by a second one superseding it, so an
-uncertain record costs more than a late one.
+**If the gate stays unclear, do not decide it — hand it to the user for the
+Hüter-Trio and stop.** A weak case is not that: a criterion without nameable
+evidence is simply not met and gets no record. But when it stays undecidable
+after the evidence is named — the evidence holds and an exclusion seems to fit
+too, or the criterion rests on a plan nobody has committed to — create
+nothing. You cannot reach the Hüter-Trio; the user does. So state the decision
+and the evidence **for and against** in a form they can forward unchanged, ask
+them to put it to the Hüter-Trio, and say that the record is on hold until the
+answer is in. Keep the reasoning inline in the code meanwhile, and do not
+write the record "provisionally": it is binding the moment it exists and can
+only be undone by a second one superseding it, so an uncertain record costs
+more than a late one.
 
 A record that does pass also holds its form:
 

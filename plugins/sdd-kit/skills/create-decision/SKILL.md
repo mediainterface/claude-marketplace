@@ -68,16 +68,28 @@ behavior or dev experience; a detail touching the whole app that is neither a
 product decision nor hard to revise. Any of them → **no record**. Say which
 one bit, suggest an inline reason in the code, and stop.
 
-**When the gate stays unclear, stop and involve the Hüter-Trio** (see **When
-the gate is genuinely unclear** in the shared reference). This is not the
-escape hatch for a weak case — a criterion without nameable evidence is
-simply not met, and that is a "no record". It is for the case that stays
+**When the gate stays unclear, this skill stops here** (see **When the gate
+is genuinely unclear** in the shared reference). This is not the escape hatch
+for a weak case — a criterion without nameable evidence is simply not met, and
+that is a "no record", routed per the table. It is for the case that stays
 undecidable *after* the evidence was named: the evidence holds but an
 exclusion seems to fit too, or the criterion rests on something nobody has
-committed to yet. Then create **nothing**: name the case and the evidence on
-both sides, ask the user to put it to the Hüter-Trio, and keep the reasoning
-inline in the code until they decide. A record written on a hunch is binding
-at once and can only be undone by a second record superseding it.
+committed to yet.
+
+Then create **nothing** and do **not** continue to Step 3. You cannot reach
+the Hüter-Trio yourself, so hand the case over and pause:
+
+- State the decision, the criterion, and the evidence for **and** against, so
+  the user can forward it unchanged.
+- Ask the user to put that question to the Hüter-Trio.
+- Tell them the skill is paused until the answer is in, and that they invoke
+  `/create-decision` again afterwards — with the answer, the gate is a
+  one-liner.
+- Suggest the inline reason in the code as the interim home of the reasoning.
+
+Do not offer to write the record "provisionally" and revert it later: it is
+binding the moment it exists and can only be undone by a second record
+superseding it.
 
 The criteria and exclusions come from `memory-bank.md` §4.2 and are changed
 only there. Do not create a record the gate refused on insistence —
