@@ -188,20 +188,34 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
 - **Skill** (`plugins/sdd-kit/skills/create-decision/SKILL.md`): `/create-decision` — documents
   decisions in the Memory Bank as Decision Records, named `docs/decisions/YYYY-MM-DD-<title>.md`
   (date-based like learnings, so parallel branches don't collide on a "next number"; legacy `NNNN-…`
-  records coexist and are never renamed). Applies a **hard significance gate** (record only on
-  structural impact, hard-to-reverse, precedent, or cross-cutting — otherwise routes to a
-  convention, a learning, or an inline reason in the code — never to the spec, which does not
-  survive the story). The criteria themselves are the Hüter-Trio's; what the skills control is
-  **how** they are checked: each criterion counts only with **evidence named out loud to the user**
-  (which existing pattern changes — an interface following the project's established pattern applies
-  a decision rather than making one; the second place that exists *today*; the concrete
-  features/apps/teams; the revert cost), and a **locality counter-check** overrides a formally
-  ticked criterion (one spot, one feature, cheap revert → an inline reason at the code, no record).
-  The reference carries a negative and a positive example of exactly that. The triage runs where a
-  record is **first proposed** — a spec's *Memory Bank* section included, so `/create-decision`'s
-  gate never degrades into a rubber stamp for a pre-written record. The skill also places the record
-  on the right **Memory Bank level** (`docs/decisions/` of the smallest directory subtree containing
-  everyone affected — repo root, `apps/<app>/`, `services/<service>/`, …). Gate, placement rule,
+  records coexist and are never renamed). Applies a **hard significance gate** — the five criteria
+  and three exclusions of `docs/processes/memory-bank/memory-bank.md` §4.2 (record only when the
+  decision is hard to reverse and expensive to change, spares the team the next decision, is a
+  product decision to be protected from silent rollback, breaks an existing pattern, or is
+  cross-cutting; and no exclusion bites: only one feature without effect on others, nothing changed
+  about appearance/stability/behavior/dev experience, or a whole-app detail that is neither a
+  product decision nor hard to revise). Otherwise it routes to a convention, a learning, a
+  `CLAUDE.md`, or an inline reason in the code — never to the spec, which does not survive the
+  story. The criteria themselves live in memory-bank.md and are mirrored here, not owned here; what
+  the skills control is **how** they are checked: each criterion counts only with **evidence named
+  out loud to the user** (which existing pattern it breaks — an interface following the project's
+  established pattern applies a decision rather than breaking one; the next case the rule decides;
+  what the user notices; the concrete features/apps/teams; the revert cost), and any **exclusion**
+  overrides a formally ticked criterion. The reference carries a negative and a positive example of
+  exactly that. The triage runs where a record is **first proposed** — a spec's *Memory Bank*
+  section included, so `/create-decision`'s gate never degrades into a rubber stamp for a
+  pre-written record. Past the gate the skill checks the finished record against the **form rules**
+  (under 80 lines, no amendments, no spec content — measurements, thresholds, rule catalogs,
+  mechanics —, no links to work items/PRs/specs/plans, no justification prose, stands on its own)
+  and reports each rule as pass or fail, because a record that carries spec content is the failure
+  mode that actually occurs. The body is MADR **reduced to four sections** — *Context and problem*
+  (one paragraph), *Considered options*, *Decision* (chosen option plus bullets with the reasoning
+  and the rejected alternatives inline), *Consequences*: "Decision drivers" and the per-option
+  pros-and-cons list are gone, both only repeated the context and the decision. Declining a record,
+  and deleting or merging existing ones, are **team decisions** per §4.2 — the skill never does
+  either on a single user's insistence. The skill also places the record on the right **Memory Bank
+  level** (`docs/decisions/` of the smallest directory subtree containing everyone affected — repo
+  root, `apps/<app>/`, `services/<service>/`, …). Gate, exclusions, form rules, placement rule,
   delta principle, and the **100-character line-length rule** for every file the skills write live
   in `skills/memory-bank-shared/REFERENCE.md` (a non-skill shared reference, pattern as
   `ado-shared`).

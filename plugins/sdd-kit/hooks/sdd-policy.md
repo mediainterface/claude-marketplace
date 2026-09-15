@@ -64,29 +64,51 @@ state yourself.
 ## Memory Bank records: significance & placement
 
 Before proposing or creating a Decision Record, apply the significance
-triage: a record is warranted only if the decision has **structural
-impact** (structure, interfaces, dependencies, or quality attributes), is
-**hard to reverse**, sets a **precedent** future code should follow, or is
-**cross-cutting** (spans features, apps, or teams). Otherwise do not
-propose one — a recurring coding rule belongs in `.claude/rules/`
-(convention), an observed pitfall in `/create-lesson-learned`, and a
-one-off local design choice inline in the code as its own reason. The
-spec and the PR description are **not** a storage location: both are
-transient.
+triage: a record is warranted only if **at least one** criterion applies
+and **no exclusion** does. Criteria: **hard to reverse** and expensive to
+change (stack, load-bearing library, stored data format, build/distribution
+mechanism), **eases the team's future decisions** (a rule the next feature
+applies without re-deciding), a **product decision to be protected** from
+silent rollback, **breaks an existing pattern**, or **cross-cutting** (shapes
+several features durably, and different implementations would behave
+differently for the user). Exclusions: it concerns only one feature with no
+effect on others; it changes nothing about appearance, stability, behavior or
+dev experience; it is a detail touching the whole app that is neither a
+product decision nor hard to revise.
+
+Otherwise do not propose one — a recurring coding rule belongs in
+`.claude/rules/` (convention), an observed pitfall in
+`/create-lesson-learned`, a project-level instruction in the `CLAUDE.md` of
+that level, and a one-off local design choice inline in the code as its own
+reason. The spec and the PR description are **not** a storage location: both
+are transient.
 
 A criterion counts only with **named evidence**, and you name it to the user
 when you affirm it:
 
-- **Structural impact** — which existing pattern *changes*. One that follows
-  the project's established pattern applies a decision, it does not make one.
-- **Hard to reverse** — what a revert costs.
-- **Precedent** — the second place that exists **today**.
+- **Hard to reverse** — what a revert costs, and which of stack / library /
+  data format / build mechanism it is.
+- **Eases future decisions** — the next case the rule decides without
+  re-deciding.
+- **Product decision** — what the user notices, and who would roll it back
+  unknowingly.
+- **Breaks a pattern** — which existing pattern it breaks. One that follows
+  the project's established pattern applies a decision, it does not break one.
 - **Cross-cutting** — the concrete features, apps, or teams.
 
-Even with a criterion ticked, behavior that sits at one spot, in one feature,
-and is cheap to revert gets an **inline reason in the code**, not a record.
-This applies where the record is first proposed, a spec's *Memory Bank*
-section included.
+An exclusion overrides a ticked criterion: behavior that sits at one spot, in
+one feature, gets an **inline reason in the code**, not a record. This applies
+where the record is first proposed, a spec's *Memory Bank* section included.
+**Declining** a record, and deleting or merging existing ones, are team
+decisions — never done on the spot.
+
+A record that does pass also holds its form: **under 80 lines**, no
+amendments, no spec content (measurements, thresholds, rule catalogs,
+mechanics), no links to work items, PRs, specs or plans, no justification
+prose, and it stands on its own. Body sections: *Context and problem* (one
+paragraph), *Considered options*, *Decision* (chosen option plus bullets with
+the reasoning and the rejected alternatives), *Consequences* — no "Decision
+drivers" and no per-option pros-and-cons list.
 
 Records live on Memory Bank **levels**: place each record in the
 `docs/decisions/` (or `docs/learnings/`) of the right level. A record
@@ -96,9 +118,10 @@ repo-wide/process ones); `apps/<app>/` or `services/<service>/` for
 single-app records, even feature-spanning ones. Details: the
 `sdd-kit:create-decision` skill and its shared reference.
 
-*Maintenance note: this section is a deliberate summary — the source of truth
-is the sdd-kit shared reference (`skills/memory-bank-shared/REFERENCE.md`).
-When the Hüter-Trio changes the criteria there, sync this section.*
+*Maintenance note: this section is a deliberate summary. The source of truth
+is `docs/processes/memory-bank/memory-bank.md` §4.2, mirrored in the sdd-kit
+shared reference (`skills/memory-bank-shared/REFERENCE.md`). When the criteria
+change there, sync this section.*
 
 ## Generated Markdown: wrap prose at 100 characters
 
