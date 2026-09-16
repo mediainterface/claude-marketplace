@@ -700,9 +700,9 @@ The language contract:
   (hard to reverse / eases future decisions / protected product decision / breaks a pattern /
   cross-cutting). Without a criterion there is no finding; a coding rule goes to
   `.claude/rules/`, a pitfall to `create-lesson-learned`.
-- A criterion ticked without evidence from this codebase („berührt Interfaces", „setzt Präzedenz")
-  → name the pattern it breaks and the next case the rule would decide, or the criterion does not
-  hold. A speculative next case is not a case.
+- A criterion ticked without evidence from this codebase („berührt Interfaces", „erleichtert
+  künftige Entscheidungen") → name the pattern it breaks and the next case the rule would decide,
+  or the criterion does not hold. A speculative next case is not a case.
 - An ADR demanded for behavior that sits at one spot in one feature and reverts in a line → the
   exclusions beat a formally ticked criterion. That case wants an inline reason at the code.
 - About to ask for a spec or plan to be deleted in a PR whose diff is nothing but spec and doc

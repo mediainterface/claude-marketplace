@@ -380,8 +380,8 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   words, at most three sentences — binding from the moment a subagent writes a finding, not only at
   posting time. The ADR dimension reads decision records from **every Memory Bank level** above the
   changed paths and applies the shared **significance triage** before proposing a missing record — a
-  criterion counts only with evidence named from this codebase, and the locality counter-check keeps
-  a one-spot, cheap-to-revert behavior out of the findings even when a criterion formally ticks; it
+  criterion counts only with evidence named from this codebase, and the three exclusions keep a
+  one-feature, cheap-to-revert behavior out of the findings even when a criterion formally ticks; it
   also carries the **spec/plan counter-check** — this review is where the story's spec and plan are
   removed, so it first flags reasoning that lives only in them (🟡, anchored at the code it concerns)
   and then the undeleted files themselves (🟢, 🟡 past the first review round, judged from three
