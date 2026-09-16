@@ -257,19 +257,27 @@ Runs when Phase A.5 classified this as an implementation PR. Skip this whole set
    - **Makes a new lasting decision without an ADR**: a new technology or dependency, a new
      cross-cutting pattern, or a deliberate deviation from an existing convention that future
      readers will ask "why?" about. Run it through the **significance triage** before proposing
-     anything (structural impact / hard to reverse / precedent / cross-cutting — see
+     anything (hard to reverse / eases future decisions / protected product decision / breaks a
+     pattern / cross-cutting — see
      [../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md)): a one-off local
      choice is **no finding**, a recurring coding rule belongs in `.claude/rules/`, an observed
      pitfall in `sdd-kit:create-lesson-learned`. A criterion counts only with **evidence you can
      name from this codebase**:
-     - **Structural impact** — the existing pattern the change *replaces*. One that follows the
-       established feature/route pattern applies a decision, it doesn't make one.
-     - **Hard to reverse** — what a revert costs.
-     - **Precedent** — the second place that exists **today**.
+     - **Hard to reverse** — what a revert costs, and which of stack / library / data format /
+       build mechanism it is.
+     - **Eases future decisions** — the next case the rule decides without re-deciding.
+     - **Product decision** — what the user notices, and who would roll it back unknowingly.
+     - **Breaks a pattern** — the existing pattern the change *replaces*. One that follows the
+       established feature/route pattern applies a decision, it doesn't break one.
      - **Cross-cutting** — the concrete features/apps/teams.
 
-     The **locality counter-check** applies even when a criterion held: one spot, one feature,
-     cheap revert → **no ADR finding**, at most a 🟢 asking for an inline reason in the code.
+     The three **exclusions** apply even when a criterion held — one feature without effect on
+     others, nothing changed about appearance/stability/behavior/dev experience, a whole-app
+     detail that is neither a product decision nor hard to revise → **no ADR finding**, at most
+     a 🟢 asking for an inline reason in the code. Undecidable even after the evidence is
+     named — evidence and exclusion both fitting — is a 🟢 that names both sides and suggests
+     putting the case to the Hüter-Trio, never a demanded record: the author would write one
+     that a second record has to supersede.
      Only when a criterion is met, propose the ADR:
      suggest a title, the one-sentence decision it should capture, and the **level** it belongs
      on (the smallest level whose subtree covers everyone affected — the app's `docs/decisions/`
@@ -428,9 +436,11 @@ what the spec **proposes** instead of to code that exists.
   `Deprecated`, or `Declined` decision plans against an outdated one. Point to what applies now.
 - **Does the spec take a decision that needs a record?** Run the **significance triage** from
   [../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md) with its evidence
-  named from this codebase — the existing pattern that changes, the second place that exists
-  **today**, the concrete features/apps/teams, the revert cost — then the **locality
-  counter-check**: one spot, one feature, cheap revert → no record, an inline reason in the code.
+  named from this codebase — the existing pattern it breaks, the next case the rule decides, what
+  the user notices, the concrete features/apps/teams, the revert cost — then the three
+  **exclusions**: one feature without effect on others, nothing changed about
+  appearance/stability/behavior/dev experience, a whole-app detail that is neither a product
+  decision nor hard to revise → no record, an inline reason in the code.
   A record the spec's own *Memory Bank* section already writes out gets the same triage as one
   that is merely proposed, including the records riding along in this PR (`/spec-pr` bundles
   them deliberately, so they are under review here too).
@@ -687,14 +697,14 @@ The language contract:
 - Only the root `docs/decisions/` was read in a repo with app or service levels → a record in
   `apps/<app>/docs/decisions/` binds every change inside that app. Glob all levels.
 - A missing-ADR finding for a one-off local choice → the significance triage comes first
-  (structural impact / hard to reverse / precedent / cross-cutting). Without a criterion there is
-  no finding; a coding rule goes to `.claude/rules/`, a pitfall to `create-lesson-learned`.
-- A criterion ticked without evidence from this codebase („berührt Interfaces", „setzt Präzedenz")
-  → name the pattern that changes and the second place that exists **today**, or the criterion
-  does not hold. A speculative second place is not a place.
+  (hard to reverse / eases future decisions / protected product decision / breaks a pattern /
+  cross-cutting). Without a criterion there is no finding; a coding rule goes to
+  `.claude/rules/`, a pitfall to `create-lesson-learned`.
+- A criterion ticked without evidence from this codebase („berührt Interfaces", „erleichtert
+  künftige Entscheidungen") → name the pattern it breaks and the next case the rule would decide,
+  or the criterion does not hold. A speculative next case is not a case.
 - An ADR demanded for behavior that sits at one spot in one feature and reverts in a line → the
-  locality counter-check beats a formally ticked criterion. That case wants an inline reason at
-  the code.
+  exclusions beat a formally ticked criterion. That case wants an inline reason at the code.
 - About to ask for a spec or plan to be deleted in a PR whose diff is nothing but spec and doc
   files → that is a **spec PR**, and the spec is what it exists to submit. The deletion belongs in
   the PR that implements the story, never here. Phase A.5 should have routed to C-S, where the
@@ -762,8 +772,8 @@ The language contract:
 | Review reported without checking the decision records | The ADR dimension is mandatory on every review — no decision records found is a reported result, not a skip. |
 | Only the root `docs/decisions/` read, nested levels ignored | Records live on Memory Bank levels — glob every `docs/decisions/` above the changed paths (`apps/*/`, `services/*/`, root). |
 | A missing ADR claimed for a one-off local choice | Apply the significance triage first; below the bar it is a convention, a lesson learned, or nothing. |
-| A criterion affirmed on a formality („legt IPC-Kanäle an" = Interfaces, „künftige Fälle" = Präzedenz) | Each criterion needs evidence from this codebase: the pattern that changes, the second place existing **today**, the concrete features/apps/teams, the revert cost. No evidence, no criterion. |
-| ADR demanded although the behavior sits at one spot and reverts in a line | The locality counter-check overrides a ticked criterion — one spot, one feature, cheap revert → an inline reason in the code, no record. |
+| A criterion affirmed on a formality („legt IPC-Kanäle an" = bricht ein Pattern, „künftige Fälle" = erleichtert Entscheidungen) | Each criterion needs evidence from this codebase: the pattern it breaks, the next case the rule decides, what the user notices, the concrete features/apps/teams, the revert cost. No evidence, no criterion. |
+| ADR demanded although the behavior sits at one spot and reverts in a line | The exclusions override a ticked criterion — one feature without effect on others, nothing changed about appearance/stability/behavior/dev experience → an inline reason in the code, no record. |
 | Green tests taken as proof, tests only counted | Ask per test: would it fail if the behavior were wrong? Name the production-code change that turns it red. |
 | A test that mirrors the code (mock-call assertions, tautologies, `toBeDefined()`) waved through | It cannot fail by construction and reads as coverage forever — at least 🟡, with the sabotage that stays green in the suggestion. |
 | Bugfix merged without a test reproducing the bug | Ask for the regression test at the lowest level where the bug is reproducible. |

@@ -188,20 +188,50 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
 - **Skill** (`plugins/sdd-kit/skills/create-decision/SKILL.md`): `/create-decision` — documents
   decisions in the Memory Bank as Decision Records, named `docs/decisions/YYYY-MM-DD-<title>.md`
   (date-based like learnings, so parallel branches don't collide on a "next number"; legacy `NNNN-…`
-  records coexist and are never renamed). Applies a **hard significance gate** (record only on
-  structural impact, hard-to-reverse, precedent, or cross-cutting — otherwise routes to a
-  convention, a learning, or an inline reason in the code — never to the spec, which does not
-  survive the story). The criteria themselves are the Hüter-Trio's; what the skills control is
-  **how** they are checked: each criterion counts only with **evidence named out loud to the user**
-  (which existing pattern changes — an interface following the project's established pattern applies
-  a decision rather than making one; the second place that exists *today*; the concrete
-  features/apps/teams; the revert cost), and a **locality counter-check** overrides a formally
-  ticked criterion (one spot, one feature, cheap revert → an inline reason at the code, no record).
-  The reference carries a negative and a positive example of exactly that. The triage runs where a
-  record is **first proposed** — a spec's *Memory Bank* section included, so `/create-decision`'s
-  gate never degrades into a rubber stamp for a pre-written record. The skill also places the record
-  on the right **Memory Bank level** (`docs/decisions/` of the smallest directory subtree containing
-  everyone affected — repo root, `apps/<app>/`, `services/<service>/`, …). Gate, placement rule,
+  records coexist and are never renamed). Applies a **hard significance gate** — the five criteria
+  and three exclusions of `skills/memory-bank-shared/REFERENCE.md` (record only when the
+  decision is hard to reverse and expensive to change, spares the team the next decision, is a
+  product decision to be protected from silent rollback, breaks an existing pattern, or is
+  cross-cutting; and no exclusion bites: only one feature without effect on others, nothing changed
+  about appearance/stability/behavior/dev experience, or a whole-app detail that is neither a
+  product decision nor hard to revise). Otherwise it routes to a convention, a learning, a
+  `CLAUDE.md`, or an inline reason in the code — never to the spec, which does not survive the
+  story. The criteria live **here** — the shared reference is their single source of truth, and
+  the Memory Bank process document (`docs/processes/memory-bank/memory-bank.md`) references this
+  skill instead of repeating them, so they cannot drift apart in two places; changing them is the
+  Hüter-Trio's call. What the skills add on top is **how** the criteria are checked: each
+  criterion counts only with **evidence named
+  out loud to the user** (which existing pattern it breaks — an interface following the project's
+  established pattern applies a decision rather than breaking one; the next case the rule decides;
+  what the user notices; the concrete features/apps/teams; the revert cost), and any **exclusion**
+  overrides a formally ticked criterion. The reference carries a negative and a positive example of
+  exactly that. The triage runs where a record is **first proposed** — a spec's *Memory Bank*
+  section included, so `/create-decision`'s gate never degrades into a rubber stamp for a
+  pre-written record. A gate outcome that stays **unclear after the evidence was named** — the
+  evidence holds and an exclusion seems to fit too, or the criterion rests on a plan nobody has
+  committed to — is not decided by the skill at all: it creates nothing and **stops**. A skill
+  cannot reach the Hüter-Trio, so it states the decision and the evidence for and against in a
+  form the user can forward unchanged, asks *them* to put the case to the Trio, and says it is
+  paused until the answer is in — no record written "provisionally", no partial file, with the
+  reasoning staying inline in the code meanwhile. `/spec-pr` is the one exception in direction:
+  there the open question holds back the *record*, not the spec PR, which goes up without it.
+  Deliberately not an escape hatch for a weak case (no nameable evidence is simply no record):
+  the escalation exists because a record binds the moment it exists and can only be undone by a
+  second record superseding it, so an uncertain one costs more than a late one. The same rule
+  runs through `hooks/sdd-policy.md`, `/spec-pr` Step 3, and `/pr-review` (where it makes a 🟢
+  naming both sides and pointing at the Trio, instead of a demanded record). Past the gate the
+  skill checks the finished record against the **form rules**
+  (under 80 lines, no amendments, no spec content — measurements, thresholds, rule catalogs,
+  mechanics —, no links to work items/PRs/specs/plans, no justification prose, stands on its own)
+  and reports each rule as pass or fail, because a record that carries spec content is the failure
+  mode that actually occurs. The body is MADR **reduced to four sections** — *Context and problem*
+  (one paragraph), *Considered options*, *Decision* (chosen option plus bullets with the reasoning
+  and the rejected alternatives inline), *Consequences*: "Decision drivers" and the per-option
+  pros-and-cons list are gone, both only repeated the context and the decision. Declining a record,
+  and deleting or merging existing ones, are **team decisions** — the skill never does either on
+  a single user's insistence. The skill also places the record on the right **Memory Bank
+  level** (`docs/decisions/` of the smallest directory subtree containing everyone affected — repo
+  root, `apps/<app>/`, `services/<service>/`, …). Gate, exclusions, form rules, placement rule,
   delta principle, and the **100-character line-length rule** for every file the skills write live
   in `skills/memory-bank-shared/REFERENCE.md` (a non-skill shared reference, pattern as
   `ado-shared`).
@@ -248,10 +278,15 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   PR, with a round complete once every `isRequired` reviewer has seen the code once — evidenced by a
   current vote, an earlier one from the PR's system threads, or a thread they opened, because ADO
   clears votes on every new push. The policy prose also carries a compact **Memory Bank records:
-  significance & placement** section — the four significance criteria plus the
-  smallest-covering-level placement rule, each criterion only counting with **named evidence** and a
-  locality counter-check that overrides a ticked one — so record proposals are filtered at session
-  level, before any skill is invoked. A further cross-cutting section, **Generated Markdown: wrap
+  significance & placement** section — the five significance criteria and the three exclusions
+  plus the smallest-covering-level placement rule, each criterion only counting with **named
+  evidence** and any exclusion overriding a ticked one, an unclear outcome handed to the user for
+  the Hüter-Trio rather than decided — so record proposals are filtered at session level, before
+  any skill is invoked. That section is a deliberate **summary** of
+  `skills/memory-bank-shared/REFERENCE.md` and has to be synced when the Trio changes the gate
+  there; the note saying so used to sit in the policy prose itself, which meant shipping a
+  maintenance instruction into every session's context for no runtime benefit. A further
+  cross-cutting section, **Generated Markdown: wrap
   prose at 100 characters**, sets the line length for every Markdown *file* the workflow writes —
   the superpowers spec and plan included, and every `CLAUDE.md` on any level, which is why it lives
   in the session-level policy rather than in a skill: hard-wrap at 100 at word boundaries,
@@ -345,8 +380,8 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   words, at most three sentences — binding from the moment a subagent writes a finding, not only at
   posting time. The ADR dimension reads decision records from **every Memory Bank level** above the
   changed paths and applies the shared **significance triage** before proposing a missing record — a
-  criterion counts only with evidence named from this codebase, and the locality counter-check keeps
-  a one-spot, cheap-to-revert behavior out of the findings even when a criterion formally ticks; it
+  criterion counts only with evidence named from this codebase, and the three exclusions keep a
+  one-feature, cheap-to-revert behavior out of the findings even when a criterion formally ticks; it
   also carries the **spec/plan counter-check** — this review is where the story's spec and plan are
   removed, so it first flags reasoning that lives only in them (🟡, anchored at the code it concerns)
   and then the undeleted files themselves (🟢, 🟡 past the first review round, judged from three

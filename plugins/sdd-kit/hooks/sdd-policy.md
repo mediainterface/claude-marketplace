@@ -64,29 +64,71 @@ state yourself.
 ## Memory Bank records: significance & placement
 
 Before proposing or creating a Decision Record, apply the significance
-triage: a record is warranted only if the decision has **structural
-impact** (structure, interfaces, dependencies, or quality attributes), is
-**hard to reverse**, sets a **precedent** future code should follow, or is
-**cross-cutting** (spans features, apps, or teams). Otherwise do not
-propose one — a recurring coding rule belongs in `.claude/rules/`
-(convention), an observed pitfall in `/create-lesson-learned`, and a
-one-off local design choice inline in the code as its own reason. The
-spec and the PR description are **not** a storage location: both are
-transient.
+triage: a record is warranted only if **at least one** criterion applies and
+**no exclusion** does.
 
 A criterion counts only with **named evidence**, and you name it to the user
-when you affirm it:
+when you affirm it — the evidence each one needs is in brackets:
 
-- **Structural impact** — which existing pattern *changes*. One that follows
-  the project's established pattern applies a decision, it does not make one.
-- **Hard to reverse** — what a revert costs.
-- **Precedent** — the second place that exists **today**.
-- **Cross-cutting** — the concrete features, apps, or teams.
+- **Hard to reverse** and expensive to change — the stack, a load-bearing
+  library, a stored data format, the build or distribution mechanism. *(What
+  a revert costs, and which of the four it is.)*
+- **Eases the team's future decisions** — a rule the next feature applies
+  without deciding the question again. *(The next case the rule decides.)*
+- **Product decision to be protected** from being silently rolled back.
+  *(What the user notices, and who would roll it back unknowingly.)*
+- **Breaks an existing pattern.** *(Which pattern. One that follows the
+  project's established pattern applies a decision, it does not break one.)*
+- **Cross-cutting** — it shapes several features durably, and different
+  implementations would behave differently for the user. *(The concrete
+  features, apps, or teams.)*
 
-Even with a criterion ticked, behavior that sits at one spot, in one feature,
-and is cheap to revert gets an **inline reason in the code**, not a record.
-This applies where the record is first proposed, a spec's *Memory Bank*
-section included.
+Exclusions, each of which overrides a ticked criterion:
+
+- It concerns **only one feature** and has no effect on others.
+- It changes nothing about **appearance, stability, behavior, or developer
+  experience**.
+- It is a **detail that touches the whole app** but is neither a product
+  decision nor hard to revise.
+
+Otherwise do not propose one — a recurring coding rule belongs in
+`.claude/rules/` (convention), an observed pitfall in
+`/create-lesson-learned`, a project-level instruction in the `CLAUDE.md` of
+that level, and a one-off local design choice inline in the code as its own
+reason. The spec and the PR description are **not** a storage location: both
+are transient.
+
+Behavior that an exclusion catches — sitting at one spot, in one feature —
+gets an **inline reason in the code**, not a record. All of this applies where
+the record is **first proposed**, a spec's *Memory Bank* section included.
+**Declining** a record, and deleting or merging existing ones, are team
+decisions — never done on the spot.
+
+**If the gate stays unclear, do not decide it — hand it to the user for the
+Hüter-Trio and stop.** A weak case is not that: a criterion without nameable
+evidence is simply not met and gets no record. But when it stays undecidable
+after the evidence is named — the evidence holds and an exclusion seems to fit
+too, or the criterion rests on a plan nobody has committed to — create
+nothing. You cannot reach the Hüter-Trio; the user does. So state the decision
+and the evidence **for and against** in a form they can forward unchanged, ask
+them to put it to the Hüter-Trio, and say that the record is on hold until the
+answer is in. Keep the reasoning inline in the code meanwhile, and do not
+write the record "provisionally": it is binding the moment it exists and can
+only be undone by a second one superseding it, so an uncertain record costs
+more than a late one.
+
+A record that does pass also holds its form:
+
+- **Under 80 lines** (the file, not the line width).
+- **No amendments** — a changed decision is superseded by a new record.
+- **No spec content** — no measurements, thresholds, rule catalogs, mechanics.
+- **No links** to work items, PRs, specs, or plans.
+- **No justification prose**, and the record stands on its own.
+
+Body sections: *Context and problem* (one paragraph), *Considered options*,
+*Decision* (chosen option plus bullets with the reasoning and the rejected
+alternatives), *Consequences* — no "Decision drivers" and no per-option
+pros-and-cons list.
 
 Records live on Memory Bank **levels**: place each record in the
 `docs/decisions/` (or `docs/learnings/`) of the right level. A record
@@ -95,10 +137,6 @@ the repo root only for matters spanning multiple apps/services (or
 repo-wide/process ones); `apps/<app>/` or `services/<service>/` for
 single-app records, even feature-spanning ones. Details: the
 `sdd-kit:create-decision` skill and its shared reference.
-
-*Maintenance note: this section is a deliberate summary — the source of truth
-is the sdd-kit shared reference (`skills/memory-bank-shared/REFERENCE.md`).
-When the Hüter-Trio changes the criteria there, sync this section.*
 
 ## Generated Markdown: wrap prose at 100 characters
 

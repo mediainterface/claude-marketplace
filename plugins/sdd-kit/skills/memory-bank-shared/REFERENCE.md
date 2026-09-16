@@ -26,9 +26,9 @@ index.
 
 Spanning multiple apps or services / process / repo-wide baselines → repo
 root. Anything that affects a single app → that app's directory — **even
-when it spans several features inside that app** (significance criterion 4
-can be met by a feature-spanning decision; significance and placement are
-independent questions). Several sibling services → their common parent
+when it spans several features inside that app** (the cross-cutting
+criterion can be met by a feature-spanning decision; significance and
+placement are independent questions). Several sibling services → their common parent
 (e.g. `services/`).
 
 ## Delta principle
@@ -56,15 +56,35 @@ the same supersede mechanism used for any revised decision.
 
 ## Significance triage
 
-A decision deserves a Decision Record only if **at least one** criterion
-applies:
+This section is the **single source of truth** for the gate. The Memory Bank
+process document (`docs/processes/memory-bank/memory-bank.md`) points at this
+skill instead of repeating the criteria — deliberately, so they are not
+maintained in two places and cannot drift apart. Changes to the criteria or
+the exclusions are the **Hüter-Trio's** call and land as a change to this
+file.
 
-1. **Structural impact** — it affects structure, interfaces, dependencies,
-   or quality attributes (security, performance, accessibility, …).
-2. **Hard to reverse** — undoing it would be expensive or risky.
-3. **Precedent** — it sets a first-of-a-kind pattern future code should
-   follow.
-4. **Cross-cutting** — it spans features, apps, or teams.
+A decision deserves a Decision Record only if **at least one** criterion
+applies **and no exclusion** does:
+
+1. **Hard to reverse and expensive to change** — the stack, a load-bearing
+   library, a stored data format, the build or distribution mechanism.
+2. **Eases the team's future decisions** — a rule the next feature applies
+   without deciding the question again.
+3. **Product decision to be protected** from being silently rolled back.
+4. **Breaks an existing pattern.**
+5. **Cross-cutting** — it shapes several features durably, and different
+   implementations would behave differently for the user.
+
+### Exclusions
+
+An exclusion **overrides a ticked criterion**. The criteria are or-ed; the
+exclusions are not:
+
+- It concerns **only one feature** and has no effect on others.
+- It changes nothing about **appearance, stability, behavior, or developer
+  experience**.
+- It is a **detail that touches the whole app** but is neither a product
+  decision nor hard to revise.
 
 ### Evidence required
 
@@ -74,26 +94,20 @@ criterion is **not** met, however plausible it reads:
 
 | Criterion | Name this |
 |---|---|
-| Structural impact | which **existing pattern changes**. An interface that follows the project's established pattern (a feature slice, the usual IPC/route layout) *applies* an existing decision — it does not make a new one. |
-| Hard to reverse | what a **revert costs** (files, migrations, released data, other teams). |
-| Precedent | the **second place that exists today** which would have to follow the rule, or whom the rule binds. "If there are ever several" does not count. |
-| Cross-cutting | the concrete **features / apps / teams**. |
+| Hard to reverse | what a **revert costs** (files, migrations, released data, other teams) — and which of stack / library / data format / build mechanism it is. |
+| Eases future decisions | the **next case** the rule would decide without re-deciding. "Someone will need this" does not count. |
+| Product decision | what the **user notices**, and who would roll it back unknowingly. |
+| Breaks a pattern | which **existing pattern** it breaks. An interface that follows the project's established pattern (a feature slice, the usual IPC/route layout) *applies* an existing decision — it does not break one. |
+| Cross-cutting | the concrete **features / apps / teams** shaped by it, and how a different implementation would behave differently for the user. |
 
-### Locality counter-check
-
-This applies **even when a criterion was answered yes**: if the behavior
-sits in **one place**, is confined to **one feature**, and a revert is
-**cheap**, there is **no record** — the reasoning belongs **inline in the
-code**, as its own reason. The four criteria are or-ed; this counter-check
-is not, it overrides a formally ticked criterion.
-
-If none applies — or the counter-check bites — **no Decision Record** is
+If no criterion applies — or an exclusion bites — **no Decision Record** is
 created. Route instead:
 
 | What it actually is | Route |
 |---|---|
 | Recurring "how we write code" rule | Convention in `.claude/rules/` (written manually: short rule + example + optional `paths:` frontmatter) |
 | Observation / pitfall | `/create-lesson-learned` |
+| Project-level instruction (structure, commands, conventions of a subtree) | The `CLAUDE.md` of that level |
 | One-off local design choice | Inline in the code, as its own reason — no record |
 
 **The spec is not a storage location.** A design spec and an implementation
@@ -104,27 +118,82 @@ still needs a durable trace belongs **inline in the code it explains**, never
 in the spec alone. Anything that is needed beyond the story and does clear the
 triage becomes a record before the spec goes away.
 
-The criteria are fixed and changed only by the Hüter-Trio (like the
-category list). Lessons Learned have **no** significance gate — they are
-deliberately low-threshold.
+### When the gate is genuinely unclear: ask the Hüter first
+
+A record is **binding the moment it exists**, and undoing one costs a second
+record that supersedes it — an entry in the Memory Bank that only documents
+that the first one should not have been written. So an uncertain record is
+more expensive than a late one.
+
+The gate itself decides most cases: a criterion whose evidence cannot be
+named is **not met**, and the routing table above then applies. Do **not**
+escalate a weak case — that is simply a "no record", with the reason inline in
+the code.
+
+Escalate only when the outcome is genuinely undecidable **after** the evidence
+has been named — the evidence holds but an exclusion seems to fit too, or the
+criterion depends on a plan nobody has committed to yet (the "second app"
+being discussed but not started). In that case: **do not create the record and
+do not decide it away.**
+
+A skill **cannot involve the Hüter-Trio itself** — it has no way to reach
+them. What it does is hand the case to the user and **stop**:
+
+1. Name the decision, the criterion, and the evidence on **both** sides — what
+   speaks for the record and what speaks against it — in a few lines the user
+   can forward as they are.
+2. Ask the user to put exactly that question to the Hüter-Trio.
+3. **Stop there.** The run ends: no record, no partial file, no "I'll write it
+   and we can revert it". Say plainly that the skill is paused until the answer
+   is in, and that it can be invoked again then.
+4. The reasoning stays inline in the code in the meantime, where it is durable
+   and costs nothing to move into a record later.
+
+Waiting is cheap — the inline reason already carries the "why" — while a
+record written to avoid the wait is binding and needs a second record to undo.
+
+The criteria and the exclusions are fixed (like the category list) and changed
+only by the Hüter-Trio, here in this file. Two further things are **team
+decisions**: **declining** a proposed record, and **deleting or merging**
+existing records — never something a skill does on its own. Lessons Learned
+have **no** significance gate; they are deliberately low-threshold.
+
+### Form rules for a record
+
+A record that passes the gate still has to hold its form. These rules are
+checked against the finished file:
+
+- **Under 80 lines** in total (the file, not the line width — prose is
+  wrapped at 100 characters, see **Line length** below).
+- **No amendments.** A changed decision is superseded by a new record, it is
+  not appended to.
+- **No spec content** — no measurements, thresholds, rule catalogs, or
+  mechanics. Those belong in the code, a convention, or the story.
+- **No links to work items, PRs, specs, or plans.** All four are transient
+  or only readable in context; the record outlives them.
+- **No justification prose.** The decision and its consequences, not an essay
+  defending them.
+- **The record stands on its own.** Cross-references only where two decisions
+  genuinely interlock (the delta principle above being that case).
 
 ### Examples
 
-**No record** — formally tickable, still local: a settings field records the
+**No record** — formally tickable, still excluded: a settings field records the
 key combination the user presses in order to assign a hotkey, and while it
 records, the app's global hotkeys are suspended so they don't fire instead of
-being captured. Claimed *structural impact* (the feature adds two IPC
-channels) and *precedent* (future key-capture fields should suspend them the
-same way). Neither survives the evidence question: the channels follow the
-app's established feature-slice pattern, so they apply an existing decision
-instead of changing one, and there is exactly **one** such field today — the
-second place was speculation, not a place. The suspend/resume sits at one spot
-and a revert is one line → an inline reason in the code.
+being captured. Claimed *breaks a pattern* (the feature adds two IPC
+channels) and *eases future decisions* (future key-capture fields should
+suspend them the same way). Neither survives the evidence question: the
+channels follow the app's established feature-slice pattern, so they apply an
+existing decision instead of breaking one, and there is exactly **one** such
+field today — the next case was speculation, not a case. The first exclusion
+bites as well: one feature, no effect on others → an inline reason in the code.
 
 **Record** — cross-feature communication runs through an owner-side bridge
-store. *Structural impact*: it replaces the direct store imports features
-used before. *Precedent*: toolbar↔editor and session-list↔player both exist
-today and both have to follow it.
+store. *Breaks a pattern*: it replaces the direct store imports features used
+before. *Cross-cutting*: toolbar↔editor and session-list↔player both exist
+today, both have to follow it, and a feature wiring itself up differently
+would behave differently for the user.
 
 ### Where the triage runs
 
@@ -135,11 +204,11 @@ written out in a spec makes the later gate a rubber stamp.
 
 ### Generalize
 
-When a decision passes as a precedent, record the
-generalizable pattern, not the single instance ("cross-feature
-communication via an owner-side bridge store", not "the toolbar↔editor
-store"). The second application of an established pattern gets no new
-record — it follows the existing one.
+When a decision passes because it **eases future decisions** or is
+**cross-cutting**, record the generalizable pattern, not the single instance
+("cross-feature communication via an owner-side bridge store", not "the
+toolbar↔editor store"). The second application of an established pattern gets
+no new record — it follows the existing one.
 
 ## Line length
 

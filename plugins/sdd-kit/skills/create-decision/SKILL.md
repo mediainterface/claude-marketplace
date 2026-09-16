@@ -1,12 +1,13 @@
 ---
 name: create-decision
-description: Creates a new Decision Record in the Memory Bank for significant decisions — technology or structure choices, security/quality baselines, precedent-setting patterns, or cross-cutting changes to ways of working. Use during spec creation or whenever such a decision is made. Triggers on phrases like "decision record", "we decided to", "write a decision", "document the decision", "why did we choose X over Y", or "ADR". Not every decision qualifies — the skill triages significance first and routes implementation details to conventions, learnings, or an inline reason in the code instead.
+description: Creates a new Decision Record in the Memory Bank for significant decisions — hard-to-reverse choices of stack, library, data format or build mechanism, rules that spare the team the next decision, product decisions to be protected from silent rollback, breaks with an existing pattern, and cross-cutting changes. Use during spec creation or whenever such a decision is made. Triggers on phrases like "decision record", "we decided to", "write a decision", "document the decision", "why did we choose X over Y", or "ADR". Not every decision qualifies — the skill applies the significance gate with its exclusions first and routes implementation details to conventions, learnings, a CLAUDE.md, or an inline reason in the code instead, and it checks the finished record against the form rules.
 ---
 
 # Create Decision Record
 
-This skill guides through creating a Decision Record in MADR format and
-places the file on the correct Memory Bank **level**. Decision Records
+This skill guides through creating a Decision Record in the Memory Bank's
+record format (MADR, reduced to four body sections) and places the file on
+the correct Memory Bank **level**. Decision Records
 cover all types of significant decisions, not just architectural ones.
 The category field in the frontmatter indicates what kind of decision it
 is.
@@ -15,8 +16,8 @@ This skill is part of the Memory Bank. Conventions live as Claude Code
 Rules in `.claude/rules/` (auto-loaded). Decisions and learnings live
 under `docs/decisions/` and `docs/learnings/` of their level — the repo
 root for suite-wide records, or an app/service subtree for records that
-concern only that app. Levels, the placement rule, and the significance
-triage are defined in the shared reference:
+concern only that app. Levels, the placement rule, the significance triage
+and the form rules are defined in the shared reference:
 [memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md).
 
 ## Process
@@ -34,37 +35,71 @@ usually invoked right after a decision was made. If it was invoked
 without enough context to judge, first ask the user to state the decision
 in one line, then apply the gate.
 
-Create a record only if **at least one** of the four criteria applies
-(structural impact · hard to reverse · precedent · cross-cutting — the
-definitions and the routing table live in the shared reference, which is
-authoritative). If none applies, **do not create the record**: tell the
-user which criteria failed and route per the **Significance triage**
+Create a record only if **at least one** of the five criteria applies
+**and no exclusion** does (hard to reverse · eases future decisions ·
+product decision to be protected · breaks an existing pattern ·
+cross-cutting — the definitions, the exclusions and the routing table live
+in the shared reference, which is the single source of truth for the gate).
+If no criterion applies, **do not create the record**: tell
+the user which criteria failed and route per the **Significance triage**
 table in the shared reference.
 
 **Say the evidence out loud.** For every criterion you affirm, name the
 criterion *and* its evidence to the user in one line before going on (see
 **Evidence required** in the shared reference):
 
-- **Structural impact** — which existing pattern *changes*.
-- **Hard to reverse** — what a revert costs.
-- **Precedent** — the second place that exists **today**.
-- **Cross-cutting** — the concrete features/apps/teams.
+- **Hard to reverse** — what a revert costs, and whether it is the stack, a
+  load-bearing library, a stored data format, or the build/distribution
+  mechanism.
+- **Eases future decisions** — the next case the rule decides without
+  re-deciding.
+- **Product decision** — what the user notices, and who would roll it back
+  unknowingly.
+- **Breaks a pattern** — which existing pattern it breaks.
+- **Cross-cutting** — the concrete features/apps/teams, and how a different
+  implementation would behave differently for the user.
 
 An unnamed criterion does not count, and a piece of evidence that has to be
 spoken usually falls apart while you speak it.
 
-Then run the **Locality counter-check** even when a criterion held: behavior
-at one spot, confined to one feature, cheap to revert → **no record**. Say
-so, suggest an inline reason in the code, and stop.
+Then check the three **exclusions** even when a criterion held — one feature
+without effect on others; nothing changed about appearance, stability,
+behavior or dev experience; a detail touching the whole app that is neither a
+product decision nor hard to revise. Any of them → **no record**. Say which
+one bit, suggest an inline reason in the code, and stop.
 
-The criteria are fixed and changed only by the Hüter-Trio. Do not create
-a refused record on insistence — ask the user to raise the case with the
-Hüter-Trio instead.
+**When the gate stays unclear, this skill stops here** (see **When the gate
+is genuinely unclear** in the shared reference). This is not the escape hatch
+for a weak case — a criterion without nameable evidence is simply not met, and
+that is a "no record", routed per the table. It is for the case that stays
+undecidable *after* the evidence was named: the evidence holds but an
+exclusion seems to fit too, or the criterion rests on something nobody has
+committed to yet.
 
-When the gate passes as a **precedent**, document the generalizable
-pattern, not the single instance (see **Generalize** in the shared
-reference). The second application of an established pattern gets no new
-record.
+Then create **nothing** and do **not** continue to Step 3. You cannot reach
+the Hüter-Trio yourself, so hand the case over and pause:
+
+- State the decision, the criterion, and the evidence for **and** against, so
+  the user can forward it unchanged.
+- Ask the user to put that question to the Hüter-Trio.
+- Tell them the skill is paused until the answer is in, and that they invoke
+  `/create-decision` again afterwards — with the answer, the gate is a
+  one-liner.
+- Suggest the inline reason in the code as the interim home of the reasoning.
+
+Do not offer to write the record "provisionally" and revert it later: it is
+binding the moment it exists and can only be undone by a second record
+superseding it.
+
+The criteria and exclusions are changed only by the Hüter-Trio, in the shared
+reference. Do not create a record the gate refused on insistence —
+**declining** a record is a team decision, so ask the user to take the case to
+the team.
+
+When the gate passes because the decision **eases future decisions** or is
+**cross-cutting**, document the generalizable pattern, not the single
+instance (see **Generalize** in the shared reference). The second
+application of an established pattern gets no new record.
 
 ### Step 3: Determine the level
 
@@ -104,13 +139,16 @@ written), suggest them instead of asking again.
    - Testing
    - Infrastructure
 3. **Context and problem**: What is the situation? What is the problem?
-4. **Decision drivers**: Which factors influence the decision?
-5. **Considered options**: Which alternatives were evaluated? (at least 2)
-6. **Decision**: Which option was chosen and why?
-7. **Consequences**: What follows from this, positive and negative?
-8. **Deciders**: Who was involved in the decision?
+   (one paragraph)
+4. **Considered options**: Which alternatives were evaluated? (at least 2)
+5. **Decision**: Which option was chosen, why, and why the alternatives were
+   rejected
+6. **Consequences**: What follows from this, positive and negative?
+7. **Deciders**: Who was involved in the decision?
 
-For each considered option, also ask about pros and cons.
+Do **not** ask for decision drivers or for a pros-and-cons list per option.
+Both only repeat the context and the decision; the rejection of each
+alternative is a bullet inside **Decision** instead.
 
 ### Step 5: Create file
 
@@ -153,11 +191,7 @@ deciders: {deciders}
 
 ## Context and problem
 
-{Context and problem}
-
-## Decision drivers
-
-{List of factors}
+{Context and problem, one paragraph}
 
 ## Considered options
 
@@ -165,27 +199,43 @@ deciders: {deciders}
 
 ## Decision
 
-{Chosen option and justification}
+{Chosen option}
 
-### Consequences
+- {Reason the option was chosen}
+- {Rejected alternative and why it was rejected}
+
+## Consequences
 
 - Positive: {positive consequences}
 - Negative: {negative consequences}
-
-## Pros and cons of the options
-
-### {Option 1}
-
-- Good, because {advantage}
-- Bad, because {disadvantage}
-
-### {Option 2}
-
-- Good, because {advantage}
-- Bad, because {disadvantage}
 ```
 
-### Step 6: Update index
+### Step 6: Check the form rules
+
+Check the finished file against the **Form rules for a record** in the shared
+reference and report the result to the user — each rule with pass or fail:
+
+1. **Under 80 lines** — count the lines of the file. Over the limit means the
+   record carries content that belongs elsewhere; shorten it by removing that
+   content (usually spec content or justification prose), not by unwrapping
+   the prose.
+2. **No amendments** — no "Update", "Nachtrag", "Amendment" or dated
+   addition appended below the sections. A changed decision is superseded by
+   a new record.
+3. **No spec content** — no measurements, thresholds, rule catalogs, or
+   mechanics.
+4. **No links to work items, PRs, specs, or plans** — including bare `#123`
+   work item references. A link to another *record* is fine (that is the
+   delta principle).
+5. **No justification prose** — no paragraph defending the decision against
+   an imagined objection.
+6. **Stands on its own** — cross-references only where two decisions really
+   interlock.
+
+Fix every violation before going on. Name each violation and the fix to the
+user; do not silently rewrite.
+
+### Step 7: Update index
 
 Update `{scope}/docs/decisions/README.md` with the new entry. If the
 file does not exist, create it with a heading. The index lists all decisions
@@ -204,7 +254,7 @@ Add the new entry at the end of the table, which keeps it
 chronologically sorted. Never list records of other levels here — every
 level maintains only its own index.
 
-### Step 7: Confirmation
+### Step 8: Confirmation
 
 Show the user:
 - The complete content of the created file
@@ -228,9 +278,11 @@ Show the user:
   last meeting) and only guard — flagging any contradictory or nonsensical
   decision to be declined or revised, and ensuring decisions are applied
   everywhere so the architecture and code do not drift.
-- Decisions are never deleted. When a decision is revised, create a new
-  decision record that supersedes the old one, and set the old record's
-  status to `Superseded by <new record's filename without .md>`.
+- A revised decision is **superseded**, never amended and never deleted by
+  this skill: create a new decision record and set the old record's status to
+  `Superseded by <new record's filename without .md>`. Deleting or merging
+  existing records is possible, but as a **team decision** — not a skill
+  action, and not on a single user's request.
 - Records are never moved between levels by this skill. Migrating legacy
   records (including repos whose records all still sit at the repo root)
   is a project of the affected repo. Promotion to a higher level happens
@@ -241,6 +293,6 @@ Show the user:
   (`NNNN-…`). Leave them exactly as they are — old and new names coexist
   in the same directory. Never renumber or rename existing records:
   renaming is what causes stale references.
-- When the user asks about available categories: the list is fixed and
-  can only be extended by the Hüter-Trio. The same holds for the
-  significance criteria.
+- When the user asks about available categories: the list is fixed and can
+  only be extended by the Hüter-Trio, in the shared reference. The same holds
+  for the five significance criteria and the three exclusions.

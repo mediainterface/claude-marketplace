@@ -70,7 +70,7 @@ Each item has exactly one durable home:
 | The reason a piece of code is the way it is | Inline in the code, as its own reason — noted now, written with the implementation |
 | Requirement, acceptance criterion, scope boundary | The work item (user story) |
 | Recurring "how we write code" rule | A convention in `.claude/rules/` |
-| Significant decision (structural, hard to reverse, precedent, cross-cutting) | A Decision Record → invoke the `create-decision` skill (one record per decision) |
+| Significant decision (hard to reverse, eases future decisions, protected product decision, breaks a pattern, cross-cutting) | A Decision Record → invoke the `create-decision` skill (one record per decision) |
 | Recurring pattern or pitfall | A Lesson Learned → invoke the `create-lesson-learned` skill |
 
 Whatever matters only while this story is being built stays in the spec and goes away
@@ -81,14 +81,27 @@ what becomes a record.
 
 Run that triage **here**, and name the evidence with the criterion:
 
-- **Structural impact** — which existing pattern *changes*.
-- **Hard to reverse** — what a revert costs.
-- **Precedent** — the second place that exists **today**.
+- **Hard to reverse** — what a revert costs, and which of stack / library / data
+  format / build mechanism it is.
+- **Eases future decisions** — the next case the rule decides without re-deciding.
+- **Product decision** — what the user notices, and who would roll it back unknowingly.
+- **Breaks a pattern** — which existing pattern it breaks.
 - **Cross-cutting** — the concrete features/apps/teams.
 
-Then the **locality counter-check** — one spot, one feature, cheap revert → no record,
-the reason goes inline into the code. A record the spec's own *Memory Bank* section
-already writes out unfiltered turns `create-decision`'s gate into a rubber stamp.
+Then the three **exclusions**, any of which overrides a ticked criterion — one feature
+without effect on others, nothing changed about appearance/stability/behavior/dev
+experience, a whole-app detail that is neither a product decision nor hard to revise →
+no record, the reason goes inline into the code.
+
+If it stays undecidable after the evidence is named, the spec PR does **not** carry a
+record — but it does go up: the open question blocks the record, not the spec. State the
+decision and the evidence for and against so the user can forward it, ask them to put it
+to the Hüter-Trio, and say that the record follows separately once the answer is in (you
+cannot reach the Hüter-Trio yourself). The reasoning stays inline in the code meanwhile.
+A record guessed at now is binding on merge.
+
+A record the spec's own *Memory Bank* section already writes out unfiltered turns
+`create-decision`'s gate into a rubber stamp.
 
 Records and lessons created here ride in the **same** PR as the spec — note each
 created file's path from the skills' confirmation output, because Step 5 stages
