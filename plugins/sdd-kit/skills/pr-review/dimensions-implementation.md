@@ -85,14 +85,22 @@ and no other dimension looks for it. Anchor it at the documentation line that no
 **Not this dimension's job:** whether the code is correct (card 3); whether the test suite
 duplicates itself (card 6).
 
-**Severity:** a duplicate that will be maintained twice is 🟡; dead code and platform noise 🟢
-unless it misleads; a doc that now describes the wrong behavior 🟡.
+**Severity:** a duplicate that will be maintained twice is 🟡; a doc that now describes the wrong
+behavior 🟡. **Dead code and platform noise are at least 🟡, never 🟢** — an optional finding is
+the one that does not get posted, and unused code and default-generated config lines are exactly
+how a codebase degrades one merge at a time. **One exception:** code this PR adds so that the
+*next* PR can use it, to keep this PR small. That is legitimate only when the PR says so — the PR
+description (Phase C0 hands it over) names the code and the follow-up. Declared → no finding.
+Undeclared → 🟡, and the suggestion asks whether it is a leftover or prepared for a follow-up
+that the description should name.
 
 **Typical mistakes:**
 - Only the diff was read → the drift question needs the surrounding code; that is the point of
   the worktree.
 - A similarly named helper declared a duplicate without comparing what both do.
 - An export declared dead without grepping for dynamic use (string keys, index re-exports).
+- Dead code parked at 🟢 „because nothing is broken" → at least 🟡; the exception is a declared
+  follow-up in the PR description, not the reviewer's guess that one might exist.
 - Hand-rolled UI that replicates a component-library component waved through.
 
 ---

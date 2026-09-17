@@ -149,7 +149,9 @@ inherit the project's own conventions. Then the two inputs both sets need:
   against. Where the repo documents nothing, the checks still run and the report says so instead
   of inventing a standard.
 
-**Implementation PR only** — three more inputs:
+**Implementation PR only** — four more inputs:
+- **The PR title and description** from Phase A, for card 2: code added for a declared follow-up
+  PR is the one legitimate reason for unused code, and only the description can declare it.
 - **Split the diffstat** into test paths and production paths. Card 6 needs the ratio, and it
   goes into the report's status header either way.
 - **The story's spec and plan, if the branch still carries them** (`docs/superpowers/specs/`,

@@ -357,8 +357,10 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 4), and
   twice), severity, and its own typical mistakes — the per-dimension red flags and common-mistakes
   rows moved onto the cards, which removed the threefold repetition (dimension prose, red flag,
   table row) that made up most of the old length. **Implementation PR (C-I) — six dimensions:**
-  security, consistency & drift (duplicate/divergent implementations, dead
-  code, component-library usage, `.sln` platform configs), code smells & correctness, **ADR
+  security, consistency & drift (duplicate/divergent implementations, dead code and `.sln`
+  platform noise — at least 🟡, never 🟢, because optional findings go unposted and that is how
+  quality degrades over time; the one exception is code prepared for a follow-up PR that the PR
+  description declares —, component-library usage), code smells & correctness, **ADR
   compliance**,
   **test protection** (would the test fail if the behavior were wrong?), and **test surplus** (what
   could be deleted?) — the last two deliberately as *separate* dispatches, because one reviewer
