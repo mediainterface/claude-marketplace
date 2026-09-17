@@ -59,7 +59,9 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │       ├── ado-pipeline/
 │   │       │   └── SKILL.md      # /ado-pipeline — pipeline analysis + changelog via az CLI
 │   │       └── pr-review/
-│   │           └── SKILL.md      # /pr-review — deep triage-first ADO PR review in a worktree
+│   │           ├── SKILL.md      # /pr-review — the workflow (phases A–F, dispatch, report)
+│   │           ├── dimensions-implementation.md  # cards 1–7, loaded on an implementation PR only
+│   │           └── dimensions-spec.md            # cards S1–S6, loaded on a spec PR only
 │   └── guardian/                 # Guardian (Hüter-Trio) tooling (skill-only)
 │       ├── .claude-plugin/
 │       │   └── plugin.json
@@ -343,9 +345,21 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   worktree** (`.claude/worktrees/pr-review-<id>`, never the user's checkout — needed for both), then
   dispatches **one read-only subagent per dimension** (`Explore`-type, explicit `model: sonnet` — a
   skill's `allowed-tools` is not inherited, so the read-only guarantee has to live in the subagent's
-  own tool set). **Implementation PR (C-I) — seven dimensions:** security,
-  CI/pipeline status, consistency & drift (duplicate/divergent implementations, dead code,
-  component-library usage, `.sln` platform configs), code smells & correctness, **ADR compliance**,
+  own tool set). **The skill is split into a workflow and two dimension references.** `SKILL.md`
+  holds the phases A–F, the dispatch rules, the finding schema and the report layout, and stays
+  under the recommended 500 lines (the body is in context for every turn after loading, so each
+  line costs repeatedly); the review questions live as **dimension cards** in
+  `dimensions-implementation.md` (1–7) and `dimensions-spec.md` (S1–S6). The orchestrator reads
+  only the file for the PR kind at hand and hands each card **verbatim** to its subagent — the
+  cards are prompt material for the explorers, not workflow, which is why moving them out does not
+  tear the phase logic apart, and a spec PR never loads the code dimensions at all. Each card has
+  the same shape: question, checks, **evidence**, what is *not* its job (so nothing is reported
+  twice), severity, and its own typical mistakes — the per-dimension red flags and common-mistakes
+  rows moved onto the cards, which removed the threefold repetition (dimension prose, red flag,
+  table row) that made up most of the old length. **Implementation PR (C-I) — seven dimensions:**
+  security, CI/pipeline status, consistency & drift (duplicate/divergent implementations, dead
+  code, component-library usage, `.sln` platform configs), code smells & correctness, **ADR
+  compliance**,
   **test protection** (would the test fail if the behavior were wrong?), and **test surplus** (what
   could be deleted?) — the last two deliberately as *separate* dispatches, because one reviewer
   holding both jobs always reports the gap and drops the surplus. **Spec PR (C-S) — its own set:**
@@ -365,9 +379,19 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   implementation would have to invent, missing non-goals), and S6 security by design, dispatched
   **only** when the spec touches a trust boundary. The work item's content comes from
   `/ado-workitem`'s *show* workflow, which is why that skill joins `/ado-pr` and `/ado-pipeline` as
-  a required sub-skill. Two hard rules: review and posting
-  are separate phases (the review is read-only and ends in a report), and the user's checkout is
-  never touched. Findings are reported as a **numbered list** grouped 🔴/🟡/🟢, each entry starting
+  a required sub-skill. Three hard rules: review and posting are separate phases (the review is
+  read-only and ends in a report), the user's checkout is never touched, and **no finding without
+  evidence**. The last one is the **finding contract**, added with the automated per-commit use in
+  mind, where nobody triages before posting: every finding carries an `evidence` field — the place
+  read in the worktree beyond the diff hunk, the concrete input or production change that makes it
+  true, or the search behind a claimed absence — each card says what counts for its dimension (the
+  competing test's file and name, the existing equivalent's path, the record file, the path from
+  untrusted input to the sink, the caller that can deliver the null). A subagent that cannot fill
+  it does not report the finding; Phase D reads the evidence of every finding, **drops** those
+  whose evidence is missing or does not hold (never downgrades them to 🟢 — a wrong comment costs
+  trust, a missing one nothing) and reports the dropped count in the status header, then asks
+  „would the author change anything for this?" before numbering. `evidence` never goes into the
+  posted comment. Findings are reported as a **numbered list** grouped 🔴/🟡/🟢, each entry starting
   with `**[N]**` and never `N.` (the terminal Markdown renderer would add its own counter and
   restart it), with a non-postable **status header** carrying the PR kind plus the signal proving
   it, the CI results, and then either the test-to-production line ratio (implementation PR) or the
