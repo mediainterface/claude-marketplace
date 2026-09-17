@@ -186,7 +186,7 @@ proportion to the small change this shape usually is. Hand the changed doc and s
 1. **Read the dimension reference for this kind** — `dimensions-implementation.md` on an
    implementation PR, `dimensions-spec.md` on a spec PR — and never the other one.
 2. **Dispatch one subagent per card**, using a **read-only agent type** (`Explore`, or any agent
-   whose tool set excludes `Edit`/`Write`). This is what actually enforces „review only": a
+   whose tool set excludes `Edit`/`Write`). This is what actually enforces "review only": a
    skill's `allowed-tools` is **not** inherited by its subagents, so the read-only guarantee has
    to live in each subagent's own tool set — a general-purpose subagent could edit files.
 3. **Every dispatch carries an explicit `model: sonnet`.** An implementation review spawns ~7
@@ -227,12 +227,12 @@ its dimension; the common shape is:
 - **The place read** — file and lines in the worktree beyond the diff hunk (the caller, the
   enclosing unit, the competing test, the existing equivalent, the record).
 - **The concrete case** — the input, state, or production change that makes the finding true
-  („bei leerer Liste", „wenn der Token abgelaufen ist", „ändere X, der Test bleibt grün").
+  (an empty list, an expired token, "change X and the test stays green").
 - **The search**, where the claim is an absence (no caller, no test, no equivalent): what was
   grepped for, so a missed spelling can be spotted.
 
-A subagent that cannot fill `evidence` for a finding **does not report it**. „Möglicherweise",
-„könnte", „sollte geprüft werden" in a summary are signs of exactly that. Dropping a finding is
+A subagent that cannot fill `evidence` for a finding **does not report it**. Hedges in a summary
+("possibly", "could", "should be checked") are signs of exactly that. Dropping a finding is
 always allowed; inventing one never is.
 
 ### Phase D — Consolidate & report for triage (STOP here)
@@ -240,12 +240,12 @@ Merge the subagents' findings, then filter and rank:
 
 1. **Evidence check.** Read each finding's `evidence`. Where it is missing, names a place that
    does not say what it claims, or rests on a case the code cannot reach, **drop the finding**
-   and note it in one line under the status header („N Funde ohne tragfähigen Beleg verworfen").
+   and note it in one line under the status header ("N findings dropped for lack of evidence").
    Spot-check the rest against the worktree where the claim is expensive if wrong (a deletion
    suggestion, a 🔴).
 2. **Would the author act on it?** A finding nobody would change anything for — a matter of
    taste, a hypothetical without a path, a restatement of what the code visibly does — goes, or
-   becomes a genuine question if the intent is really unclear. „Post all" has to be a sensible
+   becomes a genuine question if the intent is really unclear. "Post all" has to be a sensible
    answer to this list.
 3. **Dedupe.** Drop any finding that duplicates a point already in an existing PR thread (note it
    as already-raised instead). Where cards 6 and 7 land on the same test, merge them into
@@ -262,12 +262,12 @@ The report has **two clearly separated parts**:
   missing, plus the one-line root cause for each failed build — and the count of findings
   dropped in the evidence check. Then, depending on the kind:
   - **Implementation PR:** the change's **test-to-production line ratio** (e.g. „303 Testzeilen /
-    183 Produktivzeilen"). Context for the reader, never a finding on its own. „No decision
-    records in this repo" and „no documented test process" go here too.
+    183 Produktivzeilen"). Context for the reader, never a finding on its own. "No decision
+    records in this repo" and "no documented test process" go here too.
   - **Spec PR:** the spec's path; the linked work item with its **state** — the SDD policy
     expects **Refinement** at spec time, so report a deviation here and never change it — or the
     fact that no work item is linked at all; and every dimension that was **not** dispatched (S6
-    on a spec with no trust boundary), so the reader can tell „checked, nothing found" from „not
+    on a spec with no trust boundary), so the reader can tell "checked, nothing found" from "not
     checked". A marker-versus-diff contradiction from Phase A.5 belongs here too.
 - **Numbered findings** (the only postable part): every entry here must be worth a comment on a
   line — of code, or of the spec — and survive steps 1 and 2 above.
@@ -303,8 +303,8 @@ Vorschlag: beim Abbruch `idle` melden — oder ist das gewollt?
 `useTenantUsers` macht fast dasselbe wie das vorhandene `useUsers` — zusammenführen?
 ```
 
-Then **stop and ask the user which findings to post** — offer: name the numbers („1, 3"),
-„post all", or „I'll post them myself". **Post nothing until they answer.**
+Then **stop and ask the user which findings to post** — offer: name the numbers ("1, 3"),
+"post all", or "I'll post them myself". **Post nothing until they answer.**
 
 ### Phase E — Post approved findings (only on explicit go)
 For each finding the user approved, use `sdd-kit:ado-pr`'s **PR Comments** workflow to add a
@@ -322,13 +322,13 @@ it holds no changes worth keeping). Never remove the user's other worktrees.
 
 This style applies to every finding's `summary`, `why`, and `suggestion` from the moment a
 review subagent writes it — the triage report and the posted comments reuse that wording nearly
-verbatim, nothing is „simplified later". A finding reads like a note from a teammate — German,
-informal „du" — and must be understandable for a colleague who doesn't live in this code.
+verbatim, nothing is "simplified later". A finding reads like a note from a teammate — German,
+informal "du" — and must be understandable for a colleague who doesn't live in this code.
 
 The recipe, in order:
 
 1. **The concrete observation, at the spot** — what you see at this line, named specifically
-   (the symbol, the call), not „there may be an issue in this area".
+   (the symbol, the call), not "there may be an issue in this area".
 2. **What goes wrong, told as a tiny concrete story** — „wenn X passiert, bleibt Y hängen".
    Skip it if the line already shows the consequence.
 3. **A concrete suggestion or a genuine question** — what to do instead, or what you're unsure of.
@@ -376,15 +376,15 @@ Orchestration mistakes. The per-dimension ones live on the cards.
   triage gate. Report first.
 - Checking out the PR branch in the user's working directory, or `git checkout`/`git switch` in
   the main checkout → use the worktree from Phase B.
-- Editing or „fixing" code → this skill reviews, it does not change code.
-- A finding with an empty `evidence`, or one you would keep „zur Sicherheit" as 🟢 → drop it.
+- Editing or "fixing" code → this skill reviews, it does not change code.
+- A finding with an empty `evidence`, or one you would keep as a 🟢 "just in case" → drop it.
   Uncertain findings are not downgraded, they are removed; the count goes in the status header.
-- A summary containing „möglicherweise", „könnte", „sollte geprüft werden" → the subagent did
-  not check. Either the evidence names the case, or the finding goes.
+- A summary that hedges ("possibly", "could", "should be checked") → the subagent did not
+  check. Either the evidence names the case, or the finding goes.
 - A numbered finding whose content is „der Test X schlägt fehl", „die Pipeline ist rot", or a
   build error → that is the status header's job. Move it there, or turn it into a code finding
   at the line that actually causes it.
-- „Post all" would post something the user has to talk you out of → the list isn't triaged yet;
+- "Post all" would post something the user has to talk you out of → the list isn't triaged yet;
   anything not worth a comment belongs in the status header, not in the numbers.
 - A finding arrives in technical shorthand and you plan to simplify it when posting → the
   recipe binds in Phase C already; fix the subagent prompts.
@@ -395,7 +395,7 @@ Orchestration mistakes. The per-dimension ones live on the cards.
 - The card text paraphrased into the prompt instead of passed verbatim → the checks and the
   evidence rules get lost in the summary. Hand over the card.
 - A security, smell, drift, or test explorer dispatched on a documentation-only diff → that is a
-  spec PR; Phase A.5 should have routed to C-S. Concluded „no 📝, so implementation PR" while the
+  spec PR; Phase A.5 should have routed to C-S. Concluded "no 📝, so implementation PR" while the
   diff is documentation only → the changed-file set decides, the marker proves nothing.
 - A mixed diff (docs **and** code) reported as a rule violation, or reviewed as if the doc half
   were not there → neither. Implementation PR, and Phase C0 hands the doc files to cards 3 and 5.

@@ -34,7 +34,7 @@ in the caller makes the line safe, and a sink no untrusted data reaches is no fi
 behind a check that does exist is 🟡; hardening with no reachable input is at most 🟢.
 
 **Typical mistakes:**
-- „Könnte injiziert werden" without naming where the untrusted data comes from → find the source
+- "Could be injected" without naming where the untrusted data comes from → find the source
   or drop it.
 - A logged object flagged for secrets without reading what the object actually holds at that
   point.
@@ -53,7 +53,7 @@ note it.
 
 **The result is status information for the report header — never a numbered, postable
 finding.** A red check, a failing test, a build error: the PR page already shows all of it, so a
-comment saying so adds nothing and forces the user to exclude it instead of saying „post all".
+comment saying so adds nothing and forces the user to exclude it instead of saying "post all".
 
 **One exception, and it is not a CI finding:** if the root cause turns out to be a real defect in
 the changed code, that becomes a normal `smell` or `security` finding anchored at the offending
@@ -139,16 +139,16 @@ security consequences (card 1); duplication (card 3).
 on a caller contract nobody enforces is 🟡; complexity and naming are 🟢.
 
 **Typical mistakes:**
-- „Hier könnte `x` null sein" while every caller constructs `x` two lines earlier → check the
+- "`x` could be null here" while every caller constructs `x` two lines earlier → check the
   callers.
-- A finding about a pattern („sollte eher …") with no input on which the current code fails.
+- A finding about a pattern ("should rather …") with no input on which the current code fails.
 - Style the linter enforces reported as a smell.
 
 ---
 
 ## 5 — ADR compliance & durable context — runs on every review
 
-Not only when the change „looks architectural". No decision records in the repo → report the ADR
+Not only when the change "looks architectural". No decision records in the repo → report the ADR
 part as not applicable, don't silently skip it. The spec/plan check runs regardless.
 
 **Question:** does the change violate, outdatedly follow, or silently make a decision the Memory
@@ -171,7 +171,7 @@ shows in code the diff doesn't contain (the callers, the rest of the class, the 
   convention in the surrounding code).
 - **Makes a new lasting decision without an ADR:** a new technology or dependency, a new
   cross-cutting pattern, or a deliberate deviation from an existing convention that future
-  readers will ask „why?" about. Run it through the **significance triage** before proposing
+  readers will ask "why?" about. Run it through the **significance triage** before proposing
   anything — see [../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md). A
   one-off local choice is **no finding**, a recurring coding rule belongs in `.claude/rules/`, an
   observed pitfall in `sdd-kit:create-lesson-learned`. A criterion counts only with **evidence you
@@ -267,7 +267,7 @@ sabotage into the finding: „brich testweise X — der Test bleibt grün."
 - **It tests the framework or the mock, not our code** — that the state setter sets, that the
   ORM saves, that a mock returns what it was told to return.
 - **Its assertion says nothing** — `toBeDefined()`, `not.toThrow()`, a bare render, or a
-  snapshot as the only check: this proves „did not crash", not „behaves correctly".
+  snapshot as the only check: this proves "did not crash", not "behaves correctly".
 - **It is over-mocked** — the unit's own internals mocked away until only the mocks are under
   test. Mock the external dependency, keep the inside real.
 - **Its name promises more than it checks** — „rejects an expired token" asserting only that no
@@ -290,8 +290,8 @@ sabotage into the finding: „brich testweise X — der Test bleibt grün."
 
 **Evidence:** for a weak test, the **sabotage** — the concrete production change that leaves it
 green; for a gap, the **branch or behavior** in the production diff (file:line) and the search
-of the existing suite that found no test for it. „Sollte getestet werden" without the untested
-branch named is not a finding.
+of the existing suite that found no test for it. "Should be tested" without the untested branch
+named is not a finding.
 
 **Not this dimension's job — and it must stay out of this dispatch:** which tests could be
 deleted without losing anything. That is **card 7**: a reviewer holding both jobs at once always

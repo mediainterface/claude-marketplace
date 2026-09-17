@@ -390,7 +390,7 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   it does not report the finding; Phase D reads the evidence of every finding, **drops** those
   whose evidence is missing or does not hold (never downgrades them to 🟢 — a wrong comment costs
   trust, a missing one nothing) and reports the dropped count in the status header, then asks
-  „would the author change anything for this?" before numbering. `evidence` never goes into the
+  "would the author change anything for this?" before numbering. `evidence` never goes into the
   posted comment. Findings are reported as a **numbered list** grouped 🔴/🟡/🟢, each entry starting
   with `**[N]**` and never `N.` (the terminal Markdown renderer would add its own counter and
   restart it), with a non-postable **status header** carrying the PR kind plus the signal proving

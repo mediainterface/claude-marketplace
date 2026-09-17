@@ -58,7 +58,7 @@ demanded for a one-feature choice the exclusions cover.
 
 ## S2 — Consistency with the code that already exists
 
-The drift dimension turned around: instead of „does this code duplicate something", ask „does
+The drift dimension turned around: instead of "does this code duplicate something", ask "does
 this plan duplicate, contradict, or misdescribe what is already there". The one dimension in this
 set that genuinely searches the codebase — give it the room card 3 would have had.
 
@@ -79,8 +79,8 @@ set that genuinely searches the codebase — give it the room card 3 would have 
 is not enough); for a missing module, the search that did not find it and, if it moved, where it
 is now; for a convention, the CLAUDE.md line or sibling file that shows it.
 
-**Typical mistakes:** an equivalent claimed on the name alone; „existiert nicht" after a single
-grep for one spelling.
+**Typical mistakes:** an equivalent claimed on the name alone; "does not exist" after a single grep
+for one spelling.
 
 ---
 
@@ -156,14 +156,14 @@ Its self-consistency, independent of the story.
   ask the concrete question.
 
 **Evidence:** the **two passages** that contradict (both lines); for an open decision, the
-concrete case the implementer would have to guess at — not „Fehlerfälle fehlen" but which input
+concrete case the implementer would have to guess at — not "error cases are missing" but which input
 or state has no specified outcome.
 
 **Severity by consequence:** something the implementation would have to guess at is 🟡, a real
 contradiction 🔴, a stylistic gap 🟢.
 
 **Typical mistakes:** dispatched together with S3 (two dispatches, always); a generic
-„Edge-Cases fehlen" without naming one.
+"edge cases are missing" without naming one.
 
 ---
 
