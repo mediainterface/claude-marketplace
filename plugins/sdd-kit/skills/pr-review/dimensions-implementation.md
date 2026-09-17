@@ -3,7 +3,7 @@
 Reference for [SKILL.md](SKILL.md), not a skill of its own. Read it in **Phase C-I only** —
 a spec PR never loads it — and hand each card **verbatim** to the subagent of that dimension,
 together with the shared dispatch block from SKILL.md (worktree path, diff range, changed-file
-list, the finding schema with its evidence contract, the writing recipe). The cards are prompt
+list, the finding schema with its evidence contract, `finding-style.md`). The cards are prompt
 material for the explorers; the orchestrator does not paraphrase them.
 
 Each card has the same shape: the **question** the dimension answers, the **checks**, what

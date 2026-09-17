@@ -61,7 +61,8 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │       └── pr-review/
 │   │           ├── SKILL.md      # /pr-review — the workflow (phases A–F, dispatch, report)
 │   │           ├── dimensions-implementation.md  # cards 1–6, loaded on an implementation PR only
-│   │           └── dimensions-spec.md            # cards S1–S6, loaded on a spec PR only
+│   │           ├── dimensions-spec.md            # cards S1–S6, loaded on a spec PR only
+│   │           └── finding-style.md              # ELI5 recipe + examples, handed to every subagent
 │   └── guardian/                 # Guardian (Hüter-Trio) tooling (skill-only)
 │       ├── .claude-plugin/
 │       │   └── plugin.json
@@ -345,11 +346,13 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 4), and
   worktree** (`.claude/worktrees/pr-review-<id>`, never the user's checkout — needed for both), then
   dispatches **one read-only subagent per dimension** (`Explore`-type, explicit `model: sonnet` — a
   skill's `allowed-tools` is not inherited, so the read-only guarantee has to live in the subagent's
-  own tool set). **The skill is split into a workflow and two dimension references.** `SKILL.md`
+  own tool set). **The skill is split into a workflow and three references.** `SKILL.md`
   holds the phases A–F, the dispatch rules, the finding schema and the report layout, and stays
-  under the recommended 500 lines (the body is in context for every turn after loading, so each
-  line costs repeatedly); the review questions live as **dimension cards** in
-  `dimensions-implementation.md` (1–6) and `dimensions-spec.md` (S1–S6). The orchestrator reads
+  at roughly 300 lines (the body is in context for every turn after loading, so each line costs
+  repeatedly); the review questions live as **dimension cards** in
+  `dimensions-implementation.md` (1–6) and `dimensions-spec.md` (S1–S6), and the **ELI5 recipe**
+  with its good/bad examples in `finding-style.md` — like the cards, prompt material handed to
+  every subagent verbatim rather than workflow. The orchestrator reads
   only the file for the PR kind at hand and hands each card **verbatim** to its subagent — the
   cards are prompt material for the explorers, not workflow, which is why moving them out does not
   tear the phase logic apart, and a spec PR never loads the code dimensions at all. Each card has
@@ -374,7 +377,7 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 4), and
   work item** in both directions (acceptance criteria the spec does not address, and spec content
   the story never asked for — its own dispatch, because a reviewer holding S3 and S5 at once always
   drops the comparison against the external source, the same failure mode that splits dimensions 5
-  and 7), **S4 the planned test approach against the repo's test process** (level, forbidden test
+  and 6), **S4 the planned test approach against the repo's test process** (level, forbidden test
   classes, required artefacts — the legitimate remainder of dimensions 5 and 6 at spec time, judged
   against *this* repo's documented process or reported as undocumented, never against a policy
   imported from elsewhere), S5 implementability (internal contradictions, open decisions the
