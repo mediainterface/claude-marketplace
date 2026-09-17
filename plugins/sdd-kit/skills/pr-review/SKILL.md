@@ -3,8 +3,9 @@ name: pr-review
 description: >-
   Use when you want a thorough, triage-first review of an Azure DevOps pull request — you have a
   PR ID or URL and want more than the diff checked. Covers security, code smells, dead code and
-  drift, duplicate or divergent implementations across the wider codebase, test quality in both directions (tests that cannot fail if the behavior breaks, and
-  tests that are redundant or over-broad), and decision records (ADRs) — violations of active
+  drift, duplicate or divergent implementations across the wider codebase, test quality in both
+  directions (tests that cannot fail if the behavior breaks, and tests that are redundant or
+  over-broad), and decision records (ADRs) — violations of active
   ones, code following superseded ones, and decisions missing a record. Also checks whether the
   story's design spec and implementation plan are deleted here, and whether anything still needed
   was left only in them. A spec PR gets its own, much smaller review instead — the spec against
