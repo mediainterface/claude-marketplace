@@ -2,9 +2,8 @@
 name: pr-review
 description: >-
   Use when you want a thorough, triage-first review of an Azure DevOps pull request — you have a
-  PR ID or URL and want more than the diff checked. Covers security, CI/pipeline status, code
-  smells, dead code and drift, duplicate or divergent implementations across the wider
-  codebase, test quality in both directions (tests that cannot fail if the behavior breaks, and
+  PR ID or URL and want more than the diff checked. Covers security, code smells, dead code and
+  drift, duplicate or divergent implementations across the wider codebase, test quality in both directions (tests that cannot fail if the behavior breaks, and
   tests that are redundant or over-broad), and decision records (ADRs) — violations of active
   ones, code following superseded ones, and decisions missing a record. Also checks whether the
   story's design spec and implementation plan are deleted here, and whether anything still needed
@@ -27,14 +26,13 @@ diff), reports the findings for **triage**, and posts **only the findings the us
 
 This file is the **workflow**. The review questions themselves live in two dimension references
 next to it, loaded only for the PR kind at hand and handed to the subagents verbatim:
-[dimensions-implementation.md](dimensions-implementation.md) (cards 1–7) and
+[dimensions-implementation.md](dimensions-implementation.md) (cards 1–6) and
 [dimensions-spec.md](dimensions-spec.md) (cards S1–S6).
 
 The Azure DevOps plumbing lives in this plugin's sibling skills — this skill orchestrates them;
 it does not re-implement `az`. **REQUIRED SUB-SKILLS:**
 - **`sdd-kit:ado-pr`** — PR metadata, local diff, comment threads (its *PR Comments* workflow is
   the only way this skill posts anything).
-- **`sdd-kit:ado-pipeline`** — root-cause analysis for a failed PR build.
 - **`sdd-kit:ado-workitem`** — the linked work item's content (title, description, acceptance
   criteria, state) via its *show* workflow. The spec-PR review compares the spec against it.
 - The ADO connection detection (**Step 0**), **Setup Check** (sign-in confirmation),
@@ -104,7 +102,7 @@ Classify with the shared definition — **Spec PR vs. implementation PR** in
   would cost more than a separate spec review is worth. Two consequences instead of a complaint:
   - **Do not demand the deletion** of a spec the same PR is *adding* (status `A` in
     `--name-status`) — you do not ask for a file the PR exists to introduce.
-  - **The doc part still gets reviewed**, alongside the code — Phase C0 hands it to cards 3
+  - **The doc part still gets reviewed**, alongside the code — Phase C0 hands it to cards 2
     and 5. Classifying it as an implementation PR must not mean the spec half goes unread.
   Only one thing about the mixture is worth a finding, and it is about scope, not form: when the
   spec describes **substantially more** than this PR delivers, the separate spec PR would have
@@ -137,7 +135,7 @@ From inside the worktree, compute the diff (`--name-status`, `--stat`, full diff
 against the target) and read the CLAUDE.md files near the changed directories so the subagents
 inherit the project's own conventions. Then the two inputs both sets need:
 
-- **The repo's decision records**, if present — the ADR checks (card 5 / S1) need them on every
+- **The repo's decision records**, if present — the ADR checks (card 4 / S1) need them on every
   review of either kind. Records live on **Memory Bank levels**: glob for **every**
   `docs/decisions/` directory, not just the repo root's (`docs/decisions/`,
   `apps/*/docs/decisions/`, `services/*/docs/decisions/`, …), and keep the ones whose level
@@ -146,16 +144,16 @@ inherit the project's own conventions. Then the two inputs both sets need:
   **proposes to touch**, not the path the spec file itself sits at.
 - **Whatever this repo documents about testing** — a test process or strategy document, a testing
   section in a CLAUDE.md / CONTRIBUTING, otherwise the conventions of the existing test suite.
-  Cards 6 and 7 layer it on top of their own checks; on a spec PR it is the yardstick S4 measures
+  Cards 5 and 6 layer it on top of their own checks; on a spec PR it is the yardstick S4 measures
   against. Where the repo documents nothing, the checks still run and the report says so instead
   of inventing a standard.
 
 **Implementation PR only** — three more inputs:
-- **Split the diffstat** into test paths and production paths. Card 7 needs the ratio, and it
+- **Split the diffstat** into test paths and production paths. Card 6 needs the ratio, and it
   goes into the report's status header either way.
 - **The story's spec and plan, if the branch still carries them** (`docs/superpowers/specs/`,
   `docs/superpowers/plans/` — wherever this repo keeps them): hand their paths and content to
-  card 5. This asks about files **present in the worktree**, not files in the diff — a merged
+  card 4. This asks about files **present in the worktree**, not files in the diff — a merged
   spec PR put them there, so they will not show up in this PR's changed-file list.
 - **Is this PR past its first review round** — has every required reviewer seen this code at
   least once? Judge that from evidence, not from the current tally: Azure DevOps clears votes on
@@ -168,8 +166,8 @@ inherit the project's own conventions. Then the two inputs both sets need:
 **Mixed PR only (documentation *and* code) — the doc half gets reviewed too.** Phase A.5
 classified it as an implementation PR, so C-I runs; a second full C-S pass would be out of
 proportion to the small change this shape usually is. Hand the changed doc and spec files to
-**card 3** (does the documentation describe what the code in this PR actually does?) and
-**card 5** (as content — records, durable context — never as deletion candidates).
+**card 2** (does the documentation describe what the code in this PR actually does?) and
+**card 4** (as content — records, durable context — never as deletion candidates).
 
 **Spec PR only** — two more inputs:
 - **The spec itself**, read in full: the `*-design.md` (or whatever this repo names it) the PR
@@ -189,7 +187,7 @@ proportion to the small change this shape usually is. Hand the changed doc and s
    whose tool set excludes `Edit`/`Write`). This is what actually enforces "review only": a
    skill's `allowed-tools` is **not** inherited by its subagents, so the read-only guarantee has
    to live in each subagent's own tool set — a general-purpose subagent could edit files.
-3. **Every dispatch carries an explicit `model: sonnet`.** An implementation review spawns ~7
+3. **Every dispatch carries an explicit `model: sonnet`.** An implementation review spawns ~6
    explorers at roughly 100k tokens each; inheriting the session's model makes that
    disproportionately expensive, and Sonnet handles the dimension analysis. Escalate to the
    session model only when the user explicitly asks for a deeper pass.
@@ -201,9 +199,9 @@ proportion to the small change this shape usually is. Hand the changed doc and s
 
 #### Finding schema and contract (every subagent, both kinds)
 A finding is **something that needs a comment on a line** — of code on an implementation PR, of
-the spec on a spec PR — **and that would make the author change something.** Anything the PR
-page already displays by itself (check results, test failures, build logs) is status, not a
-finding, and never enters this list.
+the spec on a spec PR — **and that would make the author change something.** CI status is not
+part of this review: a red pipeline or a failing test is the author's to investigate, and
+anything the PR page already displays by itself never enters this list.
 
 ```
 severity  : 🔴 Blocker | 🟡 Sollte | 🟢 Optional
@@ -248,7 +246,7 @@ Merge the subagents' findings, then filter and rank:
    becomes a genuine question if the intent is really unclear. "Post all" has to be a sensible
    answer to this list.
 3. **Dedupe.** Drop any finding that duplicates a point already in an existing PR thread (note it
-   as already-raised instead). Where cards 6 and 7 land on the same test, merge them into
+   as already-raised instead). Where cards 5 and 6 land on the same test, merge them into
    **one** finding at the higher severity and say both things in it („prüft nichts, was … nicht
    schon prüft — und würde auch bei falschem Verhalten grün bleiben"). Never drop the surplus
    half while merging: it is the half only one dimension was looking for. On a spec PR the same
@@ -258,9 +256,8 @@ Merge the subagents' findings, then filter and rank:
 
 The report has **two clearly separated parts**:
 - **Status header** (not numbered, not postable). Always: the **PR kind** from Phase A.5 with the
-  signal that proves it, the CI/pipeline line — which required checks are green, red, or
-  missing, plus the one-line root cause for each failed build — and the count of findings
-  dropped in the evidence check. Then, depending on the kind:
+  signal that proves it, and the count of findings dropped in the evidence check. Then, depending
+  on the kind:
   - **Implementation PR:** the change's **test-to-production line ratio** (e.g. „303 Testzeilen /
     183 Produktivzeilen"). Context for the reader, never a finding on its own. "No decision
     records in this repo" and "no documented test process" go here too.
@@ -381,16 +378,16 @@ Orchestration mistakes. The per-dimension ones live on the cards.
   Uncertain findings are not downgraded, they are removed; the count goes in the status header.
 - A summary that hedges ("possibly", "could", "should be checked") → the subagent did not
   check. Either the evidence names the case, or the finding goes.
-- A numbered finding whose content is „der Test X schlägt fehl", „die Pipeline ist rot", or a
-  build error → that is the status header's job. Move it there, or turn it into a code finding
-  at the line that actually causes it.
+- A finding whose content is „der Test X schlägt fehl", „die Pipeline ist rot", or a build error →
+  CI is not this review's job; the author investigates failures. Drop it — unless the subagent
+  named the code defect behind it, which is then an ordinary finding at the causing line.
 - "Post all" would post something the user has to talk you out of → the list isn't triaged yet;
   anything not worth a comment belongs in the status header, not in the numbers.
 - A finding arrives in technical shorthand and you plan to simplify it when posting → the
   recipe binds in Phase C already; fix the subagent prompts.
 - A comment that opens with praise, restates the code, or runs past three sentences of prose
   (bulleted enumerations don't count) → apply the recipe.
-- Cards 6 and 7 — or S3 and S5 — dispatched as one subagent → the gap always wins over the
+- Cards 5 and 6 — or S3 and S5 — dispatched as one subagent → the gap always wins over the
   surplus, the spec-internal gap over the comparison against the story. Two dispatches.
 - The card text paraphrased into the prompt instead of passed verbatim → the checks and the
   evidence rules get lost in the summary. Hand over the card.
@@ -398,10 +395,10 @@ Orchestration mistakes. The per-dimension ones live on the cards.
   spec PR; Phase A.5 should have routed to C-S. Concluded "no 📝, so implementation PR" while the
   diff is documentation only → the changed-file set decides, the marker proves nothing.
 - A mixed diff (docs **and** code) reported as a rule violation, or reviewed as if the doc half
-  were not there → neither. Implementation PR, and Phase C0 hands the doc files to cards 3 and 5.
+  were not there → neither. Implementation PR, and Phase C0 hands the doc files to cards 2 and 4.
 - The spec review ran without the linked work item → S3 has nothing to compare against. Fetch it
   via `sdd-kit:ado-workitem`, or report that none is linked.
-- About to report without having read the repo's decision records → card 5 / S1 runs on every
+- About to report without having read the repo's decision records → card 4 / S1 runs on every
   review; glob **every** `docs/decisions/` above the changed paths.
 - Dimension subagents dispatched without an explicit model → they inherit the session's model.
   Pass `model: sonnet` on every dispatch.

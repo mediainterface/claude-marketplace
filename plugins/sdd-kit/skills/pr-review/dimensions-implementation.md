@@ -28,7 +28,7 @@ in the caller makes the line safe, and a sink no untrusted data reaches is no fi
 "could leak" only if you name the log line, config file, or response that carries it.
 
 **Not this dimension's job:** code quality and correctness without a security consequence
-(card 4); the red pipeline (card 2).
+(card 3). CI status is nobody's job in this review — the author investigates failing builds.
 
 **Severity:** a hole with a named path from input to sink is 🔴; a missing defense-in-depth layer
 behind a check that does exist is 🟡; hardening with no reachable input is at most 🟢.
@@ -41,28 +41,7 @@ behind a check that does exist is 🟡; hardening with no reachable input is at 
 
 ---
 
-## 2 — CI / pipelines — produces the status line, not findings
-
-**Question:** is every **required** check on this PR green, and if not, why not?
-
-**Checks:** get the PR's build-validation status (try
-`az repos pr policy list --id {prId} --org {org} -o json`; else list recent builds for the
-source branch and read `result`). For any **failed required** build, hand its `buildId` to
-`sdd-kit:ado-pipeline` for a one-line root cause. A green-but-not-required check never blocks;
-note it.
-
-**The result is status information for the report header — never a numbered, postable
-finding.** A red check, a failing test, a build error: the PR page already shows all of it, so a
-comment saying so adds nothing and forces the user to exclude it instead of saying "post all".
-
-**One exception, and it is not a CI finding:** if the root cause turns out to be a real defect in
-the changed code, that becomes a normal `smell` or `security` finding anchored at the offending
-line, worded as the defect itself („`x` ist hier `null`, wenn …") — never as „der Test schlägt
-fehl". The value is the diagnosis the pipeline doesn't give, not the red status it does.
-
----
-
-## 3 — Consistency & drift (the expensive, high-value one)
+## 2 — Consistency & drift (the expensive, high-value one)
 
 **Question:** does the PR add a second version of something the codebase already has, depart from
 how its siblings do it, or leave code behind that nothing uses?
@@ -103,8 +82,8 @@ and no other dimension looks for it. Anchor it at the documentation line that no
 - For a departed pattern: the **sibling** that shows the pattern (path), so the author sees what
   to align with.
 
-**Not this dimension's job:** whether the code is correct (card 4); whether the test suite
-duplicates itself (card 7).
+**Not this dimension's job:** whether the code is correct (card 3); whether the test suite
+duplicates itself (card 6).
 
 **Severity:** a duplicate that will be maintained twice is 🟡; dead code and platform noise 🟢
 unless it misleads; a doc that now describes the wrong behavior 🟡.
@@ -118,7 +97,7 @@ unless it misleads; a doc that now describes the wrong behavior 🟡.
 
 ---
 
-## 4 — Code smells & correctness
+## 3 — Code smells & correctness
 
 **Question:** with which concrete input or state does this code do the wrong thing?
 
@@ -132,8 +111,8 @@ guarantees non-null is no finding, so read the callers before claiming one. If a
 reachable in theory, say so and let the severity carry it; if you cannot name a scenario, there
 is no finding.
 
-**Not this dimension's job:** tests — card 6, so the two don't report the same gap twice;
-security consequences (card 1); duplication (card 3).
+**Not this dimension's job:** tests — card 5, so the two don't report the same gap twice;
+security consequences (card 1); duplication (card 2).
 
 **Severity:** a bug reachable in production with a named input is 🔴; a wrong result that depends
 on a caller contract nobody enforces is 🟡; complexity and naming are 🟢.
@@ -146,7 +125,7 @@ on a caller contract nobody enforces is 🟡; complexity and naming are 🟢.
 
 ---
 
-## 5 — ADR compliance & durable context — runs on every review
+## 4 — ADR compliance & durable context — runs on every review
 
 Not only when the change "looks architectural". No decision records in the repo → report the ADR
 part as not applicable, don't silently skip it. The spec/plan check runs regardless.
@@ -218,7 +197,7 @@ shows in code the diff doesn't contain (the callers, the rest of the class, the 
 follows it, quoted at the line; for a missing record, the named criterion evidence above; for
 trapped reasoning, the passage of the spec or plan and the code it concerns.
 
-**Not this dimension's job:** duplication and dead code (card 3); test rules (cards 6 and 7).
+**Not this dimension's job:** duplication and dead code (card 2); test rules (cards 5 and 6).
 
 **Typical mistakes:**
 - Only the root `docs/decisions/` read in a repo with app or service levels → a record in
@@ -235,7 +214,7 @@ trapped reasoning, the passage of the spec or plan and the code it concerns.
 
 ---
 
-## 6 — Test protection — does the suite actually secure the new behavior?
+## 5 — Test protection — does the suite actually secure the new behavior?
 
 Runs on every review whose PR touches code. Where tests are generated alongside the code, they
 are green from the first run — and green proves nothing. A test written *from* the implementation
@@ -294,7 +273,7 @@ of the existing suite that found no test for it. "Should be tested" without the 
 named is not a finding.
 
 **Not this dimension's job — and it must stay out of this dispatch:** which tests could be
-deleted without losing anything. That is **card 7**: a reviewer holding both jobs at once always
+deleted without losing anything. That is **card 6**: a reviewer holding both jobs at once always
 prioritises the gap, because a gap reads as the more alarming defect, and the surplus never gets
 reported. A test that fails properly but checks the same case as a test three files away passes
 this card's question cleanly; don't stretch the question to catch it.
@@ -314,10 +293,10 @@ with nothing underneath.
 
 ---
 
-## 7 — Test surplus — what could be deleted without losing a check?
+## 6 — Test surplus — what could be deleted without losing a check?
 
 Its own dimension with its own subagent, on every review that adds or changes tests. Surplus
-tests cost real money — maintenance, runtime, and noise in every future diff — and card 6 is
+tests cost real money — maintenance, runtime, and noise in every future diff — and card 5 is
 blind to them. Nobody finds this unless somebody is looking for exactly it.
 
 **Question — per new or changed test: if I delete this test, what is no longer checked?** If the
@@ -356,7 +335,7 @@ and a wrong deletion suggestion costs the team its trust in the whole dimension.
 **existing** suite, not just the PR's new files — the duplicate usually sits in a test that has
 been there for months. For runtime relevance, the evidence is the grep of production callers.
 
-**Not this dimension's job:** whether a test can fail (card 6); the doc/spec files (card 5).
+**Not this dimension's job:** whether a test can fail (card 5); the doc/spec files (card 4).
 
 **Severity:** a redundant test is 🟡, merely excessive breadth is 🟢 — and „das kann weg" is worth
 reporting exactly as much as „das fehlt". Never park a surplus finding at 🟢 just because nothing

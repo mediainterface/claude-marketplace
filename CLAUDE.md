@@ -60,7 +60,7 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │       │   └── SKILL.md      # /ado-pipeline — pipeline analysis + changelog via az CLI
 │   │       └── pr-review/
 │   │           ├── SKILL.md      # /pr-review — the workflow (phases A–F, dispatch, report)
-│   │           ├── dimensions-implementation.md  # cards 1–7, loaded on an implementation PR only
+│   │           ├── dimensions-implementation.md  # cards 1–6, loaded on an implementation PR only
 │   │           └── dimensions-spec.md            # cards S1–S6, loaded on a spec PR only
 │   └── guardian/                 # Guardian (Hüter-Trio) tooling (skill-only)
 │       ├── .claude-plugin/
@@ -184,7 +184,7 @@ sits earlier: while the spec is written, everything needed beyond the user story
 be captured **outside** the spec — inline in the code as its own reason, in the user story, in a
 `.claude/rules/` convention, or as a Decision Record / Lesson Learned in the Memory Bank. The check
 at code review only confirms it. This runs through the whole plugin: `hooks/sdd-policy.md` (capture
-duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
+duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 4), and
 `skills/memory-bank-shared/REFERENCE.md` (the spec is not a storage location).
 
 - **Skill** (`plugins/sdd-kit/skills/create-decision/SKILL.md`): `/create-decision` — documents
@@ -336,9 +336,9 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   — docs *and* code — is explicitly not a violation:** a small change (a bug fix, a contained
   adjustment) legitimately carries its doc update along, and splitting it costs more overhead than
   a separate spec review is worth, so it is classified as an implementation PR and not indicted.
-  Its doc half is still reviewed — Phase C0 hands the changed doc/spec files to dimension 3 („does
+  Its doc half is still reviewed — Phase C0 hands the changed doc/spec files to dimension 2 („does
   the documentation describe what the code in this PR actually does?", the drift check nothing else
-  performs) and dimension 5 (records, durable context), never as deletion candidates, because you
+  performs) and dimension 4 (records, durable context), never as deletion candidates, because you
   do not ask for a file the same PR adds. Only a spec describing **substantially more** than the PR
   delivers earns a 🟢, and about scope rather than form: the separate spec PR would have bought
   feedback before the implementation existed. It checks the PR branch out in an **isolated
@@ -349,15 +349,15 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   holds the phases A–F, the dispatch rules, the finding schema and the report layout, and stays
   under the recommended 500 lines (the body is in context for every turn after loading, so each
   line costs repeatedly); the review questions live as **dimension cards** in
-  `dimensions-implementation.md` (1–7) and `dimensions-spec.md` (S1–S6). The orchestrator reads
+  `dimensions-implementation.md` (1–6) and `dimensions-spec.md` (S1–S6). The orchestrator reads
   only the file for the PR kind at hand and hands each card **verbatim** to its subagent — the
   cards are prompt material for the explorers, not workflow, which is why moving them out does not
   tear the phase logic apart, and a spec PR never loads the code dimensions at all. Each card has
   the same shape: question, checks, **evidence**, what is *not* its job (so nothing is reported
   twice), severity, and its own typical mistakes — the per-dimension red flags and common-mistakes
   rows moved onto the cards, which removed the threefold repetition (dimension prose, red flag,
-  table row) that made up most of the old length. **Implementation PR (C-I) — seven dimensions:**
-  security, CI/pipeline status, consistency & drift (duplicate/divergent implementations, dead
+  table row) that made up most of the old length. **Implementation PR (C-I) — six dimensions:**
+  security, consistency & drift (duplicate/divergent implementations, dead
   code, component-library usage, `.sln` platform configs), code smells & correctness, **ADR
   compliance**,
   **test protection** (would the test fail if the behavior were wrong?), and **test surplus** (what
@@ -371,15 +371,17 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   in — the only spec dimension that really searches the codebase), **S3 the spec against the linked
   work item** in both directions (acceptance criteria the spec does not address, and spec content
   the story never asked for — its own dispatch, because a reviewer holding S3 and S5 at once always
-  drops the comparison against the external source, the same failure mode that splits dimensions 6
+  drops the comparison against the external source, the same failure mode that splits dimensions 5
   and 7), **S4 the planned test approach against the repo's test process** (level, forbidden test
-  classes, required artefacts — the legitimate remainder of dimensions 6 and 7 at spec time, judged
+  classes, required artefacts — the legitimate remainder of dimensions 5 and 6 at spec time, judged
   against *this* repo's documented process or reported as undocumented, never against a policy
   imported from elsewhere), S5 implementability (internal contradictions, open decisions the
   implementation would have to invent, missing non-goals), and S6 security by design, dispatched
   **only** when the spec touches a trust boundary. The work item's content comes from
-  `/ado-workitem`'s *show* workflow, which is why that skill joins `/ado-pr` and `/ado-pipeline` as
-  a required sub-skill. Three hard rules: review and posting are separate phases (the review is
+  `/ado-workitem`'s *show* workflow, which is why that skill joins `/ado-pr` as a required
+  sub-skill (`/ado-pipeline` is no longer one: CI status left the review — a red build is the
+  author's to investigate, not the reviewer's, and reporting it added nothing the PR page does
+  not show). Three hard rules: review and posting are separate phases (the review is
   read-only and ends in a report), the user's checkout is never touched, and **no finding without
   evidence**. The last one is the **finding contract**, added with the automated per-commit use in
   mind, where nobody triages before posting: every finding carries an `evidence` field — the place
@@ -394,7 +396,7 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   posted comment. Findings are reported as a **numbered list** grouped 🔴/🟡/🟢, each entry starting
   with `**[N]**` and never `N.` (the terminal Markdown renderer would add its own counter and
   restart it), with a non-postable **status header** carrying the PR kind plus the signal proving
-  it, the CI results, and then either the test-to-production line ratio (implementation PR) or the
+  it, and then either the test-to-production line ratio (implementation PR) or the
   spec's path, the linked work item with its state — the policy expects **Refinement** at spec time,
   reported never changed — and every dimension that was *not* dispatched, so the reader can tell
   „geprüft, nichts gefunden" from „nicht geprüft" (spec PR). Findings are posted only for the
@@ -414,7 +416,7 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   of the signals). Phase A therefore keeps the system threads instead of dropping them, excluding
   them from the dedupe only. On a **spec PR** the whole C-I set never runs, so that check cannot
   arise at all — S1 asks the durable-context half of it instead, at the point where it is still
-  cheap to act on. The ADO plumbing comes from `/ado-pr`, `/ado-pipeline`, and `/ado-workitem`, with
+  cheap to act on. The ADO plumbing comes from `/ado-pr` and `/ado-workitem`, with
   `skills/ado-shared/REFERENCE.md` and `skills/memory-bank-shared/REFERENCE.md` by relative path.
 - **Requires** the `az` CLI with the `azure-devops` extension installed and the user signed in via
   `az devops login` for the `/ado-pr`, `/ado-workitem`, `/ado-pipeline`, and `/pr-review` skills.

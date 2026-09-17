@@ -6,7 +6,7 @@ dimension, together with the shared dispatch block from SKILL.md (worktree path,
 changed-file list, the finding schema with its evidence contract, the writing recipe). The cards
 are prompt material for the explorers; the orchestrator does not paraphrase them.
 
-**The seven code dimensions do not run here.** A spec has no production code, no test, and
+**The six code dimensions do not run here.** A spec has no production code, no test, and
 nothing to drift, so they would spend a full explorer fleet reporting the absence of things that
 cannot exist yet. What is worth reviewing about a spec is whether it matches the story it serves,
 the decisions already taken, the code it will land in, and the process that will judge it — while
@@ -20,7 +20,7 @@ something entirely missing from the spec anchors at the heading it should have f
 
 ## S1 — Memory Bank: conflicts and missing records
 
-The counterpart of card 5, applied to what the spec **proposes** instead of to code that exists.
+The counterpart of card 4, applied to what the spec **proposes** instead of to code that exists.
 
 **Checks:**
 - **Does the spec contradict an active record?** Read every record from Phase C0 whose topic
@@ -60,7 +60,7 @@ demanded for a one-feature choice the exclusions cover.
 
 The drift dimension turned around: instead of "does this code duplicate something", ask "does
 this plan duplicate, contradict, or misdescribe what is already there". The one dimension in this
-set that genuinely searches the codebase — give it the room card 3 would have had.
+set that genuinely searches the codebase — give it the room card 2 would have had.
 
 **Checks:**
 - **Does the spec propose something the codebase already has?** Search for an existing
@@ -72,7 +72,7 @@ set that genuinely searches the codebase — give it the room card 3 would have 
   can carry out — 🟡, and free to fix now.
 - **Does the plan fit the conventions of the place it lands in?** The CLAUDE.md files of the
   affected directories, the patterns of the sibling code, and the component library where the
-  repo has one — hand-rolled UI where the library has the component is card 3's rule, applied
+  repo has one — hand-rolled UI where the library has the component is card 2's rule, applied
   before the markup is written.
 
 **Evidence:** the **path** of the existing equivalent and what it does (read it, a matching name
@@ -88,7 +88,7 @@ for one spelling.
 
 Compare in **both** directions, using the work item from Phase C0. Its own dispatch, separate
 from S5 on purpose: a reviewer holding both jobs weighs the spec-internal gap higher and the
-comparison against the external source quietly drops out — the same reason cards 6 and 7 are
+comparison against the external source quietly drops out — the same reason cards 5 and 6 are
 split.
 
 **Checks:**
@@ -116,7 +116,7 @@ invented instead.
 
 ## S4 — Planned test approach against the repo's test process
 
-The legitimate remainder of cards 6 and 7 at spec time. „Would this test fail if the behavior
+The legitimate remainder of cards 5 and 6 at spec time. „Would this test fail if the behavior
 were wrong" cannot be asked — no test exists — but whether what is planned will satisfy the
 process that later judges it can, and that is far cheaper to settle here than in the
 implementation review.
@@ -134,7 +134,7 @@ implementation review.
   the work item, acceptance tests — whatever this repo actually asks for.
 - **If the repo documents no test process:** say so in the report and judge against the existing
   suite's conventions. Do **not** import a policy from a codebase you happen to know — levels,
-  tooling, and naming differ per repo. Identical to card 6's rule, and just as binding here.
+  tooling, and naming differ per repo. Identical to card 5's rule, and just as binding here.
 
 **Evidence:** the **rule in this repo's process document** (path and passage) the plan misses, or
 the statement that the repo documents none and the suite convention judged against instead.
