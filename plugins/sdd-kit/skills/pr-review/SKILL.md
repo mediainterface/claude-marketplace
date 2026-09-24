@@ -146,10 +146,11 @@ inherit the project's own conventions. Then the two inputs both sets need:
 **Implementation PR only** — three more inputs:
 - **Split the diffstat** into test paths and production paths. Dimension 7 needs the ratio, and
   it goes into the report's status header either way.
-- **The story's spec and plan, if the branch still carries them** (`docs/superpowers/specs/`,
-  `docs/superpowers/plans/` — wherever this repo keeps them): hand their paths and content to
-  dimension 5. This asks about files **present in the worktree**, not files in the diff — a
-  merged spec PR put them there, so they will not show up in this PR's changed-file list.
+- **The story's spec and plan, if the branch still carries them** (`docs/sdd/specs/`,
+  `docs/sdd/plans/` — for a story begun before the move `docs/superpowers/specs/` and
+  `docs/superpowers/plans/`): hand their paths and content to dimension 5. This asks about files
+  **present in the worktree**, not files in the diff — a merged spec PR put them there, so they
+  will not show up in this PR's changed-file list.
 - **Is this PR past its first review round** — has every required reviewer seen this code at
   least once? Judge that from evidence, not from the current tally: Azure DevOps clears votes on
   a new push, so a reviewer who reviewed and was then reset shows no vote while their review did

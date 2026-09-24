@@ -20,11 +20,29 @@ origin`) if you do not already know it:
 
 ## Spec → PR before implementation
 
-Once the superpowers `brainstorming` skill has produced a design spec and the user
-has approved it, do **not** invoke the `writing-plans` skill and do **not** write an
-implementation plan or any code. Instead, invoke the `sdd-kit:spec-pr` skill, which
-opens a pull request for the spec (plus any Memory Bank items) and then stops until
-the PR is merged.
+**A story's design spec is written with `sdd-kit:design-spec`.** It carries the
+planning conversation, the MIRA form (section order, what belongs in a spec and what
+in the plan) and the checks before the PR. When the superpowers `brainstorming`
+skill is the one writing the spec, keep its conversation, but invoke
+`sdd-kit:design-spec` before the document is written and use that form instead of
+brainstorming's own template.
+
+**Specs and plans live under `docs/sdd/`.** The spec goes to
+`docs/sdd/specs/YYYY-MM-DD-<app>-<topic>-design.md`, the implementation plan to
+`docs/sdd/plans/` (file name as `writing-plans` picks it) — at the repository root,
+never on an app or service level: they belong to a story, and a story can span
+several apps. This is the user preference for the spec and plan location that the
+superpowers `brainstorming` and `writing-plans` skills honour over their
+`docs/superpowers/` default; they keep committing the files as before. A story begun
+before this move may still have its spec and plan under `docs/superpowers/specs/` and
+`docs/superpowers/plans/` — wherever this policy looks for a story's spec or plan,
+look there too.
+
+Once a design spec is written — by `sdd-kit:design-spec` or by `brainstorming` —
+and the user has approved it, do **not** invoke the `writing-plans` skill and do
+**not** write an implementation plan or any code. Instead, invoke the
+`sdd-kit:spec-pr` skill, which opens a pull request for the spec (plus any Memory
+Bank items) and then stops until the PR is merged.
 
 The implementation plan (`writing-plans`) happens only **after** the spec PR is
 merged, as a separate later effort. Proceed to `writing-plans` now **only** if the
@@ -34,9 +52,7 @@ user explicitly asks for an implementation plan in this session.
 design spec and an implementation plan are working artifacts of one story, not
 documentation: they are deleted again at the human code review of the story's
 implementation (see "Implementation" below for which review that is, and which it is
-not). The superpowers skills keep writing them to
-`docs/superpowers/` and committing them — that stays as it is; this policy overrides
-only how long they live.
+not).
 
 So while the spec is being written, look for everything in it that is needed
 **beyond** this user story and this spec — the grounds for a decision, a constraint,
@@ -215,9 +231,10 @@ carrying the deletion out is your job — say what you are removing, then do it:
    living only in the spec or the plan gets captured now. This check was already made
    while the spec was written (see "Spec → PR before implementation"), so here it
    normally only confirms.
-2. **Then delete.** `git rm` the story's spec and plan — superpowers writes them to
-   `docs/superpowers/specs/` and `docs/superpowers/plans/` — and commit the deletion
-   into the branch of the **implementation PR** under review. Never into a spec PR's
-   branch; if the PR you are in changes no production code, it is the wrong one.
+2. **Then delete.** `git rm` the story's spec and plan — under `docs/sdd/specs/` and
+   `docs/sdd/plans/`, for a story begun before the move under `docs/superpowers/` — and
+   commit the deletion into the branch of the **implementation PR** under review.
+   Never into a spec PR's branch; if the PR you are in changes no production code, it
+   is the wrong one.
 3. **Never** delete Memory Bank records or conventions along with them. Those are the
    durable trace and stay.

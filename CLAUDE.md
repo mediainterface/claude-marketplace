@@ -48,6 +48,8 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │       │   └── SKILL.md      # /create-lesson-learned — capture patterns and pitfalls
 │   │       ├── memory-bank-shared/
 │   │       │   └── REFERENCE.md  # Shared levels model, placement rule, significance triage (not a skill)
+│   │       ├── design-spec/
+│   │       │   └── SKILL.md      # /design-spec — write a story's design spec in the MIRA form
 │   │       ├── spec-pr/
 │   │       │   └── SKILL.md      # /spec-pr — open a PR for the spec, then stop (no plan/code)
 │   │       ├── ado-shared/
@@ -160,10 +162,10 @@ Hook-only plugin that keeps `CLAUDE.md` files in sync with staged changes before
 ### sdd-kit
 
 The skill set for MediaInterface's Spec-Driven Development (SDD) workflow — the skills we rely on
-across SDD (capturing the decisions and lessons behind a spec, gating the spec into a pull request,
-reviewing the resulting PRs in depth, and handling the Azure DevOps work — PRs, work items,
-pipelines — along the way), not a general-purpose collection. It is mostly skills plus one hook (the
-spec→PR redirect); no MCP server.
+across SDD (writing a story's design spec, capturing the decisions and lessons behind it, gating
+the spec into a pull request, reviewing the resulting PRs in depth, and handling the Azure DevOps
+work — PRs, work items, pipelines — along the way), not a general-purpose collection. It is mostly
+skills plus one hook (the spec→PR redirect); no MCP server.
 
 **Specs and plans are transient.** A design spec and an implementation plan belong to one story, not
 to the repository: they are created as before (Refinement → spec PR → `writing-plans` after the
@@ -175,15 +177,25 @@ out *which* review is meant is deliberate: Claude reviews its own code constantl
 implementing, and a spec PR is never the place — it matches the pattern from the outside (a PR in
 review with a spec file in it) while being the opposite situation, so the policy names both
 distinguishing marks: the implementation PR changes production code, and the spec PR is long merged
-by then. The superpowers plugin (`brainstorming`, `writing-plans`) still writes them to
-`docs/superpowers/` and commits them — it is a third-party plugin and stays untouched; our
-SessionStart policy overrides only how long they live. The protection against losing the reasoning
-sits earlier: while the spec is written, everything needed beyond the user story and the spec has to
-be captured **outside** the spec — inline in the code as its own reason, in the user story, in a
-`.claude/rules/` convention, or as a Decision Record / Lesson Learned in the Memory Bank. The check
-at code review only confirms it. This runs through the whole plugin: `hooks/sdd-policy.md` (capture
-duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
-`skills/memory-bank-shared/REFERENCE.md` (the spec is not a storage location).
+by then. The protection against losing the reasoning sits earlier: while the spec is written,
+everything needed beyond the user story and the spec has to be captured **outside** the spec —
+inline in the code as its own reason, in the user story, in a `.claude/rules/` convention, or as a
+Decision Record / Lesson Learned in the Memory Bank. The check at code review only confirms it. This
+runs through the whole plugin: `hooks/sdd-policy.md` (capture duty + deletion step), `/spec-pr`
+(Step 3), `/pr-review` (dimension 5), and `skills/memory-bank-shared/REFERENCE.md` (the spec is not
+a storage location).
+
+**Specs and plans live under `docs/sdd/`** — `docs/sdd/specs/` and `docs/sdd/plans/` at the repo
+root, never on an app level, because a story can span several apps. The path names the process
+rather than the plugin that happens to write the file, and the `sdd` segment keeps these working
+artifacts apart from the durable `docs/decisions/` and `docs/learnings/`, next to which a plain
+`docs/specs/` would look just as permanent. The superpowers plugin (`brainstorming`,
+`writing-plans`) is third-party and stays untouched: both skills honour a user preference for the
+spec and plan location over their `docs/superpowers/` default, and the SessionStart policy states
+exactly that preference. Stories begun before the move still have their files under
+`docs/superpowers/`, so `/spec-pr` (Step 1), the policy's deletion step, `/pr-review` (Phase C0)
+and `/design-spec` (predecessor spec) look there as well — a fallback that can go once no such story
+is left, which happens by itself, since every spec is deleted at its implementation's review.
 
 - **Skill** (`plugins/sdd-kit/skills/create-decision/SKILL.md`): `/create-decision` — documents
   decisions in the Memory Bank as Decision Records, named `docs/decisions/YYYY-MM-DD-<title>.md`
@@ -238,6 +250,21 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
 - **Skill** (`plugins/sdd-kit/skills/create-lesson-learned/SKILL.md`): `/create-lesson-learned` —
   captures recurring patterns and pitfalls in the Memory Bank, placed on the right Memory Bank level
   like decisions (no significance gate — learnings stay deliberately low-threshold).
+- **Skill** (`plugins/sdd-kit/skills/design-spec/SKILL.md`): `/design-spec <work item>` — writes a
+  story's design spec to `docs/sdd/specs/` in the compact, decision-centred **MIRA form**,
+  optimised for the reviewer reading it side by side in the spec PR's diff. It reads before it
+  talks (work item via `/ado-workitem`, epic, sibling stories, predecessor spec, affected code,
+  Memory Bank levels, the repo's test process), has the user confirm the **premise** before any
+  single decision, and asks the open decisions directly instead of parking them. The form is a
+  fixed section order — Context, a **Decisions** table (`Topic | Decision | Why`) as the core, Out
+  of scope, optional domain sections with checklists, Errors, Edge cases, Tests written against
+  the repo's own test process and only the levels it actually runs, Memory Bank, Delivery as a PR
+  split — plus rules that keep plan detail out (no file, component or test names), claims about
+  today checked against the code, one rule in one place, 200–300 lines. Whether anything becomes
+  a record is never judged in the skill: it runs `/create-decision` / `/create-lesson-learned` and
+  records only their verdict. Ends by handing over to `/spec-pr`. The SessionStart policy routes
+  every story spec through it — when superpowers `brainstorming` is the one writing, its
+  conversation stays but its spec template is replaced by this form.
 - **Skill** (`plugins/sdd-kit/skills/spec-pr/SKILL.md`): `/spec-pr` — the SDD replacement for the
   superpowers brainstorming skill's `writing-plans` handoff. After a spec is written and approved,
   it opens a pull request for the spec (offering to bundle Memory Bank items via `/create-decision`
@@ -261,7 +288,9 @@ duty + deletion step), `/spec-pr` (Step 3), `/pr-review` (dimension 5), and
   Claude evaluates itself when the policy first becomes relevant: git origin on
   `ado.mediainterface.de` (any URL form; the collection doesn't matter) → in force; any other origin
   → **ask the user once** before following the workflow; no git repo or no origin → does not apply,
-  no question asked. The policy has two parts: (1) after a spec is approved, override the
+  no question asked. The policy has two parts: (1) write every story spec with `/design-spec` (when
+  `brainstorming` writes it, its template gives way to that form) and keep spec and plan under
+  `docs/sdd/`, and after a spec is approved, override the
   brainstorming skill's `writing-plans` handoff and route to `/spec-pr` (open the spec PR and stop)
   unless the user explicitly asks for a plan, flagging a referenced ticket that is not in the
   **Refinement** state, and require that everything needed beyond the story and the spec is captured

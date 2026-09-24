@@ -3,10 +3,11 @@ name: spec-pr
 description: >-
   Opens a pull request for a just-written Spec-Driven-Development spec (plus any
   Memory Bank items) and then STOPS — no implementation plan, no code — until the PR
-  is merged. Use immediately after the superpowers brainstorming skill produces a
-  spec and the user approves it, INSTEAD of writing-plans. Auto-detects the git
-  remote: Azure DevOps → the ado-pr workflow, GitHub → the gh CLI. Also triggers on
-  "PR the spec", "open a spec PR", or "ship the spec for review".
+  is merged. Use immediately after a spec is written (by sdd-kit:design-spec or the
+  superpowers brainstorming skill) and the user approves it, INSTEAD of
+  writing-plans. Auto-detects the git remote: Azure DevOps → the ado-pr workflow,
+  GitHub → the gh CLI. Also triggers on "PR the spec", "open a spec PR", or "ship the
+  spec for review".
 argument-hint: (run after a spec is written & approved; no arguments needed)
 allowed-tools: Bash, Read, Glob, Grep, Skill
 ---
@@ -15,11 +16,11 @@ allowed-tools: Bash, Read, Glob, Grep, Skill
 
 In MediaInterface's Spec-Driven-Development flow, a spec is reviewed and **merged as
 its own pull request before any implementation planning or coding happens**. This
-skill takes the spec the superpowers `brainstorming` skill just wrote, opens a PR for
-it (together with any Memory Bank items), and then **stops**. It deliberately does
-**not** invoke `writing-plans`, does not write an implementation plan, and does not
-write code — getting the spec merged, and any later implementation, are separate
-efforts.
+skill takes the spec just written — by `sdd-kit:design-spec` or the superpowers
+`brainstorming` skill — opens a PR for it (together with any Memory Bank items), and
+then **stops**. It deliberately does **not** invoke `writing-plans`, does not write an
+implementation plan, and does not write code — getting the spec merged, and any later
+implementation, are separate efforts.
 
 > **This skill is the SDD replacement for brainstorming's `writing-plans` handoff.**
 > A SessionStart hook in this plugin injects the policy that routes here; you can
@@ -44,11 +45,12 @@ that instead — this gate is the default next step after a spec, not a hard loc
 Find the design spec the flow just produced:
 
 ```bash
-ls -t docs/superpowers/specs/*-design.md 2>/dev/null | head -5
+find docs/sdd/specs docs/superpowers/specs -name '*-design.md' -exec ls -t {} + 2>/dev/null | head -5
 ```
 
-Use the most recent one. If several are plausible, ask the user which to PR. If none
-exists, say so and stop — there is nothing to open a PR for.
+`docs/superpowers/specs/` only holds specs of stories begun before the move to
+`docs/sdd/`. Use the most recent one. If several are plausible, ask the user which to
+PR. If none exists, say so and stop — there is nothing to open a PR for.
 
 ### Step 2: Restate the scope (once)
 
