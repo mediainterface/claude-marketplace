@@ -1,11 +1,11 @@
 ---
 name: design-spec
 description: >-
-  Writes a story's design spec under docs/superpowers/specs/ in the MIRA form — a
-  compact, decision-centred document for the spec PR of the SDD workflow. Use when a
-  refined work item is to be turned into a design spec, when the user asks to plan a
-  story or write its spec, and whenever the superpowers brainstorming skill is about to
-  write the spec document for a story. Covers the planning conversation before writing,
+  Writes a story's design spec under docs/sdd/specs/ in the MIRA form — a compact,
+  decision-centred document for the spec PR of the SDD workflow. Use when a refined
+  work item is to be turned into a design spec, when the user asks to plan a story or
+  write its spec, and whenever the superpowers brainstorming skill is about to write
+  the spec document for a story. Covers the planning conversation before writing,
   the section order, what belongs in a spec versus the implementation plan, and the
   checks before sdd-kit:spec-pr.
 argument-hint: <work item ID or URL>
@@ -21,11 +21,11 @@ line by line, nothing a reviewer cannot check.
 ## Workflow
 
 1. **Read before talking.** The work item (description and acceptance criteria), its parent epic
-   and sibling stories, the predecessor's spec if one is still in the repo, the affected code,
-   the Memory Bank levels involved (`docs/decisions/`, `apps/<app>/docs/`,
-   `services/<svc>/docs/`) and the repo's test process if it defines one. Fetch the work item
-   through `sdd-kit:ado-workitem`; it should be in the **Refinement** state — if not, say so, do
-   not change it.
+   and sibling stories, the predecessor's spec if one is still in the repo (`docs/sdd/specs/`,
+   older ones under `docs/superpowers/specs/`), the affected code, the Memory Bank levels
+   involved (`docs/decisions/`, `apps/<app>/docs/`, `services/<svc>/docs/`) and the repo's test
+   process if it defines one. Fetch the work item through `sdd-kit:ado-workitem`; it should be in
+   the **Refinement** state — if not, say so, do not change it.
    - *Siblings:* do not build what a sibling plans, but leave the hook it will need where it
      costs nothing now (an id kept on a view, a union typed to grow) and name the hook in Out
      of scope with the sibling's id.
@@ -42,7 +42,8 @@ line by line, nothing a reviewer cannot check.
    the document it writes follows the form below instead of its own template.
 3. **Write the spec** in the form below, English, hard-wrapped at 100 characters (tables,
    code blocks and single long links excepted), file
-   `docs/superpowers/specs/YYYY-MM-DD-<app>-<topic>-design.md`. Branch `spec/<id>-<topic>`.
+   `docs/sdd/specs/YYYY-MM-DD-<app>-<topic>-design.md` at the repository root, never on an app
+   level. Branch `spec/<id>-<topic>`.
 4. **Check** wrap length, that every relative link resolves, that a decision changed during the
    discussion left no old wording behind (search the whole spec for it — edge cases, tests and AC
    coverage keep stale copies longest), and that everything needed beyond the story is captured

@@ -45,11 +45,12 @@ that instead — this gate is the default next step after a spec, not a hard loc
 Find the design spec the flow just produced:
 
 ```bash
-ls -t docs/superpowers/specs/*-design.md 2>/dev/null | head -5
+find docs/sdd/specs docs/superpowers/specs -name '*-design.md' -exec ls -t {} + 2>/dev/null | head -5
 ```
 
-Use the most recent one. If several are plausible, ask the user which to PR. If none
-exists, say so and stop — there is nothing to open a PR for.
+`docs/superpowers/specs/` only holds specs of stories begun before the move to
+`docs/sdd/`. Use the most recent one. If several are plausible, ask the user which to
+PR. If none exists, say so and stop — there is nothing to open a PR for.
 
 ### Step 2: Restate the scope (once)
 
