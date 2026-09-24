@@ -41,14 +41,18 @@ Writing editor that identifies and removes AI writing patterns to make text soun
 
 ### sdd-kit
 
-Spec-Driven Development toolkit: capture Decision Records and Lessons Learned with guided workflows and standardized templates (MADR format), gate an approved spec into a pull request before any implementation, review the resulting pull requests in depth, and run the Azure DevOps side of delivery — pull requests, work items, and pipelines/changelogs — through the Azure CLI.
+Spec-Driven Development toolkit: capture Decision Records and Lessons Learned with guided workflows
+and standardized templates (MADR format), write a story's design spec in a compact, decision-centred
+form, gate an approved spec into a pull request before any implementation, review the resulting pull
+requests in depth, and run the Azure DevOps side of delivery — pull requests, work items, and
+pipelines/changelogs — through the Azure CLI.
 
 | | |
 |---|---|
 | Install | `claude plugin install sdd-kit@mediainterface` |
 | Type | Skills + SessionStart hook (the spec→PR policy) |
-| Requires | Nothing for `/create-decision` and `/create-lesson-learned`. `/ado-*` and `/pr-review` need the `az` CLI with the `azure-devops` extension and an Azure DevOps sign-in via `az devops login` (PAT); `/spec-pr` additionally needs the `gh` CLI on GitHub remotes. |
-| Skills | `/create-decision`, `/create-lesson-learned`, `/spec-pr`, `/pr-review`, `/ado-pr`, `/ado-workitem`, `/ado-pipeline` |
+| Requires | Nothing for `/create-decision` and `/create-lesson-learned`; `/design-spec` reads the work item via `/ado-workitem`. `/ado-*` and `/pr-review` need the `az` CLI with the `azure-devops` extension and an Azure DevOps sign-in via `az devops login` (PAT); `/spec-pr` additionally needs the `gh` CLI on GitHub remotes. |
+| Skills | `/create-decision`, `/create-lesson-learned`, `/design-spec`, `/spec-pr`, `/pr-review`, `/ado-pr`, `/ado-workitem`, `/ado-pipeline` |
 
 ## Adding a plugin
 

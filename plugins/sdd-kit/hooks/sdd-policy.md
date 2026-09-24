@@ -20,8 +20,15 @@ origin`) if you do not already know it:
 
 ## Spec → PR before implementation
 
-Once the superpowers `brainstorming` skill has produced a design spec and the user
-has approved it, do **not** invoke the `writing-plans` skill and do **not** write an
+**A story's design spec is written with `sdd-kit:design-spec`.** It carries the
+planning conversation, the MIRA form (section order, what belongs in a spec and what
+in the plan) and the checks before the PR. When the superpowers `brainstorming`
+skill is the one writing the spec, keep its conversation, but invoke
+`sdd-kit:design-spec` before the document is written and use that form instead of
+brainstorming's own template.
+
+Once a design spec is written — by `sdd-kit:design-spec` or by `brainstorming` —
+and the user has approved it, do **not** invoke the `writing-plans` skill and do **not** write an
 implementation plan or any code. Instead, invoke the `sdd-kit:spec-pr` skill, which
 opens a pull request for the spec (plus any Memory Bank items) and then stops until
 the PR is merged.
