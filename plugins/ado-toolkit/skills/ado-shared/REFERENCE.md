@@ -13,7 +13,8 @@ branch, a work item written from a change in the code. Outside such a checkout t
 (Step 0, step 3).
 
 **Complete Step 0 and the Setup Check below once, before any `az` command.** The Command Map,
-Repository Mismatch Check, Quirks, and Error-handling rules here apply to all three skills.
+Repository Mismatch Check, Quirks, Written-as-the-user, and Error-handling rules here apply to
+all three skills.
 
 > **German-localized Server.** Our Azure DevOps is German, so work item types and states are
 > German (e.g. `Aufgabe`, not `Task`) — fetch them from the server rather than assuming
@@ -148,14 +149,26 @@ for CLI arguments (`--title`, `--description`, `--state`, …) and for JSON bodi
 
 ## Line breaks — never hard-wrap ADO text
 
-Titles, descriptions, and comment bodies sent **to** ADO are not wrapped at a fixed
-column. ADO's Markdown commonly renders a single newline as a line break, so a
-hard-wrapped paragraph arrives as a column of ragged short lines. Keep each paragraph on
-one line and separate paragraphs with a blank line; lists, tables, and code fences work
-as usual.
+Titles, descriptions, and comment bodies sent **to** ADO are not wrapped at a fixed column.
+The two kinds of text render differently:
+
+- **Pull requests** (description, comment threads) are **Markdown**, which commonly renders a
+  single newline as a line break — a hard-wrapped paragraph arrives as a column of ragged
+  short lines. Keep each paragraph on one line and separate paragraphs with a blank line;
+  lists, tables, and code fences work as usual.
+- **Work items** (description, acceptance criteria, repro steps, resolution, comments) are
+  **HTML**: a newline is just a space, so structure comes from `<p>`, `<ul><li>` and the like
+  (see the `ado-workitem` skill).
 
 A wrap rule a repository sets for its Markdown **files** applies to those files, never to
 text typed into an ADO field.
+
+## Written as the user
+
+Everything sent through `az` — PR descriptions, PR and work item comments, work item fields —
+appears in ADO under the **user's** name. Write it as they would: never name the user, never
+refer to them in the third person ("the objection above holds", not "<name> is right"), and
+keep explanations meant only for the user in the chat. Show the text before posting it.
 
 ## Title schema (PRs & work items)
 
@@ -211,9 +224,12 @@ discover the correct one with `az devops invoke --query "[?area=='build']"` (or
 | Work item **types** (localized names) | `az devops invoke --area wit --resource workItemTypes --route-parameters project={project} --org {org} --api-version 7.1 -o json` |
 | Work item type **states** (localized) | `az devops invoke --area wit --resource workItemTypeStates --route-parameters project={project} type={typeName} --org {org} --api-version 7.1 -o json` |
 | Show work item | `az boards work-item show --id {id} --org {org} -o json` |
-| Create work item | `az boards work-item create --title "{title}" --type "{germanTypeName}" [--description "{description}"] [--assigned-to "{user}"] --org {org} --project {project} -o json` |
-| Update work item | `az boards work-item update --id {id} [--title "{title}"] [--state "{germanState}"] [--assigned-to "{user}"] --org {org} -o json` |
-| Link work item to parent | `az boards work-item relation add --id {childId} --relation-type parent --target-id {parentId} --org {org} -o json` |
+| Create work item | `az boards work-item create --title "{title}" --type "{germanTypeName}" [--description "{descriptionHtml}"] [--fields "{referenceName}={html}" …] [--assigned-to "{displayName}"] --area "{project}\{team}" --iteration "{project}\{team}" --org {org} --project {project} -o json` |
+| Update work item | `az boards work-item update --id {id} [--title "{title}"] [--state "{germanState}"] [--assigned-to "{displayName}"] [--description "{descriptionHtml}"] [--fields "{referenceName}={html}" …] --org {org} -o json` |
+| Relation types (localized names) | `az boards work-item relation list-type --org {org} -o json` |
+| Link work item to parent | `az boards work-item relation add --id {childId} --relation-type "{parentRelationName}" --target-id {parentId} --org {org} -o json` (on our server `"Übergeordnetes Element"`) |
+| Work item comments (list) | `az devops invoke --area wit --resource comments --route-parameters project={project} workItemId={id} --org {org} --api-version 7.1-preview -o json` |
+| Add work item comment | `az boards work-item update --id {id} --discussion "{commentHtml}" --org {org} -o json` |
 | Query work items (WIQL) | `az boards query --wiql "{wiql}" --org {org} --project {project} -o json` |
 
 **CLI-vs-REST differences to remember:**
@@ -223,11 +239,18 @@ discover the correct one with `az devops invoke --query "[?area=='build']"` (or
   local git operations, same as the REST skill.
 - The task-log `invoke` returns a JSON object with a `value` array of log lines; join
   that array to reconstruct the plain-text log.
-- **German installation:** work item **type** names (`Aufgabe`, not `Task`) and **state**
-  names (`Aktiv`, not `Active`) are localized. `--type` / `--state` and WIQL *values* take
+- **German installation:** work item **type** names (`Aufgabe`, not `Task`), **state**
+  names (`Aktiv`, not `Active`) and **relation type** names (`Übergeordnetes Element`, not
+  `parent`) are localized. `--type` / `--state` / `--relation-type` and WIQL *values* take
   these German names — fetch them from the server (see the `ado-workitem` skill) rather than
   assuming. WIQL *field reference names* (`System.WorkItemType`, `System.State`) stay
   invariant English.
+- `--assigned-to` takes the user's **display name** (`"Erika Mustermann"`); an e-mail address
+  or `DOMAIN\account` is rejected as an unknown identity.
+- `az` reads stdin. Inside a `while read` loop it swallows the loop's input and hangs — call it
+  with `</dev/null` there.
+- A **preview** API version is written `7.1-preview`, without the `.N` suffix: the CLI fails to
+  parse `7.1-preview.4` ("could not convert string to float").
 
 ## Repository Mismatch Check
 

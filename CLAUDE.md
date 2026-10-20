@@ -30,7 +30,7 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │       ├── ado-pr/
 │   │       │   └── SKILL.md      # /ado-pr — PR review/create/update/comment via az CLI
 │   │       ├── ado-workitem/
-│   │       │   └── SKILL.md      # /ado-workitem — German-localized work items via az CLI
+│   │       │   └── SKILL.md      # /ado-workitem — work items/tickets incl. comments via az CLI
 │   │       └── ado-pipeline/
 │   │           └── SKILL.md      # /ado-pipeline — pipeline analysis + changelog via az CLI
 │   ├── humanizer/                # AI writing pattern removal skill
@@ -175,14 +175,32 @@ teams that do not follow SDD or mostly work on tickets rather than code. It was 
   PRs without `ado-toolkit` knowing what a spec is. PR Update keeps a PR's current marker and
   description structure unless the user asks otherwise, and asks rather than re-votes when the
   CLI returns the title with its emoji stripped.
+- **Ticket practice in `/ado-workitem`** — what teams had kept in personal memories lives in
+  the skill, because it holds for everyone on the server. Every multi-line field and every
+  comment is **HTML** (`<p>`, `<ul>`; a newline is just a space), while PR texts are Markdown —
+  the shared reference's **Line breaks** section keeps the two apart. Each type's content goes
+  into its own field: a User Story's acceptance criteria into
+  `Microsoft.VSTS.Common.AcceptanceCriteria`, a Fehler's content into
+  `Microsoft.VSTS.TCM.ReproSteps` (its form shows no description) and, after the fix, the
+  solution into `Microsoft.VSTS.Common.Resolution` — writing that changes no state. Area and
+  Iteration both go onto the **team node**; the team is **asked or known from the context**
+  (the conversation, the repo's `CLAUDE.md` / `.claude/rules/`) and never inferred from the
+  parent or siblings, which sometimes sit on the project root. The parent link uses the
+  server's localized relation name (`"Übergeordnetes Element"` — `parent` does not match
+  here), `--assigned-to` takes the display name, and a draft is shown before anything is
+  created, changed or commented. **Comments** are one flat discussion: read via
+  `az devops invoke --area wit --resource comments --api-version 7.1-preview` (the CLI cannot
+  parse `7.1-preview.4`, the server rejects `7.1`), added via `--discussion`. A short
+  **Writing tickets** section and the shared **Written as the user** rule keep tickets to what
+  the reader needs and everything posted in the user's voice.
 - They assume the user is already signed in via `az devops login` (PAT-based); they never
   authenticate themselves and prompt the user if sign-in is missing. The Server is
   **German-localized**, so work item types/states are German (e.g. `Aufgabe`, not `Task`) —
   fetched from the server rather than assumed — and all German text sent to ADO keeps its real
   umlauts/ß (never transliterated to `ue`/`oe`/`ae`/`ss`), a rule spelled out in the shared
   reference's **German text** section. A neighbouring **Line breaks** section keeps text sent
-  *to* ADO unwrapped, since ADO's Markdown turns a single newline into a line break and a wrapped
-  paragraph would arrive as ragged short lines.
+  *to* ADO unwrapped: PR Markdown turns a single newline into a line break, so a wrapped
+  paragraph would arrive as ragged short lines, and work item HTML ignores newlines altogether.
 - **Requires** a git checkout of an Azure DevOps repository, the `az` CLI with the
   `azure-devops` extension, and a sign-in via `az devops login`.
 

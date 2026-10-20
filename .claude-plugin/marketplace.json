@@ -17,7 +17,7 @@
     {
       "name": "ado-toolkit",
       "source": "./plugins/ado-toolkit",
-      "description": "Azure DevOps Server via the az CLI — work items, pull requests (review, create, update, comment), pipeline failure analysis and changelogs. Standalone, no development process assumed.",
+      "description": "Azure DevOps Server via the az CLI — work items (create, update, comment), pull requests (review, create, update, comment), pipeline failure analysis and changelogs. Standalone, no development process assumed.",
       "version": "1.0.0"
     },
     {

@@ -1,7 +1,7 @@
 {
   "name": "ado-toolkit",
   "version": "1.0.0",
-  "description": "Azure DevOps Server via the Azure CLI (az + azure-devops extension): /ado-pr reviews, creates, updates and comments on pull requests, /ado-workitem creates, shows, queries and updates work items (German-localized server), /ado-pipeline analyses build failures and writes changelogs. Works inside a git checkout of an Azure DevOps repository; assumes you are signed in via az devops login (PAT).",
+  "description": "Azure DevOps Server via the Azure CLI (az + azure-devops extension): /ado-pr reviews, creates, updates and comments on pull requests, /ado-workitem creates, shows, queries, updates and comments on work items (German-localized server), /ado-pipeline analyses build failures and writes changelogs. Works inside a git checkout of an Azure DevOps repository; assumes you are signed in via az devops login (PAT).",
   "author": { "name": "MediaInterface GmbH" },
   "license": "Apache-2.0",
   "repository": "https://github.com/mediainterface/claude-marketplace",

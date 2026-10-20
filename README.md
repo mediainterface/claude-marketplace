@@ -20,10 +20,10 @@ claude plugin install <plugin-name>@mediainterface
 
 ### ado-toolkit
 
-Azure DevOps Server through the Azure CLI: create, show, query and update work items, review,
-create, update and comment on pull requests, analyse failed builds and write changelogs. It
-assumes no particular development process, so teams that mostly work on tickets can use it as
-well as teams that code; `sdd-kit` builds on it.
+Azure DevOps Server through the Azure CLI: create, show, query, update and comment on work items,
+review, create, update and comment on pull requests, analyse failed builds and write changelogs. It
+assumes no particular development process, so teams that mostly work on tickets can use it as well
+as teams that code; `sdd-kit` builds on it.
 
 | | |
 |---|---|
