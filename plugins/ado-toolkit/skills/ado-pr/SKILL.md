@@ -16,9 +16,9 @@ Pull-request workflows for Azure DevOps via the Azure CLI (`az` + `azure-devops`
 **review**, **create**, **update**, and **comment** on PRs. Use this skill when the user
 pastes a PR URL/ID or asks to review, open, update, or comment on an Azure DevOps PR.
 
-> **Shared setup first.** Before any `az` command, complete **Step 0 (connection detection)**
-> and the **Setup Check (sign-in confirmation)** in
-> [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md). That file also holds the
+> **Shared setup first.** Before the first `az` command, run **Step 0 (connection detection)**
+> in [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md); when an `az` command fails, its
+> **Setup Check** diagnoses the error first. That file also holds the
 > **Command Map**, **Title schema**, **German text** (umlauts verbatim), **Repository
 > Mismatch Check**, **Quirks**, and **Error handling & local-state safety** rules the
 > workflows below refer to. `{org}` = `organization`, `{repo}` = `repository`, `{project}`

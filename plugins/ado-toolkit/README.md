@@ -5,7 +5,7 @@ extension). Three skills cover the day-to-day work around tickets, pull requests
 
 | Skill | What it does |
 |---|---|
-| `/ado-workitem` | Create, show, query (WIQL), update and comment on work items (tickets). Each type's content goes into its own field (acceptance criteria, repro steps, resolution), Area and Iteration onto the team the user names. Types, states and relation types are read from the server, because ours is German-localized (`Aufgabe`, not `Task`). |
+| `/ado-workitem` | Create, show, query (WIQL), update and comment on work items (tickets). Each type's content goes into its own field (acceptance criteria, repro steps, resolution), Area and Iteration onto the team the user names. Type, state, field and relation names are read from the server once and cached per server and project, since they differ by language and process (`Aufgabe`, not `Task`). |
 | `/ado-pr` | Review a PR, create or update one (German title schema, work item linked and referenced as `#id`), and add, answer or resolve comment threads. |
 | `/ado-pipeline` | Analyse a failed build (timeline, failed-task logs, root cause, fix) and write a changelog since a build or commit. |
 

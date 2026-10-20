@@ -34,11 +34,11 @@ skill orchestrates its skills; it does not re-implement `az`. **REQUIRED SUB-SKI
 - **`ado-toolkit:ado-workitem`** — the linked work item's content (title, description,
   acceptance criteria, state) via its *show* workflow. The spec-PR review compares the spec
   against it.
-- The ADO connection detection (**Step 0**), **Setup Check** (sign-in confirmation),
-  **Repository Mismatch Check**, **Quirks**, and **German text** rules in `ado-toolkit`'s shared
-  reference (`ado-shared/REFERENCE.md`, linked from `ado-toolkit:ado-pr` — invoke that skill
-  first so the reference is at hand) apply — complete Step 0 and the Setup Check once before any
-  `az` command.
+- The ADO connection detection (**Step 0**), **Setup Check** (diagnosis of a failed `az`
+  command), **Repository Mismatch Check**, **Quirks**, and **German text** rules in
+  `ado-toolkit`'s shared reference (`ado-shared/REFERENCE.md`, linked from `ado-toolkit:ado-pr`
+  — invoke that skill first so the reference is at hand) apply — run Step 0 once before the
+  first `az` command.
 - **Spec PR vs. implementation PR** — the kind detection Phase A.5 applies — in
   [../sdd-pr-shared/REFERENCE.md](../sdd-pr-shared/REFERENCE.md).
 
@@ -55,8 +55,8 @@ skill orchestrates its skills; it does not re-implement `az`. **REQUIRED SUB-SKI
 
 ### Phase A — Setup & PR facts (read-only)
 1. Parse the PR ID from the argument (numeric ID or extract from the URL).
-2. Run `ado-toolkit`'s **Step 0** (connection detection) + **Setup Check** (sign-in
-   confirmation). If not signed in, stop and show the sign-in instructions.
+2. Run `ado-toolkit`'s **Step 0** (connection detection). If an `az` command fails — not signed
+   in, CLI or extension missing — its **Setup Check** gives the fix; stop there.
 3. Fetch PR metadata (`ado-toolkit:ado-pr` review step): `sourceRefName`, `targetRefName`, `title`,
    `description`, `status`, linked work items, `repository.name`, `lastMergeSourceCommit`, and
    `reviewers` (with `isRequired` and `vote` — Phase C0 combines these with the thread history to

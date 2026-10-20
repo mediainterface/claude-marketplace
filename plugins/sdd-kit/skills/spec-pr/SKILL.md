@@ -168,7 +168,7 @@ git remote get-url origin
 
 - **Azure DevOps remote** (a `…/_git/…` URL, or `dev.azure.com` / `*.visualstudio.com`):
   invoke `ado-toolkit:ado-pr` and follow its **PR Creation** workflow — its shared reference
-  brings **Step 0** and the **Setup Check**, which come first. Prescribe the **Spec PR
+  brings **Step 0**, which comes first. Prescribe the **Spec PR
   conventions** from [../sdd-pr-shared/REFERENCE.md](../sdd-pr-shared/REFERENCE.md): the
   **📝 spec-only** marker and the spec description (**Inhalt** and **Erwartetes
   Umsetzungsrisiko**). A linked **work item is required** — ADO mandates one for every PR —

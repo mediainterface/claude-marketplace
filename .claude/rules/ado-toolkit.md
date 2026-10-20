@@ -12,6 +12,8 @@ paths:
   the checkout's `origin` picks the server and project.
 - **`skills/ado-shared/REFERENCE.md` holds everything shared.** Do not repeat its content in a
   `SKILL.md`; link to it.
-- **Server facts are verified, not assumed** (localized names, HTML fields, the comments API
-  version, `--assigned-to` by display name). Before changing one, check it against the server
-  with a read-only `az` call.
+- **No server's names are hard-coded.** Types, states, fields and relation types come from the
+  discovery cache (`ado-shared/REFERENCE.md`), because other teams run their own servers and
+  projects with their own process. Values from `ado.mediainterface.de` appear only as examples.
+- **Behavior facts are verified, not assumed** (HTML fields, the comments API version,
+  `--assigned-to` by display name). Before changing one, check it with a read-only `az` call.

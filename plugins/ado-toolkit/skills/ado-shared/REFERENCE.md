@@ -12,15 +12,16 @@ talk to, and the checkout is the material many actions work from — a PR from t
 branch, a work item written from a change in the code. Outside such a checkout they stop
 (Step 0, step 3).
 
-**Complete Step 0 and the Setup Check below once, before any `az` command.** The Command Map,
-Repository Mismatch Check, Quirks, Written-as-the-user, and Error-handling rules here apply to
-all three skills.
+**Run Step 0 once, before the first `az` command.** The **Setup Check** runs only when an `az`
+command fails. The Discovery cache, Command Map, Repository Mismatch Check, Quirks,
+Written-as-the-user, and Error-handling rules here apply to all three skills.
 
-> **German-localized Server.** Our Azure DevOps is German, so work item types and states are
-> German (e.g. `Aufgabe`, not `Task`) — fetch them from the server rather than assuming
-> English names. German text keeps its real umlauts/ß — see **German text** below. The
-> skills assume you are **already signed in**; they never authenticate for you (see Setup
-> Check step 3).
+> **Names depend on the server and the project.** Work item types, states, fields and relation
+> types carry the server's language and the project's process: a German server says `Aufgabe`,
+> not `Task`, and `Übergeordnetes Element`, not `parent`; another team's server or a new
+> project may name them differently again. Never assume them — take them from the **Discovery
+> cache** below. German text keeps its real umlauts/ß — see **German text**. The skills assume
+> you are **already signed in**; they never authenticate for you (see **Setup Check**).
 
 ## Step 0: Detect ADO Connection
 
@@ -47,41 +48,28 @@ all three skills.
    do not get `--project`.
 5. Store `organization`, `project`, `repository`. Use them for ALL subsequent `az` calls.
 
-Then run the **Setup Check** below once before any other `az` command.
+## Setup Check — when an `az` command fails
 
-## Setup Check (run once)
+There is no check up front: the first real command shows whether the toolchain works, and a
+working setup costs no extra call. When an `az` command fails, match its error against the
+cases below **before anything else**; on a match, give the fix and **stop**.
 
-Verify the toolchain before doing real work. On any failure, give the exact fix and **stop**.
-
-1. **Azure CLI present:**
-   ```bash
-   az version
-   ```
-   If `az` is not found:
+1. **Azure CLI missing** — `az: command not found` (Windows: `'az' is not recognized`):
    > **Azure CLI is not installed.** Install it, then re-run.
    > - macOS: `brew install azure-cli`
    > - Windows: `winget install -e --id Microsoft.AzureCLI`
    > - Linux / other: https://learn.microsoft.com/cli/azure/install-azure-cli
 
-2. **azure-devops extension present:**
-   ```bash
-   az extension show --name azure-devops
-   ```
-   If missing:
+2. **azure-devops extension missing** — `az` does not know the command group (e.g.
+   `'repos' is misspelled or not recognized`; `az extension show --name azure-devops` confirms):
    ```bash
    az extension add --name azure-devops
    ```
 
-3. **Authenticated:** Assume the user has **already** signed the Azure CLI in to Azure
-   DevOps. Do **not** authenticate on their behalf — never run `az devops login`, set auth
-   environment variables, or read a PAT from the environment yourself. Only **confirm** their
-   existing sign-in with a read-only call (covered by the Code scope below):
-   ```bash
-   az repos show --repository {repository} --org {organization} --project {project} --detect false -o json
-   ```
-   If this returns an authentication/authorization error (HTTP 401/403) or reports the user
-   is not signed in, **stop**, show them the **authentication instructions** below, and
-   wait — do not start any work until they confirm they have signed in.
+3. **Not signed in** — HTTP 401/403, `TF400813`, or a message that the user is not authorized
+   or not logged in. Do **not** authenticate on their behalf — never run `az devops login`,
+   set auth environment variables, or read a PAT from the environment yourself. Show the
+   **authentication instructions** below and wait until the user confirms they have signed in.
 
 ### Authentication instructions (show these to the user; do not act on them yourself)
 
@@ -106,8 +94,63 @@ Verify the toolchain before doing real work. On any failure, give the exact fix 
 >
 > (A PAT you already use for the obsolete MCP-based `azure-devops` plugin works as well.)
 
-After giving any Setup Check instruction (steps 1–3), **stop** — run no further `az`
+After giving any Setup Check instruction (cases 1–3), **stop** — run no further `az`
 commands and do no work until it is resolved; for sign-in, until the user confirms.
+
+## Discovery cache
+
+Names on the server — work item types, their states and fields, relation types — are looked up
+once and kept in a cache file per collection, so later commands and sessions skip the lookup.
+They rarely change, and when they do, the next command that needs them notices.
+
+**File:** `${CLAUDE_PLUGIN_DATA}/discovery/{host}-{collection}.json` — `{host}` without port,
+every character other than a letter, digit, `.`, `_` or `-` replaced by `-`. Read and write it
+with the Read and Write tools (the directory may not exist yet; Write creates it). Shape:
+
+```json
+{
+  "relationTypes": {
+    "System.LinkTypes.Hierarchy-Reverse": "Übergeordnetes Element",
+    "System.LinkTypes.Hierarchy-Forward": "Untergeordnet"
+  },
+  "projects": {
+    "{project}": {
+      "types": { "Microsoft.VSTS.WorkItemTypes.Bug": "Fehler", "Microsoft.VSTS.WorkItemTypes.Task": "Aufgabe" },
+      "states": { "Fehler": ["Neu", "Aktiv", "Geschlossen"] },
+      "fields": { "Fehler": ["System.Description", "Microsoft.VSTS.TCM.ReproSteps"] }
+    }
+  }
+}
+```
+
+**Rules:**
+- **Read the file first.** Use what it has. Fetch only what is missing — the type list once per
+  project, states and fields per type when that type is first needed, relation types once per
+  collection — then write the file back with the new entry added and every other entry kept.
+- **Refresh on rejection.** When the server rejects a cached name (unknown type, state, field
+  or relation type), fetch that one part again, update the file, and retry the command once.
+- **Reload on request.** When the user asks to reload, delete the project's entry (or the file)
+  and fetch anew.
+- **No expiry.** Something added on the server shows up as a missing entry the first time it is
+  needed; something renamed or removed shows up as a rejection.
+- **Only names go in** — no teams, area or iteration paths, people, work item content, or
+  credentials.
+
+**Lookups** — each returns just the names, keeping the output small:
+```bash
+# types of a project
+az devops invoke --area wit --resource workItemTypes --route-parameters project={project} \
+  --org {org} --api-version 7.1 --query "value[].{name:name, referenceName:referenceName}" -o json
+# fields of one type
+az devops invoke --area wit --resource workItemTypes --route-parameters project={project} "type={typeName}" \
+  --org {org} --api-version 7.1 --query "fields[].referenceName" -o json
+# states of one type
+az devops invoke --area wit --resource workItemTypeStates --route-parameters project={project} "type={typeName}" \
+  --org {org} --api-version 7.1 --query "value[].name" -o json
+# parent/child relation types of the collection
+az boards work-item relation list-type --org {org} \
+  --query "[?starts_with(referenceName, 'System.LinkTypes.Hierarchy')].{referenceName:referenceName, name:name}" -o json
+```
 
 ## Quirks — expected false signals (do NOT treat as errors)
 
@@ -221,13 +264,11 @@ discover the correct one with `az devops invoke --query "[?area=='build']"` (or
 | Reply to a PR thread | `az devops invoke --area git --resource pullRequestThreadComments --route-parameters project={project} repositoryId={repo} pullRequestId={prId} threadId={threadId} --http-method POST --in-file {body.json} --media-type application/json --org {org} --api-version 7.1 -o json` |
 | Resolve/reopen a PR thread | `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} threadId={threadId} --http-method PATCH --in-file {body.json} --media-type application/json --org {org} --api-version 7.1 -o json` |
 | Link / list / unlink PR work items | `az repos pr work-item add\|list\|remove --id {prId} [--work-items {id}] --org {org} -o json` |
-| Work item **types** (localized names) | `az devops invoke --area wit --resource workItemTypes --route-parameters project={project} --org {org} --api-version 7.1 -o json` |
-| Work item type **states** (localized) | `az devops invoke --area wit --resource workItemTypeStates --route-parameters project={project} type={typeName} --org {org} --api-version 7.1 -o json` |
+| Work item types, fields, states, relation types | Read the **Discovery cache** first; its lookups fetch only what is missing |
 | Show work item | `az boards work-item show --id {id} --org {org} -o json` |
-| Create work item | `az boards work-item create --title "{title}" --type "{germanTypeName}" [--description "{descriptionHtml}"] [--fields "{referenceName}={html}" …] [--assigned-to "{displayName}"] --area "{project}\{team}" --iteration "{project}\{team}" --org {org} --project {project} -o json` |
-| Update work item | `az boards work-item update --id {id} [--title "{title}"] [--state "{germanState}"] [--assigned-to "{displayName}"] [--description "{descriptionHtml}"] [--fields "{referenceName}={html}" …] --org {org} -o json` |
-| Relation types (localized names) | `az boards work-item relation list-type --org {org} -o json` |
-| Link work item to parent | `az boards work-item relation add --id {childId} --relation-type "{parentRelationName}" --target-id {parentId} --org {org} -o json` (on our server `"Übergeordnetes Element"`) |
+| Create work item | `az boards work-item create --title "{title}" --type "{typeName}" [--description "{descriptionHtml}"] [--fields "{referenceName}={html}" …] [--assigned-to "{displayName}"] --area "{project}\{team}" --iteration "{project}\{team}" --org {org} --project {project} -o json` |
+| Update work item | `az boards work-item update --id {id} [--title "{title}"] [--state "{stateName}"] [--assigned-to "{displayName}"] [--description "{descriptionHtml}"] [--fields "{referenceName}={html}" …] --org {org} -o json` |
+| Link work item to parent | `az boards work-item relation add --id {childId} --relation-type "{parentRelationName}" --target-id {parentId} --org {org} -o json` (name from the Discovery cache, e.g. `"Übergeordnetes Element"`) |
 | Work item comments (list) | `az devops invoke --area wit --resource comments --route-parameters project={project} workItemId={id} --org {org} --api-version 7.1-preview -o json` |
 | Add work item comment | `az boards work-item update --id {id} --discussion "{commentHtml}" --org {org} -o json` |
 | Query work items (WIQL) | `az boards query --wiql "{wiql}" --org {org} --project {project} -o json` |
@@ -239,12 +280,10 @@ discover the correct one with `az devops invoke --query "[?area=='build']"` (or
   local git operations, same as the REST skill.
 - The task-log `invoke` returns a JSON object with a `value` array of log lines; join
   that array to reconstruct the plain-text log.
-- **German installation:** work item **type** names (`Aufgabe`, not `Task`), **state**
-  names (`Aktiv`, not `Active`) and **relation type** names (`Übergeordnetes Element`, not
-  `parent`) are localized. `--type` / `--state` / `--relation-type` and WIQL *values* take
-  these German names — fetch them from the server (see the `ado-workitem` skill) rather than
-  assuming. WIQL *field reference names* (`System.WorkItemType`, `System.State`) stay
-  invariant English.
+- **Localized names:** `--type` / `--state` / `--relation-type` and WIQL *values* take the
+  server's display names (on a German server `Aufgabe`, `Aktiv`, `Übergeordnetes Element`) —
+  take them from the **Discovery cache**. WIQL *field reference names* (`System.WorkItemType`,
+  `System.State`) stay invariant English.
 - `--assigned-to` takes the user's **display name** (`"Erika Mustermann"`); an e-mail address
   or `DOMAIN\account` is rejected as an unknown identity.
 - `az` reads stdin. Inside a `while read` loop it swallows the loop's input and hangs — call it
