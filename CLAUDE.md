@@ -69,7 +69,9 @@ relative path.
 **This file**
 - Stays under 200 lines and holds only what every session needs. No skill descriptions — those
   live in each `SKILL.md` frontmatter and the plugin READMEs. Knowledge needed only when working
-  on one plugin goes into a path-scoped rule `.claude/rules/<plugin>.md`.
+  on one plugin goes into a path-scoped rule `.claude/rules/<plugin>.md` — and only what none of
+  the plugin's own files states (which files must change together, deliberate boundaries).
+  Never restate a skill there; the agent reads the skill anyway.
 
 ## Pitfalls
 
