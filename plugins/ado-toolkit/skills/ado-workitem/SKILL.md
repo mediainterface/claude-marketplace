@@ -62,7 +62,7 @@ Only fall back to an English guess if discovery genuinely fails — and tell the
    matching German `name` from the fetched list (`Aufgabe`). If there is no clear match,
    show the available types and ask which to use — do not invent one.
 2. Gather: the **type**, the **description** (`<Beschreibung>` — this is also the title, see
-   step 3), the **parent work item** (its ID — the SDD default; almost every item sits under
+   step 3), the **parent work item** (its ID — the default; almost every item sits under
    one), and optionally assignee, area, iteration.
 3. **Build the title:** just the concise German description (`<Beschreibung>`) — see the
    shared **Title schema**. Do **not** prefix the parent type, a `#<ID>`, or the component;
@@ -77,7 +77,7 @@ Only fall back to an English guess if discovery genuinely fails — and tell the
      [--area "{area}"] [--iteration "{iteration}"] \
      --org {org} --project {project} -o json
    ```
-5. **Link to the parent** (if any — the SDD default; this parent relation is the real
+5. **Link to the parent** (if any — the default; this parent relation is the real
    link, and the only place the parent is recorded now that the title no longer carries
    a `#<ParentID>` reference):
    ```bash

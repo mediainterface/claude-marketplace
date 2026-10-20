@@ -1,10 +1,16 @@
 # Azure DevOps via the Azure CLI — shared reference
 
-Shared setup and reference for the Azure DevOps CLI skills (`ado-pr`, `ado-workitem`,
-`ado-pipeline`). They talk to Azure DevOps through the Azure CLI (`az`) with the
-`azure-devops` extension instead of REST/MCP, and target the **newest** Azure DevOps
-**Server** version. The MCP-based `azure-devops` skill remains the right choice for the older
-Server version.
+Shared setup and reference for the skills of the `ado-toolkit` plugin (`ado-pr`,
+`ado-workitem`, `ado-pipeline`). They talk to Azure DevOps through the Azure CLI (`az`) with
+the `azure-devops` extension instead of REST/MCP, and target the **newest** Azure DevOps
+**Server** version. They replace the MCP-based `azure-devops` plugin, which is obsolete and
+will be removed.
+
+**A git checkout is always the starting point.** The skills run inside a repository whose
+`origin` lives on Azure DevOps: that remote decides which server, collection and project they
+talk to, and the checkout is the material many actions work from — a PR from the current
+branch, a work item written from a change in the code. Outside such a checkout they stop
+(Step 0, step 3).
 
 **Complete Step 0 and the Setup Check below once, before any `az` command.** The Command Map,
 Repository Mismatch Check, Quirks, and Error-handling rules here apply to all three skills.
@@ -26,8 +32,9 @@ Repository Mismatch Check, Quirks, and Error-handling rules here apply to all th
      `{user}@{host}:{collection}/{project}/_git/{repo}` → take `{collection}`, `{project}`,
      and `{repo}` from the path and build `organization = https://{host}/{collection}`
      (confirm the HTTPS base with the user if the host/port is ambiguous).
-3. If the URL matches no Azure DevOps form, tell the user this skill only works with
-   Azure DevOps repositories and stop.
+3. If there is no git repository, no `origin`, or the URL matches no Azure DevOps form,
+   tell the user these skills only work inside a checkout of an Azure DevOps repository and
+   stop.
 4. Set CLI defaults so later commands are terse:
    ```bash
    az devops configure --defaults organization={organization} project={project}
@@ -96,7 +103,7 @@ Verify the toolchain before doing real work. On any failure, give the exact fix 
 > ```
 > Paste the PAT when prompted.
 >
-> (You can reuse the same PAT as the MCP-based `azure-devops` skill.)
+> (A PAT you already use for the obsolete MCP-based `azure-devops` plugin works as well.)
 
 After giving any Setup Check instruction (steps 1–3), **stop** — run no further `az`
 commands and do no work until it is resolved; for sign-in, until the user confirms.
@@ -147,20 +154,21 @@ hard-wrapped paragraph arrives as a column of ragged short lines. Keep each para
 one line and separate paragraphs with a blank line; lists, tables, and code fences work
 as usual.
 
-The 100-character wrap rule applies to Markdown **files** in the repo — specs, plans,
-decision records, learnings — not to text typed into an ADO field.
+A wrap rule a repository sets for its Markdown **files** applies to those files, never to
+text typed into an ADO field.
 
 ## Title schema (PRs & work items)
 
 **PR titles** (`ado-pr`) — `<Marker> #<WorkItemId> <Component/Application> - <Beschreibung>`:
 
 - **`<Marker>`** — a change-category **emoji**: 🐞 bug, 🏗️ refactor, 📖 docs,
-  🏆 feature/default, 📝 spec-only PR (the PR-creation workflow defines how it is chosen).
+  🏆 feature/default (the PR-creation workflow defines how it is chosen). A skill that runs
+  that workflow for its own kind of PR may prescribe a marker of its own instead.
 - **`#<WorkItemId>`** — a `#1234` reference to the delivered work item, which ADO renders as
   an auto-link. It is only the *readable* reference; the actual PR↔work-item link is **always**
   set separately (`az repos pr work-item add`) and is never replaced by the mention.
 - **`<Component/Application>`** — the specific affected app/component, e.g. `mira-desktop`,
-  `controller-app`. Derive it from context (commit scopes, file paths, the spec subject);
+  `controller-app`. Derive it from context (commit scopes, file paths, the PR's subject);
   **if it cannot be determined confidently, ask the user** — do not guess.
 - **`<Beschreibung>`** — a concise German summary (real umlauts/ß — see **German text** above).
 
@@ -174,50 +182,6 @@ title.
 
 (Per Quirks, an emoji in a returned PR title may be missing from the CLI's JSON — expected;
 the resource has it.)
-
-## Spec PR vs. implementation PR
-
-On the SDD workflow's normal path a story's spec gets its own pull request and is merged before
-the implementation starts, so most PRs are plainly one kind or the other — and `pr-review`
-reviews the two very differently (a spec has no tests, no production code, and no drift;
-measuring it against the code dimensions finds nothing and costs a full run). `ado-pr` picks the
-kind when it **creates** a PR, `pr-review` determines it for an **existing** one. This section is
-the single definition both use.
-
-**A mixed PR is not a rule violation.** Small changes — a bug fix, a contained adjustment —
-legitimately carry their spec or documentation update next to the code; splitting those in two
-costs more overhead than a separate spec review is worth. What the workflow's own spec PR buys is
-feedback **before** the implementation exists, and that is only worth having when there is a
-substantial implementation left to steer. So a mixed diff is classified, not indicted.
-
-**Two signals:**
-
-- **The changed-file set** — a PR is spec-only when **every** changed file is documentation:
-  `*.md`, or anything under a `docs/` directory on **any** level (root `docs/`, nested
-  `apps/<app>/docs/`, `services/<service>/docs/`, including their `decisions/` and
-  `learnings/`). A single changed source file makes it an implementation PR.
-- **The title marker** — a leading 📝 (see **Title schema** above) records that the PR was
-  *created* as a spec PR.
-
-**The changed-file set decides; the marker only corroborates.** The marker states an intention
-at creation time, the diff is what the PR actually became — and per **Quirks** the CLI may
-return a title with the emoji stripped, so a missing 📝 in JSON is not evidence of anything.
-Never let an absent marker outvote a documentation-only diff.
-
-| Changed files | Kind |
-|---|---|
-| documentation only | **Spec PR** — with or without the 📝. A missing marker means the emoji was stripped from the JSON or the PR was not created through `ado-pr`; neither is a reason to doubt the diff. |
-| documentation **and** source code | **Implementation PR** — the ordinary shape of a small change that brings its doc update along. Review the code with the code dimensions and the doc part alongside it. |
-| source code only | **Implementation PR.** |
-
-A **📝 in the title of a PR that changes source code** is worth one line to the author — the
-title no longer describes the PR and reviewers read the marker as "no code here" — but it is a
-title to correct, not a breach to report.
-
-**Where the two callers differ.** When *creating* a PR, an auto-detected spec PR is
-**confirmed with the user** before the 📝 goes into the title. When *reviewing* an existing PR
-there is nothing left to confirm — the diff already decided. Classify, proceed, and state the
-kind plus the signal that proves it in the report instead of asking.
 
 ## Command Map (REST endpoint → az command)
 

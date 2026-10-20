@@ -24,8 +24,8 @@ line by line, nothing a reviewer cannot check.
    and sibling stories, the predecessor's spec if one is still in the repo (`docs/sdd/specs/`,
    older ones under `docs/superpowers/specs/`), the affected code, the Memory Bank levels
    involved (`docs/decisions/`, `apps/<app>/docs/`, `services/<svc>/docs/`) and the repo's test
-   process if it defines one. Fetch the work item through `sdd-kit:ado-workitem`; it should be in
-   the **Refinement** state — if not, say so, do not change it.
+   process if it defines one. Fetch the work item through `ado-toolkit:ado-workitem`; it should
+   be in the **Refinement** state — if not, say so, do not change it.
    - *Siblings:* do not build what a sibling plans, but leave the hook it will need where it
      costs nothing now (an id kept on a view, a union typed to grow) and name the hook in Out
      of scope with the sibling's id.

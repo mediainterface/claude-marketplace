@@ -10,7 +10,7 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 ├── .github/workflows/            # CI/CD workflows
 │   └── release-ado-mcp.yml      # Build + release the ado-mcp server tarball
 ├── plugins/
-│   ├── azure-devops/             # Azure DevOps Server integration plugin
+│   ├── azure-devops/             # OBSOLETE MCP-based ADO plugin — superseded by ado-toolkit
 │   │   ├── .claude-plugin/
 │   │   │   └── plugin.json       # Plugin manifest (name, version, description)
 │   │   ├── .mcp.json             # MCP server config (launched via npx)
@@ -20,6 +20,19 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │   └── skills/
 │   │       └── azure-devops/
 │   │           └── SKILL.md      # Skill orchestrating ADO workflows
+│   ├── ado-toolkit/              # Azure DevOps via the az CLI (skill-only, process-neutral)
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── README.md
+│   │   └── skills/
+│   │       ├── ado-shared/
+│   │       │   └── REFERENCE.md  # Shared ADO setup/auth/command-map (not a skill)
+│   │       ├── ado-pr/
+│   │       │   └── SKILL.md      # /ado-pr — PR review/create/update/comment via az CLI
+│   │       ├── ado-workitem/
+│   │       │   └── SKILL.md      # /ado-workitem — German-localized work items via az CLI
+│   │       └── ado-pipeline/
+│   │           └── SKILL.md      # /ado-pipeline — pipeline analysis + changelog via az CLI
 │   ├── humanizer/                # AI writing pattern removal skill
 │   │   ├── .claude-plugin/
 │   │   │   └── plugin.json
@@ -36,7 +49,7 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │       └── hooks.json        # Agent hook config (PreToolUse on Bash(git commit:*))
 │   ├── sdd-kit/                  # Spec-Driven Development toolkit (skills + spec→PR hook)
 │   │   ├── .claude-plugin/
-│   │   │   └── plugin.json
+│   │   │   └── plugin.json       # declares the dependency on ado-toolkit
 │   │   ├── hooks/
 │   │   │   ├── hooks.json        # SessionStart hook — inject the SDD spec→PR policy
 │   │   │   ├── inject-sdd-policy.js  # Node: reads sdd-policy.md → additionalContext
@@ -52,14 +65,8 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 │   │       │   └── SKILL.md      # /design-spec — write a story's design spec in the MIRA form
 │   │       ├── spec-pr/
 │   │       │   └── SKILL.md      # /spec-pr — open a PR for the spec, then stop (no plan/code)
-│   │       ├── ado-shared/
-│   │       │   └── REFERENCE.md  # Shared ADO setup/auth/command-map (not a skill)
-│   │       ├── ado-pr/
-│   │       │   └── SKILL.md      # /ado-pr — PR review/create/update/comment via az CLI
-│   │       ├── ado-workitem/
-│   │       │   └── SKILL.md      # /ado-workitem — German-localized work items via az CLI
-│   │       ├── ado-pipeline/
-│   │       │   └── SKILL.md      # /ado-pipeline — pipeline analysis + changelog via az CLI
+│   │       ├── sdd-pr-shared/
+│   │       │   └── REFERENCE.md  # Spec PR vs. implementation PR, spec PR conventions (not a skill)
 │   │       └── pr-review/
 │   │           └── SKILL.md      # /pr-review — deep triage-first ADO PR review in a worktree
 │   └── guardian/                 # Guardian (Hüter-Trio) tooling (skill-only)
@@ -80,6 +87,12 @@ Internal Claude Code plugin marketplace for MediaInterface GmbH.
 - Each plugin must have `.claude-plugin/plugin.json` at minimum (only `name` is required).
 - Register every plugin in `.claude-plugin/marketplace.json` under the `plugins` array.
 - No dependencies at the marketplace level — only individual plugins have their own.
+- A plugin that builds on another one declares it in its `plugin.json` as
+  `"dependencies": ["<plugin-name>"]` (bare name = same marketplace); Claude Code installs the
+  dependency along with it. A skill never links into another plugin's files by relative path —
+  installed plugins sit in separate, versioned cache directories, so such a link breaks. It
+  invokes the other plugin's skill by its namespaced name (`<plugin>:<skill>`), which brings that
+  skill's own references along.
 
 ### Plugin Entry Format (marketplace.json)
 
@@ -115,10 +128,17 @@ The same rule is in the `sdd-kit` session policy for generated documents, and th
 
 ## Plugins
 
-### azure-devops
+### azure-devops (obsolete)
 
-Azure DevOps Server integration providing pipeline analysis, PR review/create/update, and changelog
-generation.
+**Obsolete, to be removed — superseded by `ado-toolkit`.** The MCP-based Azure DevOps Server
+integration (pipeline analysis, PR review/create/update, changelogs). It was deliberately not
+turned into a new major version of itself: `ado-toolkit` works differently (Azure CLI instead of
+an MCP server) and has different prerequisites, so it stands next to it under its own name.
+Marketplace entry, `plugin.json` description, README and the skill all carry the obsolete notice;
+the skill tells the user once per session to switch. To remove it later: delete the plugin
+directory, its marketplace entry and the `release-ado-mcp.yml` workflow, map
+`"azure-devops": null` in the top-level `renames` of `marketplace.json`, and optionally set
+`forceRemoveDeletedPlugins: true` so it is uninstalled on users' machines.
 
 - **MCP Server** (`plugins/azure-devops/servers/ado-mcp/`): TypeScript, exposes `ado_get`,
   `ado_post`, `ado_patch`, `ado_delete`, `parse_ado_remote`. Distributed as `ado-mcp-latest.tgz` via
@@ -127,6 +147,44 @@ generation.
   the MCP tools.
 - **Requires** `ADO_PAT` env var (Personal Access Token). Optional `ADO_API_VERSION` (default
   `7.1`).
+
+### ado-toolkit
+
+Azure DevOps Server through the Azure CLI, as a standalone plugin for every team — including
+teams that do not follow SDD or mostly work on tickets rather than code. It was split out of
+`sdd-kit`, which now depends on it; nothing in it assumes a development process.
+
+- **Skills** (`plugins/ado-toolkit/skills/ado-pr`, `ado-workitem`, `ado-pipeline`): Azure DevOps
+  via the Azure CLI (`az` + azure-devops extension), split into `/ado-pr` (PR
+  review/create/update/comment), `/ado-workitem` (work item create/show/query/update), and
+  `/ado-pipeline` (pipeline-failure analysis + changelog), for the newest Azure DevOps Server
+  version. Shared connection detection, sign-in check, command map, title schema, quirks, and
+  error-handling live in `skills/ado-shared/REFERENCE.md` — a non-skill file the three SKILL.md
+  files link to by relative path.
+- **A git checkout is always the prerequisite** — also for ticket-only work. Its `origin` decides
+  which server, collection and project the skills talk to, and the checkout is the material many
+  actions work from (a PR from the current branch, a work item written from a change in the
+  code). Outside one, Step 0 stops; there is deliberately no mode that asks for organization and
+  project instead.
+- **Process-neutral PR creation.** The title schema gives PR titles the shape
+  `<Marker> #<WorkItemId> <Component/Application> - <Beschreibung>` with a change-category
+  emoji (🐞 bug, 🏗️ refactor, 📖 docs, 🏆 feature/default) voted over the commit messages; work
+  item titles are just the concise German description (the parent type/ID/component prefix was
+  dropped as too long). `/ado-pr`'s PR Creation workflow lets a **calling skill prescribe** its
+  own marker and description structure — that is how `sdd-kit`'s `/spec-pr` gets its 📝 spec
+  PRs without `ado-toolkit` knowing what a spec is. PR Update keeps a PR's current marker and
+  description structure unless the user asks otherwise, and asks rather than re-votes when the
+  CLI returns the title with its emoji stripped.
+- They assume the user is already signed in via `az devops login` (PAT-based); they never
+  authenticate themselves and prompt the user if sign-in is missing. The Server is
+  **German-localized**, so work item types/states are German (e.g. `Aufgabe`, not `Task`) —
+  fetched from the server rather than assumed — and all German text sent to ADO keeps its real
+  umlauts/ß (never transliterated to `ue`/`oe`/`ae`/`ss`), a rule spelled out in the shared
+  reference's **German text** section. A neighbouring **Line breaks** section keeps text sent
+  *to* ADO unwrapped, since ADO's Markdown turns a single newline into a line break and a wrapped
+  paragraph would arrive as ragged short lines.
+- **Requires** a git checkout of an Azure DevOps repository, the `az` CLI with the
+  `azure-devops` extension, and a sign-in via `az devops login`.
 
 ### humanizer
 
@@ -163,9 +221,12 @@ Hook-only plugin that keeps `CLAUDE.md` files in sync with staged changes before
 
 The skill set for MediaInterface's Spec-Driven Development (SDD) workflow — the skills we rely on
 across SDD (writing a story's design spec, capturing the decisions and lessons behind it, gating
-the spec into a pull request, reviewing the resulting PRs in depth, and handling the Azure DevOps
-work — PRs, work items, pipelines — along the way), not a general-purpose collection. It is mostly
-skills plus one hook (the spec→PR redirect); no MCP server.
+the spec into a pull request, and reviewing the resulting PRs in depth), not a general-purpose
+collection. It is mostly skills plus one hook (the spec→PR redirect); no MCP server. The Azure
+DevOps work along the way — PRs, work items, pipelines — comes from `ado-toolkit`, declared as a
+dependency in `plugin.json`, so installing or updating `sdd-kit` brings it along. Its skills are
+called as `ado-toolkit:ado-pr`, `ado-toolkit:ado-workitem`, `ado-toolkit:ado-pipeline`; what is
+SDD-specific about pull requests lives here, in `skills/sdd-pr-shared/REFERENCE.md`.
 
 **Specs and plans are transient.** A design spec and an implementation plan belong to one story, not
 to the repository: they are created as before (Refinement → spec PR → `writing-plans` after the
@@ -275,9 +336,11 @@ is left, which happens by itself, since every spec is deleted at its implementat
   one place (inline code reason, work item, `.claude/rules/` convention, Decision Record, Lesson
   Learned), and a proposed decision runs the **significance triage with its evidence named** right
   there, so the later gate in `/create-decision` is not reduced to a rubber stamp. Auto-detects the
-  remote: Azure DevOps → the `/ado-pr` creation workflow (shared title schema, **📝 spec-only**
-  marker, linked work item required as on any ADO PR); GitHub → the `gh` CLI. Invokable manually, or
-  triggered automatically by the hook below.
+  remote: Azure DevOps → `ado-toolkit:ado-pr`'s creation workflow, with the **spec PR
+  conventions** of `skills/sdd-pr-shared/REFERENCE.md` prescribed (**📝 spec-only** marker,
+  description of **Inhalt** and **Erwartetes Umsetzungsrisiko**, linked work item required as on
+  any ADO PR); GitHub → the `gh` CLI. Invokable manually, or triggered automatically by the hook
+  below.
 - **Hook** (`plugins/sdd-kit/hooks/hooks.json` + `hooks/inject-sdd-policy.js` +
   `hooks/sdd-policy.md`): a `type: "command"` **SessionStart** hook (matcher
   `startup|clear|compact`, mirroring superpowers). The `Skill` tool is not hookable, so rather than
@@ -292,8 +355,10 @@ is left, which happens by itself, since every spec is deleted at its implementat
   `brainstorming` writes it, its template gives way to that form) and keep spec and plan under
   `docs/sdd/`, and after a spec is approved, override the
   brainstorming skill's `writing-plans` handoff and route to `/spec-pr` (open the spec PR and stop)
-  unless the user explicitly asks for a plan, flagging a referenced ticket that is not in the
-  **Refinement** state, and require that everything needed beyond the story and the spec is captured
+  unless the user explicitly asks for a plan — also when the user just asks to "create a PR" for a
+  branch carrying nothing but the spec, since `ado-toolkit:ado-pr` knows no spec PRs, and an
+  existing spec PR keeps its 📝 and spec description when updated —, flagging a referenced ticket
+  that is not in the **Refinement** state, and require that everything needed beyond the story and the spec is captured
   outside the spec before the spec PR is opened (the four durable homes, since the spec does not
   survive); and (2) during implementation, when a user story is referenced, flag it if it is not in
   the **Implementation** state; explicitly do **not** create ADO tasks for the plan's todo items
@@ -322,34 +387,23 @@ is left, which happens by itself, since every spec is deleted at its implementat
   tables/code fences/frontmatter/long URLs exempt, and never reflow an existing file wholesale (a
   reformat-only diff buries the change). Text typed into a **web UI field** (PR title/description,
   PR comment, work item description) is explicitly excluded — those renderers turn a single newline
-  into a line break; the counterpart rule sits in `skills/ado-shared/REFERENCE.md`. The prose lives
+  into a line break; the counterpart rule sits in `ado-toolkit`'s `skills/ado-shared/REFERENCE.md`.
+  The prose lives
   in its own file so it can grow without touching the script; `compact` re-injection keeps it
   present across long sessions.
-- **Azure DevOps skills** (`plugins/sdd-kit/skills/ado-pr`, `ado-workitem`, `ado-pipeline`): Azure
-  DevOps via the Azure CLI (`az` + azure-devops extension), split into `/ado-pr` (PR
-  review/create/update/comment), `/ado-workitem` (work item create/show/query/update), and
-  `/ado-pipeline` (pipeline-failure analysis + changelog), for the newest Azure DevOps Server
-  version. Shared connection detection, sign-in check, command map, title schema, the **spec-PR vs.
-  implementation-PR detection**, quirks, and error-handling live in
-  `skills/ado-shared/REFERENCE.md` — a non-skill file the three ADO SKILL.md files (and
-  `/pr-review`) link to by relative path. The kind detection lives there rather than in `/ado-pr`
-  because two skills need the same answer for opposite purposes: `/ado-pr` picks the kind when it
-  *creates* a PR (and confirms it with the user, or takes `create spec` as an order), `/pr-review`
-  determines it for an *existing* PR to choose the review. The changed-file set decides
-  (documentation only — `*.md` or anything under a `docs/` directory on any level → spec PR); the 📝
-  title marker only corroborates, because per **Quirks** the CLI may hand back a title with its
-  emoji stripped, so a missing marker is never evidence. The title schema gives PR titles the shape
-  `<Marker> #<WorkItemId> <Component/Application> - <Beschreibung>` (change-category emoji incl. 📝
-  for spec-only PRs), while work item titles are just the concise German description (the parent
-  type/ID/component prefix was dropped as too long). They assume the user is already signed in via
-  `az devops login` (PAT-based); they never authenticate themselves and prompt the user if sign-in
-  is missing. The Server is **German-localized**, so work item types/states are German (e.g.
-  `Aufgabe`, not `Task`) — fetched from the server rather than assumed — and all German text sent to
-  ADO keeps its real umlauts/ß (never transliterated to `ue`/`oe`/`ae`/`ss`), a rule spelled out in
-  the shared reference's **German text** section. A neighbouring **Line breaks** section is the
-  counterpart to the policy's 100-character file rule: text sent *to* ADO is never hard-wrapped,
-  since ADO's Markdown turns a single newline into a line break and a wrapped paragraph would arrive
-  as ragged short lines. The MCP-based `azure-devops` plugin stays for the older Server version.
+- **Spec PR vs. implementation PR** (`plugins/sdd-kit/skills/sdd-pr-shared/REFERENCE.md`): a
+  non-skill reference holding the SDD layer on top of `ado-toolkit`'s PRs. The kind detection
+  lives in one place because two skills need the same answer for opposite purposes: `/spec-pr`
+  *creates* a spec PR on purpose, `/pr-review` determines the kind of an *existing* PR to choose
+  the review. The changed-file set decides (documentation only — `*.md` or anything under a
+  `docs/` directory on any level → spec PR); the 📝 title marker only corroborates, because per
+  `ado-toolkit`'s **Quirks** the CLI may hand back a title with its emoji stripped, so a missing
+  marker is never evidence. The same file carries the **spec PR conventions** `/spec-pr`
+  prescribes to `ado-toolkit:ado-pr` (📝 marker, component from the spec subject, description of
+  **Inhalt** and **Erwartetes Umsetzungsrisiko** — the risk of the implementation the spec
+  describes, not of merging the document). The former `/ado-pr create spec` and its "only docs
+  changed — spec PR?" confirmation went away with the split: a spec PR is opened through
+  `/spec-pr`, and the session policy routes there.
 - **Skill** (`plugins/sdd-kit/skills/pr-review/SKILL.md`): `/pr-review <PR_ID_OR_URL>` — the deep,
   **triage-first** review of an Azure DevOps PR (the counterpart to the quick working-tree
   `/code-review`). **Phase A.5 decides which of two reviews runs before anything else happens:** a
@@ -357,8 +411,8 @@ is left, which happens by itself, since every spec is deleted at its implementat
   because a spec has no code, no tests and nothing to drift — putting the code dimensions on a
   Markdown diff spends a full explorer fleet reporting that none of it exists yet, which is what
   made spec reviews needlessly expensive. The classification uses the plugin-wide detection in
-  `skills/ado-shared/REFERENCE.md` and, unlike `/ado-pr` at creation time, confirms nothing with the
-  user — the diff already decided. A 📝 title with source code in the diff is reviewed as an
+  `skills/sdd-pr-shared/REFERENCE.md` and confirms nothing with the user — the diff already
+  decided. A 📝 title with source code in the diff is reviewed as an
   implementation PR (the stale marker is worth a line to the author, not a finding). A **mixed diff
   — docs *and* code — is explicitly not a violation:** a small change (a bug fix, a contained
   adjustment) legitimately carries its doc update along, and splitting it costs more overhead than
@@ -393,8 +447,8 @@ is left, which happens by itself, since every spec is deleted at its implementat
   imported from elsewhere), S5 implementability (internal contradictions, open decisions the
   implementation would have to invent, missing non-goals), and S6 security by design, dispatched
   **only** when the spec touches a trust boundary. The work item's content comes from
-  `/ado-workitem`'s *show* workflow, which is why that skill joins `/ado-pr` and `/ado-pipeline` as
-  a required sub-skill. Two hard rules: review and posting
+  `ado-toolkit:ado-workitem`'s *show* workflow, which is why that skill joins `ado-toolkit:ado-pr`
+  and `ado-toolkit:ado-pipeline` as a required sub-skill. Two hard rules: review and posting
   are separate phases (the review is read-only and ends in a report), and the user's checkout is
   never touched. Findings are reported as a **numbered list** grouped 🔴/🟡/🟢, each entry starting
   with `**[N]**` and never `N.` (the terminal Markdown renderer would add its own counter and
@@ -403,8 +457,8 @@ is left, which happens by itself, since every spec is deleted at its implementat
   spec's path, the linked work item with its state — the policy expects **Refinement** at spec time,
   reported never changed — and every dimension that was *not* dispatched, so the reader can tell
   „geprüft, nichts gefunden" from „nicht geprüft" (spec PR). Findings are posted only for the
-  numbers the user names, via `/ado-pr`'s *PR Comments* workflow, anchored at `file:line` — on a
-  spec PR at the line of the spec that carries the claim. Comments follow an **ELI5 recipe** —
+  numbers the user names, via `ado-toolkit:ado-pr`'s *PR Comments* workflow, anchored at
+  `file:line` — on a spec PR at the line of the spec that carries the claim. Comments follow an **ELI5 recipe** —
   German, informal „du", everyday
   words, at most three sentences — binding from the moment a subagent writes a finding, not only at
   posting time. The ADR dimension reads decision records from **every Memory Bank level** above the
@@ -419,12 +473,14 @@ is left, which happens by itself, since every spec is deleted at its implementat
   of the signals). Phase A therefore keeps the system threads instead of dropping them, excluding
   them from the dedupe only. On a **spec PR** the whole C-I set never runs, so that check cannot
   arise at all — S1 asks the durable-context half of it instead, at the point where it is still
-  cheap to act on. The ADO plumbing comes from `/ado-pr`, `/ado-pipeline`, and `/ado-workitem`, with
-  `skills/ado-shared/REFERENCE.md` and `skills/memory-bank-shared/REFERENCE.md` by relative path.
-- **Requires** the `az` CLI with the `azure-devops` extension installed and the user signed in via
-  `az devops login` for the `/ado-pr`, `/ado-workitem`, `/ado-pipeline`, and `/pr-review` skills.
-  `/spec-pr` reuses that ADO setup for Azure DevOps remotes and needs the `gh` CLI (authenticated)
-  when the remote is GitHub.
+  cheap to act on. The ADO plumbing comes from `ado-toolkit`'s `ado-pr`, `ado-pipeline`, and
+  `ado-workitem`, invoked by their namespaced names (their shared reference comes along with
+  `ado-pr`); `skills/sdd-pr-shared/REFERENCE.md` and `skills/memory-bank-shared/REFERENCE.md` are
+  linked by relative path.
+- **Requires** the `ado-toolkit` plugin (installed automatically as a dependency) and, for
+  `/pr-review`, `/design-spec`'s work item lookup and `/spec-pr` on Azure DevOps remotes, what it
+  needs: the `az` CLI with the `azure-devops` extension and a sign-in via `az devops login`.
+  `/spec-pr` needs the `gh` CLI (authenticated) when the remote is GitHub.
 
 ### guardian
 

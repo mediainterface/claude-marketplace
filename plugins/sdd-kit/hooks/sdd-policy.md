@@ -44,6 +44,12 @@ and the user has approved it, do **not** invoke the `writing-plans` skill and do
 `sdd-kit:spec-pr` skill, which opens a pull request for the spec (plus any Memory
 Bank items) and then stops until the PR is merged.
 
+**A spec PR is always opened through `sdd-kit:spec-pr`** — also when the user just
+asks to "create a PR" and the branch carries nothing but the spec: offer `spec-pr`
+instead of a plain `ado-toolkit:ado-pr` run, which knows no spec PRs. An existing spec
+PR updated through `ado-toolkit:ado-pr` keeps its 📝 marker and its spec description
+(**Inhalt** and **Erwartetes Umsetzungsrisiko**).
+
 The implementation plan (`writing-plans`) happens only **after** the spec PR is
 merged, as a separate later effort. Proceed to `writing-plans` now **only** if the
 user explicitly asks for an implementation plan in this session.
@@ -73,7 +79,7 @@ it with the user **before** the spec PR is opened. The check at code review only
 confirms this one.
 
 **Ticket state.** If a work item / ticket is referenced during spec creation, check
-its state (via `sdd-kit:ado-workitem`): it should be in the **Refinement** state. If
+its state (via `ado-toolkit:ado-workitem`): it should be in the **Refinement** state. If
 it is not, **point this out to the user** so they can correct it — do not change the
 state yourself.
 
