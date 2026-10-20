@@ -30,7 +30,7 @@
       "name": "claude-md-improver",
       "source": "./plugins/claude-md-improver",
       "description": "PreToolUse hook that keeps CLAUDE.md files in sync with staged changes before each commit",
-      "version": "1.1.0"
+      "version": "1.2.0"
     },
     {
       "name": "sdd-kit",
