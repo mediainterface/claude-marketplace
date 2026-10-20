@@ -44,8 +44,12 @@ item** or ticket (German: *Arbeitselement*), or `$ARGUMENTS` starts with `workit
 `workitem create`, `workitem show 1234`, `workitem update 1234`, `workitem comment 1234`).
 
 ### Step 1 — Names from the discovery cache (before create/query/update)
-Read the **Discovery cache** file for this collection (shared reference) and take from it what
-the task needs; fetch with its lookups only what is missing, then write the file back:
+The **Discovery cache** (shared reference) for this collection is the file
+`${CLAUDE_PLUGIN_DATA}/discovery/{host}-{collection}.json` — `{host}` without port, every
+character other than a letter, digit, `.`, `_` or `-` replaced by `-`. If that path still starts
+with a literal `${`, the plugin's data directory is unavailable: skip the cache and look the
+names up directly. Read the file and take from it what the task needs; fetch with the cache's
+lookups only what is missing, then write the file back:
 
 - **Type names** — the display `name` is what `--type` and WIQL `[System.WorkItemType]` values
   expect. Map a type the user names in another language by its `referenceName` (`Task` →
@@ -115,20 +119,30 @@ only after the user approved it.
 
 ### Team: Area and Iteration
 
-A team's work items have **both** Area and Iteration on the team's node, `{project}\{team}`
-(project-relative, backslash-separated). If the team plans in sprints and a sprint is named,
-the iteration may be that sprint below the team node.
-
 **The team is asked, or known from the context** — the user named it in this conversation, or
 the repository's `CLAUDE.md` / `.claude/rules/` name it. Never infer it from the parent, the
 siblings, or other tickets: those sometimes sit on the project root or on another team, and the
 wrong team then never sees the ticket.
 
+**Its paths come from the server's team settings**, not from a pattern — how areas and
+iterations are cut differs between servers and projects:
+```bash
+# the team's default area: "defaultValue"
+az boards area team list --team "{team}" --org {org} --project {project} -o json
+# the team's current iteration: a sprint team's current sprint, or the team's one fixed node
+az boards iteration team list --team "{team}" --timeframe current --org {org} --project {project} \
+  --query "[].path" -o json
+```
+If the context or the user names a specific iteration, that one wins. If the team has no
+current iteration, or several, show the team's iterations (the same command without
+`--timeframe`) and ask. On some servers both paths are simply the team's node,
+`{project}\{team}` — as an example, never as an assumption.
+
 The project root is just `{project}` (no team). When showing a work item, a ticket that sits on
 the root is not a defect to report — some are put there on purpose.
 ```bash
 # put a work item on a team
-az boards work-item update --id {id} --area "{project}\{team}" --iteration "{project}\{team}" --org {org} -o json
+az boards work-item update --id {id} --area "{teamArea}" --iteration "{teamIteration}" --org {org} -o json
 # clear the team (back to the project root)
 az boards work-item update --id {id} --area "{project}" --iteration "{project}" --org {org} -o json
 ```
@@ -153,7 +167,7 @@ az boards work-item update --id {id} --area "{project}" --iteration "{project}" 
    ```bash
    az boards work-item create --title "{title}" --type "{typeName}" \
      [--description "{descriptionHtml}"] [--fields "{referenceName}={html}" …] \
-     [--assigned-to "{displayName}"] --area "{project}\{team}" --iteration "{project}\{team}" \
+     [--assigned-to "{displayName}"] --area "{teamArea}" --iteration "{teamIteration}" \
      --org {org} --project {project} -o json
    ```
 6. **Link to the parent** (if any — the default; this parent relation is the real link, and

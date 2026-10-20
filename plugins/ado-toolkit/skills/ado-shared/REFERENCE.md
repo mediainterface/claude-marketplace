@@ -103,9 +103,10 @@ Names on the server — work item types, their states and fields, relation types
 once and kept in a cache file per collection, so later commands and sessions skip the lookup.
 They rarely change, and when they do, the next command that needs them notices.
 
-**File:** `${CLAUDE_PLUGIN_DATA}/discovery/{host}-{collection}.json` — `{host}` without port,
-every character other than a letter, digit, `.`, `_` or `-` replaced by `-`. Read and write it
-with the Read and Write tools (the directory may not exist yet; Write creates it). Shape:
+**File:** one JSON file per collection, at the path the `ado-workitem` skill names in its
+Step 1. The path is given there because the plugin's data directory is only filled in inside a
+`SKILL.md`, not in this file. Read and write it with the Read and Write tools (the directory may
+not exist yet; Write creates it). Never write a cache file into the repository. Shape:
 
 ```json
 {
@@ -133,8 +134,9 @@ with the Read and Write tools (the directory may not exist yet; Write creates it
   and fetch anew.
 - **No expiry.** Something added on the server shows up as a missing entry the first time it is
   needed; something renamed or removed shows up as a rejection.
-- **Only names go in** — no teams, area or iteration paths, people, work item content, or
-  credentials.
+- **Only names go in** — no teams, area or iteration paths (a sprint team's current iteration
+  changes every sprint without the old path ever being rejected), people, work item content,
+  or credentials.
 
 **Lookups** — each returns just the names, keeping the output small:
 ```bash
@@ -266,7 +268,7 @@ discover the correct one with `az devops invoke --query "[?area=='build']"` (or
 | Link / list / unlink PR work items | `az repos pr work-item add\|list\|remove --id {prId} [--work-items {id}] --org {org} -o json` |
 | Work item types, fields, states, relation types | Read the **Discovery cache** first; its lookups fetch only what is missing |
 | Show work item | `az boards work-item show --id {id} --org {org} -o json` |
-| Create work item | `az boards work-item create --title "{title}" --type "{typeName}" [--description "{descriptionHtml}"] [--fields "{referenceName}={html}" …] [--assigned-to "{displayName}"] --area "{project}\{team}" --iteration "{project}\{team}" --org {org} --project {project} -o json` |
+| Create work item | `az boards work-item create --title "{title}" --type "{typeName}" [--description "{descriptionHtml}"] [--fields "{referenceName}={html}" …] [--assigned-to "{displayName}"] --area "{teamArea}" --iteration "{teamIteration}" --org {org} --project {project} -o json` (paths from the team settings, see `ado-workitem`) |
 | Update work item | `az boards work-item update --id {id} [--title "{title}"] [--state "{stateName}"] [--assigned-to "{displayName}"] [--description "{descriptionHtml}"] [--fields "{referenceName}={html}" …] --org {org} -o json` |
 | Link work item to parent | `az boards work-item relation add --id {childId} --relation-type "{parentRelationName}" --target-id {parentId} --org {org} -o json` (name from the Discovery cache, e.g. `"Übergeordnetes Element"`) |
 | Work item comments (list) | `az devops invoke --area wit --resource comments --route-parameters project={project} workItemId={id} --org {org} --api-version 7.1-preview -o json` |
