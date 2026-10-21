@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "PR review result",
-  "description": "What a review skill writes to <context-dir>/findings.json and the pipeline posts to the pull request. Shared by every review skill of the ci-review plugin; see its README.md.",
+  "description": "What a review skill writes to <context-dir>/findings.json and the pipeline posts to the pull request. Shared by every review skill of the ci-pr-review plugin; see its README.md.",
   "type": "object",
   "additionalProperties": false,
   "required": [

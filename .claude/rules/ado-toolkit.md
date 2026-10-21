@@ -18,7 +18,7 @@ paths:
 - **Findings files are posted by `ado-pr/scripts/post_findings.py`, never by the model.** Their
   comment texts come from reviewing an unvetted PR; a model with `az` rights that reads them can
   be steered. The field table under **Post a findings file** and the script's `check()` change
-  together, and with the schema of the `ci-review` plugin, whose skills write the format
-  (`.claude/rules/ci-review.md`).
+  together, and with the schema of the `ci-pr-review` plugin, whose skills write the format
+  (`.claude/rules/ci-pr-review.md`).
 - **Behavior facts are verified, not assumed** (HTML fields, the comments API version,
   `--assigned-to` by display name). Before changing one, check it with a read-only `az` call.

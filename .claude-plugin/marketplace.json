@@ -21,8 +21,8 @@
       "version": "1.1.0"
     },
     {
-      "name": "ci-review",
-      "source": "./plugins/ci-review",
+      "name": "ci-pr-review",
+      "source": "./plugins/ci-pr-review",
       "description": "Unattended pull request reviews for the CI pipeline — review skills that write post-ready findings, posted as anchored PR threads by ado-toolkit. Run headless through the Claude Agent SDK.",
       "version": "1.0.0"
     },

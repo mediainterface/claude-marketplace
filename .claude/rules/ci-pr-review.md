@@ -1,9 +1,9 @@
 ---
 paths:
-  - "plugins/ci-review/**"
+  - "plugins/ci-pr-review/**"
 ---
 
-# ci-review — what no single file states
+# ci-pr-review — what no single file states
 
 - **The findings format is a contract with `ado-toolkit`.** The schema lives in
   `skills/review-shared/findings.schema.json`, the poster's own check in `ado-toolkit`'s

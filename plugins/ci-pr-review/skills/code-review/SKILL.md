@@ -1,18 +1,18 @@
 ---
-name: ci-pr-review
+name: code-review
 description: >-
   Unattended review of an Azure DevOps pull request inside the CI pipeline. Reviews the
   checked-out PR head against its target in a single pass, verifies every candidate finding
   against the code, and writes post-ready German comments (blocker and should only) to
   findings.json, which the pipeline posts as anchored PR threads with ado-toolkit. Invoked
-  explicitly as `/ci-review:ci-pr-review <context-dir>`; for an interactive, triage-first review
+  explicitly as `/ci-pr-review:code-review <context-dir>`; for an interactive, triage-first review
   use sdd-kit:pr-review.
 argument-hint: <context-dir>
 disable-model-invocation: true
 allowed-tools: Read, Grep, Glob, Write, Bash(git *), Bash(python3 *)
 ---
 
-# CI PR Review
+# Code Review
 
 You review one pull request, unattended. Nobody triages your result: every finding you write is
 posted to the PR as an anchored comment, as is. The job has two halves, and they pull in
@@ -287,7 +287,7 @@ skill:
 ```json
 {
   "schemaVersion": 1,
-  "skill": "ci-pr-review",
+  "skill": "code-review",
   "status": "reviewed",
   "reason": null,
   "pullRequestId": 1234,

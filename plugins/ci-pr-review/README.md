@@ -1,4 +1,4 @@
-# ci-review
+# ci-pr-review
 
 Unattended pull request reviews for the CI pipeline. A review skill reviews the checked-out PR
 in one pass and writes `findings.json`; the pipeline posts it with `ado-toolkit` (`/ado-pr`,
@@ -8,7 +8,7 @@ use `sdd-kit:pr-review`.
 
 | Skill | What it reviews |
 |---|---|
-| `/ci-pr-review` | A code PR as a whole: against what it is meant to do (title, description, work items), the repository's `CLAUDE.md` files, `.claude/rules/`, active decision records and test process. Only blockers and shoulds, each verified against the code, as post-ready German comments. Documentation-only PRs are skipped. |
+| `/ci-pr-review:code-review` | A code PR as a whole: against what it is meant to do (title, description, work items), the repository's `CLAUDE.md` files, `.claude/rules/`, active decision records and test process. Only blockers and shoulds, each verified against the code, as post-ready German comments. Documentation-only PRs are skipped. |
 
 All review skills write the same format, so one posting step serves them all. What they share
 lives in `skills/review-shared/`:
@@ -21,19 +21,19 @@ lives in `skills/review-shared/`:
 ## Install
 
 ```
-claude plugin install ci-review@mediainterface
+claude plugin install ci-pr-review@mediainterface
 ```
 
 ## Prerequisites
 
 - **A checkout of the PR's repository** at the PR head, with the target commit fetched so the
-  merge base can be computed. `/ci-pr-review` measures the change against the conventions it
+  merge base can be computed. `code-review` measures the change against the conventions it
   finds there (`CLAUDE.md` files, `.claude/rules/`, `docs/decisions/`, `docs/processes/testing/`)
   and applies only those that exist.
 - **Git and Python 3** (standard library only) on the build agent.
 - **The Claude Agent SDK** (or the Claude Code CLI) with credentials for the model.
 - **For posting:** the `ado-toolkit` plugin and the Azure CLI with its `azure-devops` extension.
-  The review itself does not need them, so `ci-review` does not depend on `ado-toolkit`: a
+  The review itself does not need them, so `ci-pr-review` does not depend on `ado-toolkit`: a
   declared dependency would keep the SDK from loading the plugin on its own.
 
 ## Running a review in the pipeline
@@ -46,13 +46,13 @@ claude plugin install ci-review@mediainterface
 
    ```ts
    query({
-     prompt: `/ci-review:ci-pr-review ${contextDir}`, // absolute path
+     prompt: `/ci-pr-review:code-review ${contextDir}`, // absolute path
      options: {
        cwd: checkoutDir,
        model: 'claude-opus-5-5',
        systemPrompt: { type: 'preset', preset: 'claude_code' },
        settingSources: [], // no CLAUDE.md, settings, hooks or MCP servers from the PR
-       plugins: [{ type: 'local', path: `${marketplaceDir}/plugins/ci-review` }],
+       plugins: [{ type: 'local', path: `${marketplaceDir}/plugins/ci-pr-review` }],
        tools: ['Read', 'Grep', 'Glob', 'Write', 'Bash'],
        // reads inside cwd and additionalDirectories need no rule; writes only to contextDir
        allowedTools: ['Bash(git *)', 'Bash(python3 *)', `Edit(/${contextDir}/**)`],
