@@ -3,10 +3,11 @@ name: ado-pr
 description: >-
   Azure DevOps pull requests via the Azure CLI (az + azure-devops extension) — review a PR,
   create or update a PR (German title schema, ADO work items linked and referenced as #id),
-  and create/answer/resolve PR comment threads. Use when the user mentions an ADO pull
-  request / PR, pastes a PR URL or ID, or asks to review, open, update, or comment on a PR.
+  create/answer/resolve PR comment threads, and post an automated review's findings file. Use
+  when the user mentions an ADO pull request / PR, pastes a PR URL or ID, or asks to review,
+  open, update, or comment on a PR, or to post review findings.
   Targets the newest Azure DevOps Server version; assumes you are already signed in (PAT).
-argument-hint: <PR_ID_OR_URL | create | update | comment [add|reply|resolve]>
+argument-hint: <PR_ID_OR_URL | create | update | comment [add|reply|resolve|findings]>
 allowed-tools: Bash, Read, Glob, Grep
 ---
 
@@ -186,3 +187,32 @@ text** in the shared reference). If a `--resource` name is rejected, discover it
 3. PATCH it: `az devops invoke --area git --resource pullRequestThreads --route-parameters project={project} repositoryId={repo} pullRequestId={prId} threadId={threadId} --http-method PATCH --in-file "$f" --media-type application/json --org {org} --api-version 7.1 -o json`; then `rm "$f"`.
 
 Report what changed: the new comment/thread `id`, or the thread's new `status`.
+
+### Post a findings file
+
+An automated review — a review skill run headless, e.g. in a pipeline — writes its result to a
+findings file, and [`scripts/post_findings.py`](scripts/post_findings.py) posts it as one new
+thread per finding. The script never reads the comment texts as instructions: they come from
+reviewing a PR nobody vetted, so a model with `az` rights that reads them could be steered by
+it. It posts nothing for a malformed, skipped or stale result (the PR head moved past
+`reviewedCommit`), and nothing that is already on the PR. A pipeline calls it directly, with no
+model in between:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/scripts/post_findings.py" <findings.json> [--dry-run]
+```
+
+Asked in a session (`comment findings <path>`): run it with `--dry-run` first, show the threads
+it would create, and run it without the flag only once the user agrees.
+
+The file is JSON; fields not listed here are ignored.
+
+| Field | Content |
+|---|---|
+| `schemaVersion` | `1` |
+| `skill` | The reviewer's kebab-case name, shown in the header of every comment |
+| `status` | `reviewed` is posted; `skipped` and `error` only print `reason` |
+| `reason` | Why the review was skipped or failed; `null` when reviewed |
+| `pullRequestId` | The PR the findings belong to |
+| `reviewedCommit` | Full SHA of the PR head the review read; the line numbers refer to the file at this commit |
+| `findings[]` | `severity` (`blocker` or `should`), `comment` (Markdown, posted as is below the header), and the anchor: `file` + `startLine` + `endLine` (right side), `file` alone with both lines `null` (the whole file), or all three `null` (the whole PR) |
