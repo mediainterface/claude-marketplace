@@ -1,0 +1,204 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PR review result",
+  "description": "What a review skill writes to <context-dir>/findings.json and the pipeline posts to the pull request. Shared by every review skill of the ci-review plugin; see its README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "skill",
+    "status",
+    "reason",
+    "pullRequestId",
+    "reviewedCommit",
+    "baseCommit",
+    "findings"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "description": "Version of this contract. A breaking change raises it, so a poster can refuse a file it does not understand.",
+      "const": 1
+    },
+    "skill": {
+      "description": "Name of the review skill that wrote the file. The poster shows it in the comment header; the validator looks up the skill's checks in the skill's review.json.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "status": {
+      "description": "reviewed: the findings are final and are posted. skipped: the PR is outside the skill's scope. error: the review could not run. Only reviewed results carry findings.",
+      "enum": ["reviewed", "skipped", "error"]
+    },
+    "reason": {
+      "description": "Why the review was skipped or failed, for the build log; null when reviewed.",
+      "type": ["string", "null"]
+    },
+    "pullRequestId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "reviewedCommit": {
+      "description": "The PR head the review read; every line number refers to the file at this commit. The poster posts only while this is still the PR head. null only when the review failed before it could tell.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "baseCommit": {
+      "description": "Merge base of the PR head and the target commit, the left side of the reviewed diff. null only when the review failed before it could tell.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "findings": {
+      "description": "Post-ready comments, one new thread each, in the order they are posted. Empty when there is nothing to post.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/finding"
+      }
+    },
+    "reviewLog": {
+      "description": "One entry per check the skill declares, saying what the review did for it. Goes to the build log, never to the PR.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/reviewLogEntry"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "reviewed"
+          }
+        }
+      },
+      "then": {
+        "required": ["reviewLog"],
+        "properties": {
+          "reviewLog": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "null"
+          },
+          "reviewedCommit": {
+            "type": "string"
+          },
+          "baseCommit": {
+            "type": "string"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "findings": {
+            "type": "array",
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "finding": {
+      "description": "One comment and where it goes. file + startLine + endLine: a comment on those lines. file alone (both lines null): a comment on the whole file. No file (all three null): a comment on the whole PR.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "category", "file", "startLine", "endLine", "comment"],
+      "properties": {
+        "severity": {
+          "description": "blocker: breaks behavior, security, data, or an active decision record. should: a real defect with limited reach, or a rule violation. Nothing weaker is posted.",
+          "enum": ["blocker", "should"]
+        },
+        "category": {
+          "description": "The kind of defect, shared by all review skills so the poster can label and count them alike.",
+          "enum": ["correctness", "security", "rules", "adr", "tests", "consistency"]
+        },
+        "file": {
+          "description": "Repo-relative path of a file the PR changes, exactly as git prints it, without a leading slash.",
+          "type": ["string", "null"],
+          "pattern": "^[^/\\\\]"
+        },
+        "startLine": {
+          "description": "First line of the anchor, 1-based, in the file at reviewedCommit (the right side of the diff).",
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "endLine": {
+          "description": "Last line of the anchor, inclusive; equal to startLine for a single line.",
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "comment": {
+          "description": "The comment exactly as it is posted: German Markdown, without a header. The poster prepends the header that marks the comment as automated and shows skill and severity.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "file": {
+                "type": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "startLine": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "startLine": {
+                "type": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "endLine": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "endLine": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "reviewLogEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check", "outcome", "note"],
+      "properties": {
+        "check": {
+          "description": "A check named in the skill's review.json; the log names each exactly once.",
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "outcome": {
+          "description": "finding: the check produced findings. clean: the check ran and found nothing. not-applicable: the change gives the check no occasion.",
+          "enum": ["finding", "clean", "not-applicable"]
+        },
+        "note": {
+          "description": "English, for the build log: what was read or searched, which findings came of it, or why the check does not apply.",
+          "type": "string",
+          "minLength": 15
+        }
+      }
+    }
+  }
+}
