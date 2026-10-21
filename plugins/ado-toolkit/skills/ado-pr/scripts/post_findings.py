@@ -167,8 +167,8 @@ def main(argv):
         raise Failure("nothing posted, the findings file is malformed:\n- " + "\n- ".join(errors))
     skill, pr_id = data["skill"], data["pullRequestId"]
     if data["status"] != "reviewed":
-        print(f"{skill}: {data['status']} — {data.get('reason') or 'no reason given'}; "
-              "nothing to post")
+        print(f"{skill}: {data['status']}, nothing to post — "
+              f"{data.get('reason') or 'no reason given'}")
         return 0
 
     org, project, repo = connection()
