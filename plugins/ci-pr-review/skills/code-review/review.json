@@ -1,0 +1,17 @@
+{
+  "checks": [
+    "error-branch",
+    "contract",
+    "state-write",
+    "existing-data",
+    "message",
+    "reuse",
+    "other-instances",
+    "duplication",
+    "work-per-item",
+    "comments",
+    "tests",
+    "security",
+    "rules"
+  ]
+}

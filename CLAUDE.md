@@ -22,6 +22,7 @@ The repo has no build or test suite for skills. The only build is the obsolete `
 | Plugin | Type | Notes |
 |---|---|---|
 | `ado-toolkit` | Skills | Azure DevOps via the `az` CLI (`/ado-pr`, `/ado-workitem`, `/ado-pipeline`). Process-neutral, for every team. Rule: `.claude/rules/ado-toolkit.md` |
+| `ci-pr-review` | Skills | Unattended PR reviews for pipelines (`/ci-pr-review:code-review`, not the built-in `/code-review`); writes findings files that `ado-toolkit` posts. Rule: `.claude/rules/ci-pr-review.md` |
 | `sdd-kit` | Skills + SessionStart hook | Spec-Driven Development (`/design-spec`, `/spec-pr`, `/pr-review`, `/create-decision`, `/create-lesson-learned`). Depends on `ado-toolkit`. Rule: `.claude/rules/sdd-kit.md` |
 | `guardian` | Skill | `/memory-bank-changes` for the Hüter-Trio |
 | `humanizer` | Skill | Vendored from `blader/humanizer` (MIT) |
@@ -32,7 +33,7 @@ Layout of a plugin: `.claude-plugin/plugin.json` (only `name` is required), then
 `skills/<skill>/SKILL.md`, `hooks/hooks.json`, `.mcp.json` as needed, plus a `README.md`. A
 directory under `skills/` without a `SKILL.md` (`ado-shared/`, `memory-bank-shared/`,
 `sdd-pr-shared/`) holds a shared `REFERENCE.md` that the skills of the same plugin link to by
-relative path.
+relative path; `ci-pr-review`'s `review-shared/` holds the findings schema and its validator.
 
 ## Conventions
 
