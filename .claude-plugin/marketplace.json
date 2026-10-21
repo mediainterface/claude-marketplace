@@ -11,7 +11,13 @@
     {
       "name": "azure-devops",
       "source": "./plugins/azure-devops",
-      "description": "Azure DevOps Server integration — pipeline analysis, PR workflows, changelogs",
+      "description": "OBSOLETE — replaced by ado-toolkit (Azure DevOps via the az CLI) and removed soon; install ado-toolkit instead. MCP-based Azure DevOps Server integration — pipeline analysis, PR workflows, changelogs.",
+      "version": "1.0.1"
+    },
+    {
+      "name": "ado-toolkit",
+      "source": "./plugins/ado-toolkit",
+      "description": "Azure DevOps Server via the az CLI — work items (create, update, comment), pull requests (review, create, update, comment), pipeline failure analysis and changelogs. Standalone, no development process assumed.",
       "version": "1.0.0"
     },
     {
@@ -24,13 +30,13 @@
       "name": "claude-md-improver",
       "source": "./plugins/claude-md-improver",
       "description": "PreToolUse hook that keeps CLAUDE.md files in sync with staged changes before each commit",
-      "version": "1.1.0"
+      "version": "1.2.0"
     },
     {
       "name": "sdd-kit",
       "source": "./plugins/sdd-kit",
-      "description": "The tools for our Spec-Driven Development workflow — decision records, lessons learned, a design-spec writer, a spec→PR gate, a deep PR review, and Azure DevOps skills via the az CLI.",
-      "version": "1.9.0"
+      "description": "The tools for our Spec-Driven Development workflow — decision records, lessons learned, a design-spec writer, a spec→PR gate, and a deep PR review. Builds on ado-toolkit for Azure DevOps.",
+      "version": "2.0.0"
     },
     {
       "name": "guardian",

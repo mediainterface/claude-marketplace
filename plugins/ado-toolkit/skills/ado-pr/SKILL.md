@@ -6,7 +6,7 @@ description: >-
   and create/answer/resolve PR comment threads. Use when the user mentions an ADO pull
   request / PR, pastes a PR URL or ID, or asks to review, open, update, or comment on a PR.
   Targets the newest Azure DevOps Server version; assumes you are already signed in (PAT).
-argument-hint: <PR_ID_OR_URL | create [spec] | update | comment [add|reply|resolve]>
+argument-hint: <PR_ID_OR_URL | create | update | comment [add|reply|resolve]>
 allowed-tools: Bash, Read, Glob, Grep
 ---
 
@@ -16,9 +16,9 @@ Pull-request workflows for Azure DevOps via the Azure CLI (`az` + `azure-devops`
 **review**, **create**, **update**, and **comment** on PRs. Use this skill when the user
 pastes a PR URL/ID or asks to review, open, update, or comment on an Azure DevOps PR.
 
-> **Shared setup first.** Before any `az` command, complete **Step 0 (connection detection)**
-> and the **Setup Check (sign-in confirmation)** in
-> [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md). That file also holds the
+> **Shared setup first.** Before the first `az` command, run **Step 0 (connection detection)**
+> in [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md); when an `az` command fails, its
+> **Setup Check** diagnoses the error first. That file also holds the
 > **Command Map**, **Title schema**, **German text** (umlauts verbatim), **Repository
 > Mismatch Check**, **Quirks**, and **Error handling & local-state safety** rules the
 > workflows below refer to. `{org}` = `organization`, `{repo}` = `repository`, `{project}`
@@ -57,8 +57,7 @@ pastes a PR URL/ID or asks to review, open, update, or comment on an Azure DevOp
 
 ## Workflow: PR Creation
 
-**Trigger:** User asks to create a PR, or `$ARGUMENTS` starts with `create` (`create spec`
-forces a spec PR — see step 7).
+**Trigger:** User asks to create a PR, or `$ARGUMENTS` starts with `create`.
 
 1. **Verify branch is pushed:**
    ```bash
@@ -68,29 +67,27 @@ forces a spec PR — see step 7).
    If the branch is untracked or has unpushed commits, ask the user whether to push. If yes: `git push -u origin $CURRENT_BRANCH`. If no: stop.
 2. **Check for existing PR:** `az repos pr list --repository {repo} --source-branch {currentBranch} --status active --org {org} --project {project} --detect false -o json`. If a PR exists, show its title and ID and ask whether to update instead (→ PR Update workflow).
 3. **Get default branch:** `az repos show --repository {repo} --org {org} --project {project} --detect false -o json`; use `defaultBranch` (strip `refs/heads/`) as the target branch.
-4. **Gather commit and change information:** `git log --oneline "origin/{targetBranch}..{currentBranch}"` and `git diff --name-only "origin/{targetBranch}..{currentBranch}"` (the changed-file list is used to detect a spec-only PR in step 7).
+4. **Gather commit and change information:** `git log --oneline
+   "origin/{targetBranch}..{currentBranch}"` and `git diff --name-only
+   "origin/{targetBranch}..{currentBranch}"` (the changed-file list feeds the component in step 7).
 5. **Ask for the work item ID(s)** the PR delivers — the Azure DevOps work item number(s), e.g. `1234`. A linked work item is **required** for every PR here (branch policy enforces it); if the user has none, ask for one before creating the PR — do not proceed without it.
 6. **Check for a PR template:** Glob for `.azuredevops/pull_request_template.md` in the repo root; if found, read it and use it as the description structure. If none is found, use the **default template** in step 7.
-7. **Determine the PR kind, then generate title and description.**
+7. **Generate title and description.**
 
-   **Spec PR vs. implementation PR.** The two kinds and the signals that tell them apart are
-   defined once for the whole plugin — **Spec PR vs. implementation PR** in
-   [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md). Apply it to the changed-file list
-   from step 4. Two things are specific to *creating* a PR:
-   - `create spec` in `$ARGUMENTS` forces a spec PR outright, whatever the diff looks like.
-   - An auto-detected spec PR is **confirmed first** — *"Only spec/ADR/doc files changed —
-     create this as a spec PR (📝)?"* — before the 📝 goes into the title.
+   **Prescribed by a calling skill.** Another skill may run this workflow for its own kind of
+   PR and prescribe a marker or a description structure of its own. Where it does, that
+   replaces the matching default below; everything else in this workflow — the pushed branch,
+   the required work item and its link, the review in step 8 — stays as written.
 
    **Title** — shared schema `<Marker> #<WorkItemId> Component - Änderungsbeschreibung`
    (see **Title schema** in the shared reference):
-   - **Implementation PR — `<Marker>` = change-category emoji** by majority vote over commit
-     messages: 🐞 bug fixes (`fix`/`bugfix`/`hotfix`); 🏗️ refactor (`refactor`/`cleanup`/`restructure`);
-     📖 docs (`docs`/`documentation`); 🏆 features or unclear (default). Tie-break: most recent
-     commit's category.
-   - **Spec PR — `<Marker>` = 📝** (overrides the vote).
+   - **`<Marker>` = change-category emoji** by majority vote over commit messages: 🐞 bug fixes
+     (`fix`/`bugfix`/`hotfix`); 🏗️ refactor (`refactor`/`cleanup`/`restructure`); 📖 docs
+     (`docs`/`documentation`); 🏆 features or unclear (default). Tie-break: most recent commit's
+     category.
    - **#<WorkItemId>:** the Azure DevOps work item this PR delivers, written as `#1234`.
-   - **Component:** from conventional-commit scopes first, else from file paths. A spec PR has
-     no code paths, so derive it from the spec subject; **if it cannot be determined, ask the user.**
+   - **Component:** from conventional-commit scopes first, else from file paths; **if it cannot
+     be determined, ask the user.**
    - **Änderungsbeschreibung:** concise German summary — real umlauts/ß (`Prüfung`, never
      `Pruefung`; shared **German text** rule, which also covers the description below).
 
@@ -110,24 +107,18 @@ forces a spec PR — see step 7).
    Niedrig|Mittel|Hoch, weil <Begründung>
    ```
 
-   - **Implementation PR:** fill all three sections — **Inhalt** (short German summary,
-     optionally the key commits), **Betroffene Komponenten** (the affected components), and
-     **Risikobewertung** (pick `Niedrig`/`Mittel`/`Hoch` and justify after `weil`).
-   - **Spec PR:** fill **Inhalt** (short German summary) and the risk section; **omit Betroffene
-     Komponenten** (no code change yet). Title the risk section **Erwartetes Umsetzungsrisiko**
-     (not `Risikobewertung`): it assesses the risk of the **implementation the spec describes** —
-     its scope, complexity, and impact — *not* the risk of merging the spec document (that would
-     be pointless). So do **not** default to `Niedrig`; judge the level from what the spec
-     proposes. No document list, no commit list. The work item is **still linked** to the PR in
-     step 10 — only the description body differs, the link is not.
-   - **Both kinds must include a risk section** — **Risikobewertung** for an implementation PR,
-     **Erwartetes Umsetzungsrisiko** for a spec PR. If a repo template was found but has none,
-     append the appropriate one.
+   Fill all three sections — **Inhalt** (short German summary, optionally the key commits),
+   **Betroffene Komponenten** (the affected components), and **Risikobewertung** (pick
+   `Niedrig`/`Mittel`/`Hoch` and justify after `weil`). The description **must include a risk
+   section**: if a repo template was found but has none, append **Risikobewertung**.
 
    *(Reminder: per Quirks, the emoji icon — and possibly umlauts — will be mis-echoed in the CLI's returned JSON; that is expected, the PR has them. Still send title and description with the real emoji and umlauts.)*
 8. **Present to user for review:** show generated title and full description; apply requested changes; repeat until approved.
 9. **Create the PR:** `az repos pr create --repository {repo} --source-branch {source} --target-branch {target} --title "{title}" --description "{description}" --org {org} --project {project} --detect false -o json` (branch names without `refs/heads/`). Note the `pullRequestId`.
-10. **Link the work item(s) to the PR — always, for every PR type (implementation *and* spec).** This is the direct association, in addition to the `#id` in the title; the title's `#id` is not itself a link, so never skip this step (the description deliberately does not repeat the work item — it is linked here): `az repos pr work-item add --id {prId} --work-items {id} [{id2} …] --org {org} -o json`.
+10. **Link the work item(s) to the PR — always, for every PR.** This is the direct association, in
+    addition to the `#id` in the title; the title's `#id` is not itself a link, so never skip this
+    step (the description deliberately does not repeat the work item — it is linked here): `az repos
+    pr work-item add --id {prId} --work-items {id} [{id2} …] --org {org} -o json`.
 11. **Report result:** show the PR URL and ID (`pullRequestId`), and the linked work item(s).
 
 ---
@@ -141,7 +132,11 @@ forces a spec PR — see step 7).
    - One found: use it. Multiple: show list (ID + title), ask which.
 2. **Show current PR state:** display current title and description, and the linked work items (`az repos pr work-item list --id {prId} --org {org} -o json`).
 3. **Ask what to update:** title, description, status, or linked work item(s).
-4. **Generate updated values** following the same conventions as PR Creation (German; the shared **Title schema**, including the 📝 spec-PR marker and the summary-only spec description — see PR Creation step 7).
+4. **Generate updated values** following the same conventions as PR Creation (German; the shared
+   **Title schema** — see PR Creation step 7). **Keep the PR's current marker and description
+   structure** unless the user asks to change them: a skill that created the PR may have prescribed
+   both. If the returned title shows no marker (per Quirks the emoji may be stripped from the JSON),
+   ask the user which one the PR carries instead of re-voting.
 5. **Present changes for confirmation:** old vs new.
 6. **Update the PR:** `az repos pr update --id {prId} [--title "{newTitle}"] [--description "{newDescription}"] [--status active|abandoned|completed] --org {org} -o json`. Include only the flags for fields being changed (the brackets mark optional flags — omit those you are not updating). To change linked work items: `az repos pr work-item add --id {prId} --work-items {id} --org {org} -o json` (or `... work-item remove ... --work-items {id}`).
 7. **Report result:** confirm the update and show the PR URL. *(Per Quirks, ignore a missing emoji in the returned JSON.)*

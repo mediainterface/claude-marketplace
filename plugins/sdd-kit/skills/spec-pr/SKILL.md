@@ -5,8 +5,8 @@ description: >-
   Memory Bank items) and then STOPS — no implementation plan, no code — until the PR
   is merged. Use immediately after a spec is written (by sdd-kit:design-spec or the
   superpowers brainstorming skill) and the user approves it, INSTEAD of
-  writing-plans. Auto-detects the git remote: Azure DevOps → the ado-pr workflow,
-  GitHub → the gh CLI. Also triggers on "PR the spec", "open a spec PR", or "ship the
+  writing-plans. Auto-detects the git remote: Azure DevOps → the ado-toolkit:ado-pr
+  workflow, GitHub → the gh CLI. Also triggers on "PR the spec", "open a spec PR", or "ship the
   spec for review".
 argument-hint: (run after a spec is written & approved; no arguments needed)
 allowed-tools: Bash, Read, Glob, Grep, Skill
@@ -167,15 +167,14 @@ git remote get-url origin
 ```
 
 - **Azure DevOps remote** (a `…/_git/…` URL, or `dev.azure.com` / `*.visualstudio.com`):
-  follow the **PR Creation** workflow in the `ado-pr` skill
-  ([../ado-pr/SKILL.md](../ado-pr/SKILL.md)) — complete **Step 0** and the **Setup
-  Check** in [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md) first. Follow
-  the shared **Title schema** with the **📝 spec-only** marker (see the "Title schema
-  (PRs & work items)" section in the reference). A linked **work item is required** —
-  ADO mandates one for every PR — so `ado-pr` asks for it and links it (and it appears
-  as `#<ID>` in the title); if the spec has no associated work item yet, ask the user
-  which one to link before creating the PR. Push the branch, create the PR, and note the
-  `pullRequestId`.
+  invoke `ado-toolkit:ado-pr` and follow its **PR Creation** workflow — its shared reference
+  brings **Step 0**, which comes first. Prescribe the **Spec PR
+  conventions** from [../sdd-pr-shared/REFERENCE.md](../sdd-pr-shared/REFERENCE.md): the
+  **📝 spec-only** marker and the spec description (**Inhalt** and **Erwartetes
+  Umsetzungsrisiko**). A linked **work item is required** — ADO mandates one for every PR —
+  so `ado-pr` asks for it and links it (and it appears as `#<ID>` in the title); if the spec
+  has no associated work item yet, ask the user which one to link before creating the PR.
+  Push the branch, create the PR, and note the `pullRequestId`.
 - **GitHub remote** (`github.com`): push and open the PR with the `gh` CLI, reusing
   the **📝 spec-only** marker:
 

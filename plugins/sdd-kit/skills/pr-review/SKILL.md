@@ -26,18 +26,21 @@ Given a PR ID or URL, this checks out the branch in an **isolated worktree**, ru
 **multi-dimension review** (each dimension explores the code *around* the change, not only the
 diff), reports the findings for **triage**, and posts **only the findings the user approves**.
 
-The Azure DevOps plumbing lives in this plugin's sibling skills — this skill orchestrates them;
-it does not re-implement `az`. **REQUIRED SUB-SKILLS:**
-- **`sdd-kit:ado-pr`** — PR metadata, local diff, comment threads (its *PR Comments* workflow is
-  the only way this skill posts anything).
-- **`sdd-kit:ado-pipeline`** — root-cause analysis for a failed PR build.
-- **`sdd-kit:ado-workitem`** — the linked work item's content (title, description, acceptance
-  criteria, state) via its *show* workflow. The spec-PR review compares the spec against it.
-- The ADO connection detection (**Step 0**), **Setup Check** (sign-in confirmation),
-  **Repository Mismatch Check**, **Spec PR vs. implementation PR** (the kind detection Phase A.5
-  applies), **Quirks**, and **German text** rules in
-  [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md) apply — complete Step 0 and the
-  Setup Check once before any `az` command.
+The Azure DevOps plumbing lives in the `ado-toolkit` plugin, which `sdd-kit` depends on — this
+skill orchestrates its skills; it does not re-implement `az`. **REQUIRED SUB-SKILLS:**
+- **`ado-toolkit:ado-pr`** — PR metadata, local diff, comment threads (its *PR Comments*
+  workflow is the only way this skill posts anything).
+- **`ado-toolkit:ado-pipeline`** — root-cause analysis for a failed PR build.
+- **`ado-toolkit:ado-workitem`** — the linked work item's content (title, description,
+  acceptance criteria, state) via its *show* workflow. The spec-PR review compares the spec
+  against it.
+- The ADO connection detection (**Step 0**), **Setup Check** (diagnosis of a failed `az`
+  command), **Repository Mismatch Check**, **Quirks**, and **German text** rules in
+  `ado-toolkit`'s shared reference (`ado-shared/REFERENCE.md`, linked from `ado-toolkit:ado-pr`
+  — invoke that skill first so the reference is at hand) apply — run Step 0 once before the
+  first `az` command.
+- **Spec PR vs. implementation PR** — the kind detection Phase A.5 applies — in
+  [../sdd-pr-shared/REFERENCE.md](../sdd-pr-shared/REFERENCE.md).
 
 ## Two hard rules
 
@@ -52,9 +55,9 @@ it does not re-implement `az`. **REQUIRED SUB-SKILLS:**
 
 ### Phase A — Setup & PR facts (read-only)
 1. Parse the PR ID from the argument (numeric ID or extract from the URL).
-2. Run the shared reference's **Step 0** (connection detection) + **Setup Check** (sign-in
-   confirmation). If not signed in, stop and show the sign-in instructions.
-3. Fetch PR metadata (`sdd-kit:ado-pr` review step): `sourceRefName`, `targetRefName`, `title`,
+2. Run `ado-toolkit`'s **Step 0** (connection detection). If an `az` command fails — not signed
+   in, CLI or extension missing — its **Setup Check** gives the fix; stop there.
+3. Fetch PR metadata (`ado-toolkit:ado-pr` review step): `sourceRefName`, `targetRefName`, `title`,
    `description`, `status`, linked work items, `repository.name`, `lastMergeSourceCommit`, and
    `reviewers` (with `isRequired` and `vote` — Phase C0 combines these with the thread history to
    tell whether a human review has already happened; the current vote alone does not say).
@@ -83,9 +86,9 @@ git diff --name-only origin/{targetBranch}...origin/{sourceBranch}
   using is `{sourceRef}` for Phase B — do not fetch a second time there.
 
 Classify with the shared definition — **Spec PR vs. implementation PR** in
-[../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md). Four things decide it in practice:
+[../sdd-pr-shared/REFERENCE.md](../sdd-pr-shared/REFERENCE.md). Four things decide it in practice:
 
-- **The changed-file set decides; the 📝 title marker only corroborates.** Per the reference's
+- **The changed-file set decides; the 📝 title marker only corroborates.** Per `ado-toolkit`'s
   **Quirks**, the CLI may hand back a title with the emoji stripped, so a missing 📝 is not
   evidence of anything. A documentation-only diff is a spec PR with or without the marker.
 - **📝 in the title but source code in the diff** → review as an **implementation PR** (the
@@ -103,8 +106,8 @@ Classify with the shared definition — **Spec PR vs. implementation PR** in
   spec describes **substantially more** than this PR delivers, the separate spec PR would have
   bought review feedback before the implementation existed, and that is now gone. That is 🟢 —
   a question about how the next one is cut, not a defect in this one.
-- **Nothing here is confirmed with the user.** Unlike `/ado-pr` at creation time, the diff has
-  already decided. Classify, say which kind you got and which signal proves it, and continue.
+- **Nothing here is confirmed with the user** — the diff has already decided. Classify, say
+  which kind you got and which signal proves it, and continue.
 
 ### Phase B — Isolate the branch in a worktree
 Phase A.5 has already fetched, so from the repo root:
@@ -175,7 +178,7 @@ two dimensions that already ask the right questions instead:
   adds, plus anything riding along in the same PR — Memory Bank records, a `.claude/rules/`
   convention (`/spec-pr` bundles those deliberately, so they are part of what is under review).
 - **The linked work item's content.** Take the work-item IDs from Phase A and fetch the item
-  through `sdd-kit:ado-workitem`'s *show* workflow: title, description, **acceptance criteria**,
+  through `ado-toolkit:ado-workitem`'s *show* workflow: title, description, **acceptance criteria**,
   and state. The server is German-localized — read the field names from the server instead of
   assuming them (shared reference, **German text**). A PR without a linked work item, or one
   whose work item has no acceptance criteria, is itself a result: it goes into the status header
@@ -203,7 +206,7 @@ Runs when Phase A.5 classified this as an implementation PR. Skip this whole set
    PR green? Get the PR's build-validation status (try
    `az repos pr policy list --id {prId} --org {org} -o json`; else list recent builds for the
    source branch and read `result`). For any **failed** required build, hand its `buildId` to
-   `sdd-kit:ado-pipeline` for a one-line root cause.
+   `ado-toolkit:ado-pipeline` for a one-line root cause.
    The result is **status information for the report header — never a numbered, postable
    finding.** A red check, a failing test, a build error: the PR page already shows all of it,
    so a comment saying so adds nothing and forces the user to exclude it instead of saying
@@ -611,7 +614,7 @@ Then **stop and ask the user which findings to post** — offer: name the number
 "post all", or "I'll post them myself". **Post nothing until they answer.**
 
 ### Phase E — Post approved findings (only on explicit go)
-For each finding the user approved, use `sdd-kit:ado-pr`'s **PR Comments** workflow to add a
+For each finding the user approved, use `ado-toolkit:ado-pr`'s **PR Comments** workflow to add a
 comment thread anchored to the file and line (`threadContext`). Each comment reuses the
 finding's wording — it was already written per the recipe below, so posting is anchoring, not
 rewriting. Report the created thread IDs. If the user chose to post themselves, post nothing.
@@ -725,7 +728,7 @@ The language contract:
   the documentation unread.
 - The spec review ran without the linked work item → S3 has nothing to compare against, and
   inventing the acceptance criteria the story should have had is worse than reporting their
-  absence. Fetch the item via `sdd-kit:ado-workitem`, or report that none is linked.
+  absence. Fetch the item via `ado-toolkit:ado-workitem`, or report that none is linked.
 - S3 and S5 dispatched as one subagent → the spec-internal gap always wins over the comparison
   against the story, exactly as it does for dimensions 6 and 7. Two dispatches.
 - A spec's test plan judged against a test process you know from another repo → S4 measures
@@ -794,7 +797,7 @@ The language contract:
 | PR kind decided on the 📝 marker alone | The changed-file set decides; per **Quirks** the CLI may strip the emoji from the title it returns, so a missing marker is not evidence. |
 | A mixed docs + code diff reported as a rule violation | It is not one — a small change legitimately carries its doc update along, and splitting it costs more than the separate spec review is worth. Classify as an implementation PR; 🟢 only when the spec describes substantially more than the PR delivers. |
 | A mixed PR's doc half left unreviewed because the PR counted as "implementation" | Phase C0 hands the changed doc/spec files to dimension 3 (does the documentation match what the code does?) and dimension 5 (records, durable context) — never as deletion candidates. |
-| Spec reviewed without the linked work item | S3 then has nothing to compare against. Fetch it via `sdd-kit:ado-workitem`; if none is linked or it carries no acceptance criteria, report that instead of inventing criteria. |
+| Spec reviewed without the linked work item | S3 then has nothing to compare against. Fetch it via `ado-toolkit:ado-workitem`; if none is linked or it carries no acceptance criteria, report that instead of inventing criteria. |
 | Spec compared against the story in one direction only | Both directions: acceptance criteria the spec does not address (🔴/🟡) **and** spec content the story never asked for (scope creep, 🟡). |
 | Spec's test plan waved through, or judged by another repo's policy | S4 measures planned level, forbidden test classes, and required artefacts against **this** repo's process — and reports when the repo documents none. |
 | An S6 explorer dispatched for a spec that touches no trust boundary | Skip the dispatch and say so in one line — the conditional dispatch is the point. |

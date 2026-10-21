@@ -17,9 +17,9 @@ extension): **pipeline failure analysis** and **changelog since a build or commi
 skill when the user pastes a pipeline/build URL or build ID, asks why a build failed, or asks
 what changed since a build/commit.
 
-> **Shared setup first.** Before any `az` command, complete **Step 0 (connection detection)**
-> and the **Setup Check (sign-in confirmation)** in
-> [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md). That file also holds the
+> **Shared setup first.** Before the first `az` command, run **Step 0 (connection detection)**
+> in [../ado-shared/REFERENCE.md](../ado-shared/REFERENCE.md); when an `az` command fails, its
+> **Setup Check** diagnoses the error first. That file also holds the
 > **Command Map**, **Repository Mismatch Check**, **Quirks**, and **Error handling &
 > local-state safety** rules the workflows below refer to. `{org}` = `organization`,
 > `{repo}` = `repository`, `{project}` come from Step 0.

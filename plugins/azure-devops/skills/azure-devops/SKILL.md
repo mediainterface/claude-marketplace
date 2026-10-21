@@ -1,6 +1,8 @@
 ---
 name: azure-devops
 description: >-
+  OBSOLETE — superseded by the ado-toolkit plugin (/ado-pr, /ado-workitem, /ado-pipeline);
+  when ado-toolkit is installed, use its skills instead of this one.
   Work with Azure DevOps Server — analyse pipeline failures, review pull requests,
   create and update pull requests, and generate changelogs since a given build or commit.
   Use when the user mentions ADO pipelines, builds, PRs, changelogs,
@@ -11,6 +13,12 @@ allowed-tools: Bash, Read, Glob, Grep, mcp__ado__*
 ---
 
 # Azure DevOps Unified Skill
+
+> **Obsolete.** This plugin is superseded by `ado-toolkit` (Azure DevOps via the Azure CLI) and
+> will be removed from the marketplace. Before the first workflow in a session, tell the user
+> once: *"The `azure-devops` plugin is obsolete — please install `ado-toolkit`
+> (`claude plugin install ado-toolkit@mediainterface`) and uninstall this one."* Then carry on
+> with the request as usual.
 
 ## Step 0: Detect ADO Connection
 

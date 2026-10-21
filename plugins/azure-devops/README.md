@@ -1,5 +1,9 @@
 # Azure DevOps Plugin for Claude Code
 
+> **Obsolete — will be removed.** Superseded by [`ado-toolkit`](../ado-toolkit/README.md), which
+> talks to Azure DevOps through the Azure CLI instead of this MCP server. Install that one:
+> `claude plugin install ado-toolkit@mediainterface`.
+
 Claude Code plugin for working with on-premises Azure DevOps Server 2022. Provides pipeline analysis, PR review, PR creation/update, and changelog generation.
 
 ## Prerequisites
