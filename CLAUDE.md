@@ -25,6 +25,7 @@ The repo has no build or test suite for skills. The only build is the obsolete `
 | `sdd-kit` | Skills + SessionStart hook | Spec-Driven Development (`/design-spec`, `/spec-pr`, `/pr-review`, `/create-decision`, `/create-lesson-learned`). Depends on `ado-toolkit`. Rule: `.claude/rules/sdd-kit.md` |
 | `guardian` | Skill | `/memory-bank-changes` for the Hüter-Trio |
 | `humanizer` | Skill | Vendored from `blader/humanizer` (MIT) |
+| `product-docs` | Skill | `/product-doc`: pages of a `docs/product/` tree; the repository's own documentation rules win |
 | `claude-md-improver` | Agent hook | PreToolUse on `Bash(git commit:*)`: keeps `CLAUDE.md` files accurate and lean for the staged diff |
 | `azure-devops` | MCP server + skill | **Obsolete**, superseded by `ado-toolkit`; to be removed |
 

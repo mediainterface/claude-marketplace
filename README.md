@@ -54,6 +54,20 @@ Writing editor that identifies and removes AI writing patterns to make text soun
 | Requires | Nothing |
 | Source | [blader/humanizer](https://github.com/blader/humanizer) (MIT, Siqi Chen) |
 
+### product-docs
+
+Product documentation in the house form of the MIRA manuals: write a new page under
+`docs/product/` or bring an existing one into that form. Facts come from today's code, every
+label and message is quoted from the English interface, the text is American English, and each
+page takes its reader once through the feature and back to where they started.
+
+| | |
+|---|---|
+| Install | `claude plugin install product-docs@mediainterface` |
+| Type | Skill only |
+| Requires | Nothing; `ado-toolkit` optionally, to read the work item |
+| Skills | `/product-doc` |
+
 ### sdd-kit
 
 Spec-Driven Development toolkit: capture Decision Records and Lessons Learned with guided workflows
