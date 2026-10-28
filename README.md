@@ -54,7 +54,7 @@ Writing editor that identifies and removes AI writing patterns to make text soun
 | Requires | Nothing |
 | Source | [blader/humanizer](https://github.com/blader/humanizer) (MIT, Siqi Chen) |
 
-### product-docs
+### mira-docs
 
 Product documentation in the house form of the MIRA manuals: write a new page under
 `docs/product/` or bring an existing one into that form. Facts come from today's code, every
@@ -63,10 +63,10 @@ page takes its reader once through the feature and back to where they started.
 
 | | |
 |---|---|
-| Install | `claude plugin install product-docs@mediainterface` |
+| Install | `claude plugin install mira-docs@mediainterface` |
 | Type | Skill only |
 | Requires | Nothing; `ado-toolkit` optionally, to read the work item |
-| Skills | `/product-doc` |
+| Skills | `/mira-product-doc` |
 
 ### sdd-kit
 

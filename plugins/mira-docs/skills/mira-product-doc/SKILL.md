@@ -1,5 +1,5 @@
 ---
-name: product-doc
+name: mira-product-doc
 description: >-
   Writes or reworks a page of a product documentation tree (docs/product/ of an app or service)
   in the house form of the MIRA manuals: American English, every UI label and message quoted

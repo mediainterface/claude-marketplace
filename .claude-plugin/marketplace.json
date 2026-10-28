@@ -45,9 +45,9 @@
       "version": "1.1.0"
     },
     {
-      "name": "product-docs",
-      "source": "./plugins/product-docs",
-      "description": "Product documentation in the house form of the MIRA manuals — /product-doc writes or reworks a page under docs/product/: American English, the interface quoted word for word from today's code, and the reader taken once through the feature and back to where they started.",
+      "name": "mira-docs",
+      "source": "./plugins/mira-docs",
+      "description": "Product documentation in the house form of the MIRA manuals — /mira-product-doc writes or reworks a page under docs/product/: American English, the interface quoted word for word from today's code, and the reader taken once through the feature and back to where they started.",
       "version": "1.0.0"
     }
   ]
