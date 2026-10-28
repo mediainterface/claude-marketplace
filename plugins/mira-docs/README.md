@@ -1,10 +1,10 @@
 # mira-docs
 
-Product documentation for Claude Code, in the house form of the MIRA manuals.
+The tools for MIRA's documentation.
 
 | Skill | What it does |
 |---|---|
-| `/mira-product-doc` | Write a new page under `docs/product/` or bring an existing one into the house form: facts from today's code, every label and message quoted from the English interface, American English, a page that takes the reader once through the feature and back to where they started, and a check that runs until it finds nothing. |
+| `/mira-product-doc` | Writes a new page of the product documentation (user manual or internal page) or brings an existing one up to date. It reads the work item and the code, follows the repository's documentation rules and checks the page before handing it over. |
 
 The repository's own rules come first: in MIRA, `.claude/rules/product-documentation.md` and the
 tree's `CLAUDE.md`. The skill adds how a page is researched, written and checked.

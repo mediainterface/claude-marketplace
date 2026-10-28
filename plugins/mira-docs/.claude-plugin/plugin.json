@@ -1,9 +1,16 @@
 {
   "name": "mira-docs",
   "version": "1.0.0",
-  "description": "Product documentation in the house form of the MIRA manuals: /mira-product-doc writes or reworks a page under docs/product/ in American English, quotes the interface word for word from today's code, and takes the reader once through the feature and back to where they started, without saying so.",
-  "author": { "name": "MediaInterface GmbH" },
+  "description": "The tools for MIRA's documentation. /mira-product-doc writes a new page of the product documentation under docs/product/ (user manual or internal page) or brings an existing one up to date: it reads the work item and the code, follows the repository's documentation rules and checks the page before handing it over.",
+  "author": {
+    "name": "MediaInterface GmbH"
+  },
   "license": "Apache-2.0",
   "repository": "https://github.com/mediainterface/claude-marketplace",
-  "keywords": ["documentation", "mira-docs", "manual", "writing"]
+  "keywords": [
+    "documentation",
+    "mira-docs",
+    "manual",
+    "writing"
+  ]
 }

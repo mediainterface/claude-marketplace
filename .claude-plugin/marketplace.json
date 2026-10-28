@@ -47,7 +47,7 @@
     {
       "name": "mira-docs",
       "source": "./plugins/mira-docs",
-      "description": "Product documentation in the house form of the MIRA manuals — /mira-product-doc writes or reworks a page under docs/product/: American English, the interface quoted word for word from today's code, and the reader taken once through the feature and back to where they started.",
+      "description": "The tools for MIRA's documentation — /mira-product-doc writes new pages of the product documentation (user manual and internal pages) and brings existing ones up to date.",
       "version": "1.0.0"
     }
   ]

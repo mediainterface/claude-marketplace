@@ -56,10 +56,9 @@ Writing editor that identifies and removes AI writing patterns to make text soun
 
 ### mira-docs
 
-Product documentation in the house form of the MIRA manuals: write a new page under
-`docs/product/` or bring an existing one into that form. Facts come from today's code, every
-label and message is quoted from the English interface, the text is American English, and each
-page takes its reader once through the feature and back to where they started.
+The tools for MIRA's documentation. `/mira-product-doc` writes a new page of the product
+documentation (the user manual and the internal pages under `docs/product/`) or brings an
+existing one up to date, following the repository's documentation rules.
 
 | | |
 |---|---|
