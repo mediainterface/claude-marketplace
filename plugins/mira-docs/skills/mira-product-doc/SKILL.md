@@ -5,10 +5,9 @@ description: >-
   in the house form of the MIRA manuals: American English, every UI label and message quoted
   word for word from the English interface, facts taken from today's code, and a page that takes
   its reader once through the feature and back to the state they started in, without ever
-  saying so. Use when a story asks to document a feature ("dokumentieren", "Doku schreiben",
-  "Handbuchseite"), when a page under docs/product/ is written, updated after a feature change,
-  aligned with the model pages or reviewed. Not for READMEs, CLAUDE.md files, specs or decision
-  records.
+  saying so. Use when a work item asks to document a feature or to write a manual page, when a
+  page under docs/product/ is written, updated after a feature change, aligned with the model
+  pages or reviewed. Not for READMEs, CLAUDE.md files, specs or decision records.
 argument-hint: <work item ID, feature, or page path>
 ---
 
