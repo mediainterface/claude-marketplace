@@ -63,19 +63,8 @@ The folder tree is the navigation, so folder and file names must read well as me
 
 ## Front matter
 
-Every page starts with this block:
-
-```yaml
----
-title: Signing in to MIRA Desktop
-description: How to sign in to the MIRA Desktop client.
-audience: external
-category: manual
-status: draft
-tags: [manual, external, authentication]
-order: 2
----
-```
+Every page starts with a front-matter block of these fields; [example-page.md](example-page.md)
+shows one.
 
 | Field | Required | Values | Meaning |
 |-------|----------|--------|---------|
@@ -160,42 +149,7 @@ Every `external` page, in every tree:
 - `## If it doesn't work`: a table with the columns *What you see*, *What it means* and *What to
   do*, listing the messages a reader actually meets, then the tree's closing line.
 
-The skeleton of such a page:
-
-```markdown
-# Dictating a text
-
-This guide shows you how to record a dictation in the editor, correct the text, and hand it off
-to the application where it belongs.
-
-## Before you start
-
-You are signed in to MIRA Desktop, and the **Editor** shows the text area.
-
-You also need:
-
-- **A speech recognition license.** Without one, the microphone button is disabled.
-- **A working microphone.** MIRA uses your system's default microphone unless you chose another.
-
-## Step by step
-
-1. **Start the recording.** Select **Dictate**, or press **Ctrl+Space**. The button turns into
-   **Stop recording**, and screen readers announce *Recording started*.
-2. ...
-3. **Hand the text off.** Select **Cut**. The text area is empty, and MIRA confirms with *Cut*.
-
-## More options
-
-- **Copy only a part.** Select a passage first; only that passage is copied.
-
-## If it doesn't work
-
-| What you see | What it means | What to do |
-|--------------|---------------|------------|
-| *No microphone found. Please connect a recording device.* | No microphone is available. | Connect a microphone. |
-
-If a problem persists after these steps, contact your administrator.
-```
+[example-page.md](example-page.md) shows a complete page in this form.
 
 `internal` and `technical` pages keep the front matter, the voice, the circle and the links;
 their sections follow their topic.
