@@ -56,9 +56,9 @@ Writing editor that identifies and removes AI writing patterns to make text soun
 
 ### mira-docs
 
-The tools for MIRA's documentation. `/mira-product-doc` writes a new page of the product
-documentation (the user manual and the internal pages under `docs/product/`) or brings an
-existing one up to date, following the repository's documentation rules.
+The tools for MIRA's documentation. `/mira-product-doc` writes a new page of MIRA's product
+documentation (the user manual and the internal pages) or brings an existing one up to date,
+following the rules of MIRA's manuals.
 
 | | |
 |---|---|
