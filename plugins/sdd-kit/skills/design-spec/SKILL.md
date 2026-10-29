@@ -31,13 +31,20 @@ line by line, nothing a reviewer cannot check.
      of scope with the sibling's id.
    - *Predecessor:* restate only what makes this spec readable alone; an interface the
      predecessor fixed is "implemented here", not argued again.
+   - *Design artifact:* a mockup, prototype or screen design of the story — linked or embedded
+     as an image in the description, the acceptance criteria or a comment, or attached to the
+     work item or its epic. Attachments and embedded images are downloaded through
+     `ado-toolkit:ado-workitem` (*Show*), not fetched by URL. Read it as closely as the
+     acceptance criteria; one you cannot open (no access, an export missing) is raised with the
+     user, not skipped.
 2. **Discuss first, write second.** Start with the premise: in two sentences, what is wrong or
    missing today, since when (`git log -S`), and whether it ever shipped — and have the user
    confirm it before any single decision. A wrong premise rewrites the whole spec later. Then lay
    out the implementation approach in a few sentences and list the decisions the user has to
-   make — contradictions in the acceptance criteria, gaps, choices between alternatives. Ask them
-   directly; do not park them as open questions. Acceptance criteria that turn out wrong are
-   corrected in the work item (with the user's OK), not silently reinterpreted.
+   make — contradictions in the acceptance criteria or between them and the design artifact,
+   gaps, choices between alternatives. Ask them directly; do not park them as open questions.
+   Acceptance criteria that turn out wrong are corrected in the work item (with the user's OK),
+   not silently reinterpreted.
    If the superpowers `brainstorming` skill is already running, its conversation is this step;
    the document it writes follows the form below instead of its own template.
 3. **Write the spec** in the form below, English, hard-wrapped at 100 characters (tables,
@@ -46,20 +53,24 @@ line by line, nothing a reviewer cannot check.
    level. Branch `spec/<id>-<topic>`.
 4. **Check** wrap length, that every relative link resolves, that a decision changed during the
    discussion left no old wording behind (search the whole spec for it — edge cases, tests and AC
-   coverage keep stale copies longest), and that everything needed beyond the story is captured
-   outside the spec (inline reasons listed, work item updated, a record or convention only if the
+   coverage keep stale copies longest), that a design artifact from step 1 is linked in the
+   frontmatter, and that everything needed beyond the story is captured outside the spec (inline
+   reasons listed, work item updated, a record or convention only if the
    `sdd-kit:create-decision` / `create-lesson-learned` triage says so).
 5. **Hand over to `sdd-kit:spec-pr`.** No implementation plan, no code.
 
 ## Form
 
-### Frontmatter — two bullets, nothing else
+### Frontmatter — two bullets, a third for a design, nothing else
 
 ```markdown
 # <App(s)> — <Feature>: <Story title> (US #<id>) Design Spec
 
 - **Work items:** [#<id> <title>](<ADO URL>), epic [#<id> <title>](<ADO URL>).
 - **Apps / services:** `apps/<app>`, `services/<svc>`.
+- **Design:** [<artifact name>](<URL>) — the basis the UI is built on. A mockup, not a
+  specification of every detail: where this spec rules a detail (copy, error messages, states,
+  behaviour), the spec wins.
 
 ---
 ```
@@ -68,17 +79,26 @@ No date, no status, no test depth, no "builds on", no work-item state, no descri
 the app names. The spec is deleted after implementation; the state changes after merge; the
 reasons belong in the body.
 
+The **Design** bullet exists only when step 1 found a design artifact — and then it is mandatory:
+whoever implements works from the spec and does not go back to the work item, so a design the
+spec does not link is a design the implementation never sees. Link the artifact itself (the
+frame or page), not the work item that carries it; an attachment or embedded image by its
+attachment URL, followed by "attached to #<id>, download through `ado-toolkit:ado-workitem`" —
+the URL alone does not open without authentication. Keep the precedence sentence: a mockup
+cannot follow every decision of the refinement and of this spec, and the implementer has to
+know which source wins.
+
 ### Sections, in this order
 
 | § | Section | Content |
 |---|---|---|
 | 1 | Context | Three to five sentences: what exists, what is missing, what this story adds. No history, no merge status. |
-| 2 | Decisions | **The core.** One table `Topic \| Decision \| Why` with every choice between alternatives and every deviation from the story's wording. Mark what the user confirmed. |
+| 2 | Decisions | **The core.** One table `Topic \| Decision \| Why` with every choice between alternatives and every deviation from the story's wording or from the design. Mark what the user confirmed. |
 | 3 | Out of scope | One paragraph naming the sibling stories by id and what stays out. |
 | 4 | Data / content model | *Optional.* The stored shape and its rules. |
 | 5 | Backend | *Optional.* Request/response as a code block, rules as bullets. |
 | 6 | Client — contract and main | *Optional.* Messages across the process boundary, what main owns. |
-| 7 | Client — UI | *Optional.* One bullet list per surface. |
+| 7 | Client — UI | *Optional.* One bullet list per surface; with a design, the part of it the surface follows. |
 | 8 | Errors | Table `Situation \| Kind \| User sees`. |
 | 9 | Edge cases | Table `Case \| Behaviour`. |
 | 10 | Tests | Depth justification in one sentence against the repo's test process, then bullets per test level as that process names them and the repo actually runs them, AC coverage as one paragraph of section references. |
@@ -105,7 +125,9 @@ Answer each point that applies; leave out the rest silently.
   unions, what main resolves itself and never trusts the renderer with.
 - **UI surface:** entry points and the way back; focus on enter and on leave; keyboard route
   through and out; what a screen reader is told and when; forced-colors safety; dirty state and
-  its guards (leave, sign-out, quit); what the surface deliberately does not offer yet.
+  its guards (leave, sign-out, quit); what the surface deliberately does not offer yet. With a
+  design, name the screen or frame each surface follows and describe only what the mockup does
+  not show or what deviates from it — never re-describe what it shows.
 - **Edge-case dimensions:** another client changes the same data meanwhile; language or
   culture switches while open; session ends, sign-out, window close; views that stay mounted
   while hidden; casing and collation; empty and whitespace-only values; the same thing twice.
