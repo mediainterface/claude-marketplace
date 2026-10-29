@@ -198,11 +198,11 @@ automatically nor by offering it. Plan steps are tracked in the plan alone; they
 add no value as work items for human readers.
 
 **The spec's design artifact travels into the plan.** When the spec links a design
-artifact (its **Design** bullet), the implementation plan links it as well — in its
-header and in every task that builds or changes UI — together with the precedence the
-spec states: the UI is built on the design, and the spec wins on every detail it rules.
-An implementer handed a single task never opens the spec's links; without the link in
-the task, the UI drifts from the design.
+artifact (its **Design** bullet), the implementation plan links it as well, with the
+spec's note on how to open it — in its header and in every task that builds or changes
+UI — together with the precedence the spec states: the UI is built on the design, and
+the spec wins on every detail it rules. An implementer handed a single task never opens
+the spec's links; without the link in the task, the UI drifts from the design.
 
 **Delete the spec and the plan in the implementation PR, at its human code review.**
 The story's design spec and implementation plan leave the repository when its

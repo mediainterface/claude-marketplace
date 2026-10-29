@@ -182,7 +182,10 @@ az boards work-item update --id {id} --area "{project}" --iteration "{project}" 
 ### Show / Query
 - **Show one:** `az boards work-item show --id {id} --org {org} -o json`. Read the content from
   the fields of its type (a bug's description is often empty — its content is in
-  `Microsoft.VSTS.TCM.ReproSteps`); add its comments when they matter (see **Comment**).
+  `Microsoft.VSTS.TCM.ReproSteps`); add its comments when they matter (see **Comment**). Its
+  attached files and the images embedded in its fields are downloaded, not fetched by URL, when
+  their content matters — a screenshot, a mockup (shared reference, *Attachments need
+  authentication*).
 - **Query many (WIQL):** build the query with the names from step 1 (example values from a
   German server):
   ```bash

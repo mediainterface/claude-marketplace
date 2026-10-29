@@ -272,6 +272,7 @@ discover the correct one with `az devops invoke --query "[?area=='build']"` (or
 | Update work item | `az boards work-item update --id {id} [--title "{title}"] [--state "{stateName}"] [--assigned-to "{displayName}"] [--description "{descriptionHtml}"] [--fields "{referenceName}={html}" …] --org {org} -o json` |
 | Link work item to parent | `az boards work-item relation add --id {childId} --relation-type "{parentRelationName}" --target-id {parentId} --org {org} -o json` (name from the Discovery cache, e.g. `"Übergeordnetes Element"`) |
 | Work item comments (list) | `az devops invoke --area wit --resource comments --route-parameters project={project} workItemId={id} --org {org} --api-version 7.1-preview -o json` |
+| Download work item attachment | `az devops invoke --area wit --resource attachments --route-parameters project={project} id={attachmentId} --out-file {path} --org {org} --api-version 7.1` |
 | Add work item comment | `az boards work-item update --id {id} --discussion "{commentHtml}" --org {org} -o json` |
 | Query work items (WIQL) | `az boards query --wiql "{wiql}" --org {org} --project {project} -o json` |
 
@@ -292,6 +293,11 @@ discover the correct one with `az devops invoke --query "[?area=='build']"` (or
   with `</dev/null` there.
 - A **preview** API version is written `7.1-preview`, without the `.N` suffix: the CLI fails to
   parse `7.1-preview.4` ("could not convert string to float").
+- **Attachments need authentication** — a plain fetch of their URL fails. That holds for an
+  `AttachedFile` relation and for an image embedded in an HTML field (its `src`): both point to
+  `…/_apis/wit/attachments/{attachmentId}`, the id being the last path segment without
+  `?fileName=`. Download through the attachments `invoke`, into a temporary directory outside the
+  checkout, and read the file from there.
 
 ## Repository Mismatch Check
 

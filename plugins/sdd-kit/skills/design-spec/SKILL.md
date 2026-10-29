@@ -33,8 +33,10 @@ line by line, nothing a reviewer cannot check.
      predecessor fixed is "implemented here", not argued again.
    - *Design artifact:* a mockup, prototype or screen design of the story — linked or embedded
      as an image in the description, the acceptance criteria or a comment, or attached to the
-     work item or its epic. Read it as closely as the acceptance criteria; one you cannot open
-     (no access, an export missing) is raised with the user, not skipped.
+     work item or its epic. Attachments and embedded images are downloaded through
+     `ado-toolkit:ado-workitem` (*Show*), not fetched by URL. Read it as closely as the
+     acceptance criteria; one you cannot open (no access, an export missing) is raised with the
+     user, not skipped.
 2. **Discuss first, write second.** Start with the premise: in two sentences, what is wrong or
    missing today, since when (`git log -S`), and whether it ever shipped — and have the user
    confirm it before any single decision. A wrong premise rewrites the whole spec later. Then lay
@@ -80,9 +82,11 @@ reasons belong in the body.
 The **Design** bullet exists only when step 1 found a design artifact — and then it is mandatory:
 whoever implements works from the spec and does not go back to the work item, so a design the
 spec does not link is a design the implementation never sees. Link the artifact itself (the
-frame or page, an attachment by its URL), not the work item that carries it. Keep the precedence
-sentence: a mockup cannot follow every decision of the refinement and of this spec, and the
-implementer has to know which source wins.
+frame or page), not the work item that carries it; an attachment or embedded image by its
+attachment URL, followed by "attached to #<id>, download through `ado-toolkit:ado-workitem`" —
+the URL alone does not open without authentication. Keep the precedence sentence: a mockup
+cannot follow every decision of the refinement and of this spec, and the implementer has to
+know which source wins.
 
 ### Sections, in this order
 
