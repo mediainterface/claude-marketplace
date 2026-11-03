@@ -175,8 +175,9 @@ two dimensions that already ask the right questions instead:
 
 **Spec PR only** — two more inputs:
 - **The spec itself**, read in full: the `*-design.md` (or whatever this repo names it) the PR
-  adds, plus anything riding along in the same PR — Memory Bank records, a `.claude/rules/`
-  convention (`/spec-pr` bundles those deliberately, so they are part of what is under review).
+  adds, plus anything riding along in the same PR — Memory Bank records, a convention in
+  `.claude/rules/` or a `CLAUDE.md` (`/spec-pr` bundles those deliberately, so they are part of
+  what is under review).
 - **The linked work item's content.** Take the work-item IDs from Phase A and fetch the item
   through `ado-toolkit:ado-workitem`'s *show* workflow: title, description, **acceptance criteria**,
   and state. The server is German-localized — read the field names from the server instead of
@@ -264,9 +265,9 @@ Runs when Phase A.5 classified this as an implementation PR. Skip this whole set
      anything (hard to reverse / eases future decisions / protected product decision / breaks a
      pattern / cross-cutting — see
      [../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md)): a one-off local
-     choice is **no finding**, a recurring coding rule belongs in `.claude/rules/`, an observed
-     pitfall in `sdd-kit:create-lesson-learned`. A criterion counts only with **evidence you can
-     name from this codebase**:
+     choice is **no finding**, a recurring coding rule is a convention (placed per
+     **Conventions** there), an observed pitfall goes to `sdd-kit:create-lesson-learned`. A
+     criterion counts only with **evidence you can name from this codebase**:
      - **Hard to reverse** — what a revert costs, and which of stack / library / data format /
        build mechanism it is.
      - **Eases future decisions** — the next case the rule decides without re-deciding.
@@ -298,7 +299,7 @@ Runs when Phase A.5 classified this as an implementation PR. Skip this whole set
      1. **Read them and look for durable content.** Per piece of reasoning: is it needed beyond
         this story? Anything that is — a constraint, the grounds for a decision, a rule — must
         already exist **outside** the spec and the plan: inline in the code as its own reason, in
-        the work item, in `.claude/rules/`, or as a record. Something needed that lives only there
+        the work item, in a convention, or as a record. Something needed that lives only there
         is a 🟡 finding, anchored at the code it concerns, asking for the inline reason (or for a
         record, if it clears the triage above).
      2. **Then the deletion itself.** Spec and plan files still present in the branch are one 🟢
@@ -450,7 +451,7 @@ what the spec **proposes** instead of to code that exists.
   them deliberately, so they are under review here too).
 - **Is durable reasoning trapped in the spec?** This is the last cheap moment to ask. The spec is
   deleted at the implementation's code review, so everything needed beyond this story needs a
-  home outside it — inline in the code as its own reason, in the work item, in `.claude/rules/`,
+  home outside it — inline in the code as its own reason, in the work item, in a convention,
   or as a record (the routing table in `/spec-pr` Step 3). Something needed that lives only in
   the spec is 🟡, with the durable home named. In the implementation review the same check only
   confirms; here it still changes something.
@@ -702,8 +703,8 @@ The language contract:
   `apps/<app>/docs/decisions/` binds every change inside that app. Glob all levels.
 - A missing-ADR finding for a one-off local choice → the significance triage comes first
   (hard to reverse / eases future decisions / protected product decision / breaks a pattern /
-  cross-cutting). Without a criterion there is no finding; a coding rule goes to
-  `.claude/rules/`, a pitfall to `create-lesson-learned`.
+  cross-cutting). Without a criterion there is no finding; a coding rule is a convention
+  (placed per the shared reference's **Conventions**), a pitfall goes to `create-lesson-learned`.
 - A criterion ticked without evidence from this codebase („berührt Interfaces", „erleichtert
   künftige Entscheidungen") → name the pattern it breaks and the next case the rule would decide,
   or the criterion does not hold. A speculative next case is not a case.

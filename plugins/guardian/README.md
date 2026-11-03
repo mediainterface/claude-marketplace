@@ -20,7 +20,8 @@ needs a closer look.
 - **What it covers**: Decision Records and Lessons Learned in every
   `docs/decisions/` / `docs/learnings/` directory on any Memory Bank level
   (repo root or nested, e.g. `apps/<app>/docs/decisions/`), and Conventions
-  (Claude Code Rules in `.claude/rules/`).
+  (Claude Code Rules in `.claude/rules/`). Conventions of a single app or
+  service live in that level's `CLAUDE.md` and are listed only on request.
 - **How it works**: reconstructs the change timeline from **git history**
   (author, date, commit message, added/modified/deleted/renamed files) and
   enriches each touched record with its own **content** (title, category,

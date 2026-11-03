@@ -12,12 +12,13 @@ cover all types of significant decisions, not just architectural ones.
 The category field in the frontmatter indicates what kind of decision it
 is.
 
-This skill is part of the Memory Bank. Conventions live as Claude Code
-Rules in `.claude/rules/` (auto-loaded). Decisions and learnings live
-under `docs/decisions/` and `docs/learnings/` of their level — the repo
-root for suite-wide records, or an app/service subtree for records that
-concern only that app. Levels, the placement rule, the significance triage
-and the form rules are defined in the shared reference:
+This skill is part of the Memory Bank. Conventions live in a check, a doc
+comment, a `CLAUDE.md` or `.claude/rules/` (see **Conventions** in the
+shared reference). Decisions and learnings live under `docs/decisions/`
+and `docs/learnings/` of their level — the repo root for suite-wide
+records, or an app/service subtree for records that concern only that app.
+Levels, the placement rule, the significance triage and the form rules are
+defined in the shared reference:
 [memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md).
 
 ## Process

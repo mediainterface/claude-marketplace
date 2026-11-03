@@ -105,10 +105,15 @@ created. Route instead:
 
 | What it actually is | Route |
 |---|---|
-| Recurring "how we write code" rule | Convention in `.claude/rules/` (written manually: short rule + example + optional `paths:` frontmatter) |
+| Recurring "how we write code" rule a tool can check | The check: lint rule, type or test |
+| "Do X through Y", where Y is one place in the code | Doc comment at Y, one line in the level's `CLAUDE.md` |
+| Recurring rule for one app or service | The `CLAUDE.md` of that level |
+| Recurring rule across apps or services | Convention in `.claude/rules/` (short rule + example + optional `paths:` frontmatter) |
 | Observation / pitfall | `/create-lesson-learned` |
-| Project-level instruction (structure, commands, conventions of a subtree) | The `CLAUDE.md` of that level |
+| Project-level instruction (structure, commands) | The `CLAUDE.md` of that level |
 | One-off local design choice | Inline in the code, as its own reason — no record |
+
+The first four rows are conventions; **Conventions** below decides which row one takes.
 
 **The spec is not a storage location.** A design spec and an implementation
 plan are transient — they are deleted at the human code review of the
@@ -210,6 +215,31 @@ When a decision passes because it **eases future decisions** or is
 toolbar↔editor store"). The second application of an established pattern gets
 no new record — it follows the existing one.
 
+## Conventions
+
+A convention — a recurring "how we write code" rule — is written by hand, and only where a
+reader needs it and no tool can carry it. Before writing one, ask three questions in this
+order — the first "yes" decides:
+
+1. **Can a tool check it?** Then the check is the convention: a lint rule, a type, a test. Its
+   error message says what to do instead; no text beyond it.
+2. **Is there one place in the code that is *the* way to do it?** A shared component, hook,
+   module or utility ("external links go through `BrowserLink`"). Then its contract lives in
+   that place's doc comment, which is read whenever the code is used, and the `CLAUDE.md` of the
+   level names it in one line, so it is found before someone builds it a second time.
+3. **Otherwise: who has to follow it?** The **Placement rule** applies — the smallest level
+   whose subtree contains everyone affected: one app or service (or a part of it) → a short
+   section in the `CLAUDE.md` of that level; several apps or services, or the whole repo → a
+   rule in `.claude/rules/`.
+
+A path-scoped rule for a single app buys nothing: it loads like a nested `CLAUDE.md`, when
+Claude reads a file below it, and only adds a second place to look.
+
+**Form**, for a rule and a `CLAUDE.md` section alike: the rule and one example. A "Background"
+only where the rule is not self-evident, and then a few sentences on the failure it prevents —
+not how it came about, no debugging guide, no list of places not yet converted (those are work
+items), no pointer to where its tests live. Under 80 lines, like a Decision Record.
+
 ## Line length
 
 Every file these skills write — records, learnings, and the `README.md`
@@ -224,12 +254,12 @@ of the reformat.
 
 ## Boundaries
 
-- **Conventions stay central** in the repo-root `.claude/rules/` — a
-  deliberate policy, not a technical limit: a nested `.claude/rules/`
-  would load only on demand per subtree (like a nested `CLAUDE.md`),
-  which we avoid for conventions that must be in scope suite-wide in
-  every session. Their scoping is the `paths:` frontmatter, not the
-  directory location.
+- **Conventions that span several apps or services stay central** in the
+  repo-root `.claude/rules/` — a deliberate policy, not a technical limit:
+  a nested `.claude/rules/` would load only on demand per subtree (like a
+  nested `CLAUDE.md`), which we avoid for conventions that must be in
+  scope suite-wide in every session. Their scoping is the `paths:`
+  frontmatter, not the directory location.
 - Skills **never move existing records** between levels. Migrating legacy
   records is a project of the affected repo, not a skill action.
 - Every level maintains **only its own index** (`README.md`); never

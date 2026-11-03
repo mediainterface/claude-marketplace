@@ -176,8 +176,9 @@ of the **last** implementation PR, never in a spec PR.
   words or as a count ("runs at two places") — restatements drift apart with the next change.
 - **Justify the non-obvious only.** No sentence explaining why a toast, why an encoded id, why
   a test exists. The `Why` column carries the reasons that could be challenged.
-- **Reference decision records by filename**, conventions by rule name, sibling stories by id.
-  Never reference a spec or plan from code; from a spec it is fine while both exist.
+- **Reference decision records by filename**, conventions by rule name or `CLAUDE.md` section,
+  sibling stories by id. Never reference a spec or plan from code; from a spec it is fine while
+  both exist.
 - **Copy stays out.** Where a message carries a decision, describe what it tells the user and
   name it by its internal key; the wording and its translations are written with the
   implementation, where the localization rule demands them.
