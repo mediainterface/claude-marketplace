@@ -28,7 +28,7 @@
       "name": "humanizer",
       "source": "./plugins/humanizer",
       "description": "Remove AI writing patterns to make text sound more natural and human",
-      "version": "1.1.0"
+      "version": "1.1.1"
     },
     {
       "name": "sdd-kit",
