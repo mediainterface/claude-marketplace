@@ -13,6 +13,7 @@ paths:
   | Specs and plans are transient: capture duty, deletion at the implementation's review | `hooks/sdd-policy.md` | `/spec-pr` Step 3, `/pr-review` dimension 5, `memory-bank-shared/REFERENCE.md` |
   | Spec PR vs. implementation PR, spec PR conventions | `skills/sdd-pr-shared/REFERENCE.md` | `/pr-review` Phase A.5 (applied in detail), `hooks/sdd-policy.md` (short note) |
   | Design artifact: linked in the spec, the UI is built on it, the spec wins on details | `/design-spec` (*Frontmatter*) | `hooks/sdd-policy.md` (*Implementation*, carried into the plan) |
+  | Screenshot round: once, when the UI is final; supported stacks; the hand-off for the rest | `/pr-screenshots` (*When*, Step 1) | `hooks/sdd-policy.md` (*Implementation*) |
 
   The gate itself is the Hüter-Trio's call.
 - **The legacy `docs/superpowers/` fallback** sits in `hooks/sdd-policy.md`, `/spec-pr`,

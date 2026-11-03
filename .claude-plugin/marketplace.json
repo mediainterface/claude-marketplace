@@ -35,8 +35,8 @@
     {
       "name": "sdd-kit",
       "source": "./plugins/sdd-kit",
-      "description": "The tools for our Spec-Driven Development workflow — decision records, lessons learned, a design-spec writer, a spec→PR gate, and a deep PR review. Builds on ado-toolkit for Azure DevOps.",
-      "version": "2.1.0"
+      "description": "The tools for our Spec-Driven Development workflow — decision records, lessons learned, a design-spec writer, a spec→PR gate, screenshots of UI changes in the PR, and a deep PR review. Builds on ado-toolkit for Azure DevOps.",
+      "version": "2.2.0"
     },
     {
       "name": "guardian",
