@@ -7,7 +7,7 @@ directory under `plugins/`, registered in `.claude-plugin/marketplace.json`. Use
 ## Commands
 
 ```bash
-claude plugin validate .                    # marketplace + all entries (see Pitfalls: one known error)
+claude plugin validate .                    # marketplace + all entries
 claude plugin validate plugins/<plugin>     # one plugin
 claude --plugin-dir plugins/ado-toolkit --plugin-dir plugins/sdd-kit   # try local copies in a session
 echo '{}' | node plugins/sdd-kit/hooks/inject-sdd-policy.js           # print the SDD SessionStart payload
@@ -25,7 +25,6 @@ The repo has no build or test suite for skills. The only build is the obsolete `
 | `sdd-kit` | Skills + SessionStart hook | Spec-Driven Development (`/design-spec`, `/spec-pr`, `/pr-review`, `/create-decision`, `/create-lesson-learned`). Depends on `ado-toolkit`. Rule: `.claude/rules/sdd-kit.md` |
 | `guardian` | Skill | `/memory-bank-changes` for the Hüter-Trio |
 | `humanizer` | Skill | Vendored from `blader/humanizer` (MIT) |
-| `claude-md-improver` | Agent hook | PreToolUse on `Bash(git commit:*)`: keeps `CLAUDE.md` files accurate and lean for the staged diff |
 | `azure-devops` | MCP server + skill | **Obsolete**, superseded by `ado-toolkit`; to be removed |
 
 Layout of a plugin: `.claude-plugin/plugin.json` (only `name` is required), then
@@ -75,15 +74,9 @@ relative path.
 
 ## Pitfalls
 
-- `claude plugin validate .` reports one known error: `claude-md-improver` uses the reserved
-  `claude-` prefix. Renaming it needs a `renames` entry; until then the error is expected.
 - `humanizer` stays comparable to upstream: never reformat or edit its `SKILL.md` body. The
   `name` + `description` frontmatter (with explicit triggers and what it must *not* fire on) is
   the one deliberate deviation.
-- `claude-md-improver` keeps its whole behavior in the agent prompt in `hooks/hooks.json`
-  (needs Claude Code 2.1.118+). It is the main writer of `CLAUDE.md` files across our repos, so
-  the rules of *This file* above (lean, bullets, under 200 lines, no skill descriptions) and the
-  100-character wrap are spelled out there too — change them in both places.
 - `azure-devops` is obsolete; keep its notices (marketplace entry, `plugin.json`, README, skill)
   until removal. Removal: delete `plugins/azure-devops/` and `release-ado-mcp.yml`, drop the
   entry, add `"azure-devops": null` to `renames`.
