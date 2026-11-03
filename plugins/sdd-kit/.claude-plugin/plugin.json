@@ -1,7 +1,7 @@
 {
   "name": "sdd-kit",
   "version": "2.2.0",
-  "description": "The tools for MediaInterface's Spec-Driven Development (SDD) workflow: /create-decision and /create-lesson-learned capture decisions and lessons in the Memory Bank, /design-spec writes a story's design spec in the compact, decision-centred MIRA form, /spec-pr opens a PR for an approved spec instead of writing an implementation plan (applied automatically in repos on ado.mediainterface.de via a SessionStart hook), /pr-screenshots tests a UI change by hand in the running app and puts screenshots into the PR description, and /pr-review runs a deep triage-first review of an ADO pull request. Azure DevOps itself comes from the ado-toolkit plugin, installed along as a dependency.",
+  "description": "Takes a story through our Spec-Driven Development workflow: the design spec and its review before any code, then the implementation PR, with lasting decisions kept in the Memory Bank.",
   "author": {
     "name": "MIRA Hueter-Trio",
     "email": "daniel.lahmann@mediainterface.de"
