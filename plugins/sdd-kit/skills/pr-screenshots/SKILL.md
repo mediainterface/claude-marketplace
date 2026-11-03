@@ -26,8 +26,9 @@ is complete, it has been compared with the design artifact (if the spec links on
 from your own review are in. That is right before the PR is created.
 
 - **Never earlier.** Not per plan task, not after each subagent, not for interim states, not before
-  the design comparison: every discarded round pays again for the expensive part — getting the app
-  running with the data the change needs, not the screenshots themselves.
+  the design comparison. Each round tests the whole change through the running app with Playwright
+  and captures it, which costs many tokens and much time — and every round on a UI that still
+  changes is spent for nothing.
 - **An implementation plan** with UI tasks gets one closing step for this round, before the PR —
   no screenshot step in the individual tasks.
 - **Review changes a pictured state later:** retake only the affected states, against the app that
@@ -76,8 +77,8 @@ nothing about the real app.
   intercepting that one request in the real app (`page.route`); the section's intro line then
   says so.
 - **Keep running what you started** until the PR's review fixes are through, and tell the user what
-  it is: starting the app is the expensive part of the round. Parallel agents never share ports or
-  data.
+  it is: a retake then captures only the affected state, without starting over. Parallel agents
+  never share ports or data.
 - **Electron:** launch the real app with Playwright's `_electron.launch` (from the repo's own
   Playwright dependency, otherwise `playwright` installed into a temp folder), or start it with
   `--remote-debugging-port=<port>` and attach with `chromium.connectOverCDP`. Give it its own

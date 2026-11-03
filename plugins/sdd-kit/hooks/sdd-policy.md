@@ -210,8 +210,10 @@ the PR is created: it starts the real app, tests the change by hand and puts scr
 of the changed states into the PR description — or, for WPF and other UIs Playwright
 cannot drive, tells the user to add them by hand. One round, when the UI is final: the
 implementation complete, compared with the design, your own review fixes in. Never per
-plan task or for interim states — setting up the app is the expensive part. A plan with
-UI tasks gets one closing step for it, not a screenshot step per task.
+plan task or for interim states: each round tests the whole change through the app with
+Playwright and captures it, which costs many tokens and much time, and a round on a UI
+that still changes is spent for nothing. A plan with UI tasks gets one closing step for
+it, not a screenshot step per task.
 
 **Delete the spec and the plan in the implementation PR, at its human code review.**
 The story's design spec and implementation plan leave the repository when its
