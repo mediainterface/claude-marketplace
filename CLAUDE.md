@@ -22,7 +22,7 @@ The repo has no build or test suite for skills. The only build is the obsolete `
 | Plugin | Type | Notes |
 |---|---|---|
 | `ado-toolkit` | Skills | Azure DevOps via the `az` CLI (`/ado-pr`, `/ado-workitem`, `/ado-pipeline`). Process-neutral, for every team. Rule: `.claude/rules/ado-toolkit.md` |
-| `sdd-kit` | Skills + SessionStart hook | Spec-Driven Development (`/design-spec`, `/spec-pr`, `/pr-review`, `/create-decision`, `/create-lesson-learned`). Depends on `ado-toolkit`. Rule: `.claude/rules/sdd-kit.md` |
+| `sdd-kit` | Skills + SessionStart hook | Spec-Driven Development (`/design-spec`, `/spec-pr`, `/pr-screenshots`, `/pr-review`, `/create-decision`, `/create-lesson-learned`). Depends on `ado-toolkit`. Rule: `.claude/rules/sdd-kit.md` |
 | `guardian` | Skill | `/memory-bank-changes` for the Hüter-Trio |
 | `humanizer` | Skill | Vendored from `blader/humanizer` (MIT) |
 | `azure-devops` | MCP server + skill | **Obsolete**, superseded by `ado-toolkit`; to be removed |

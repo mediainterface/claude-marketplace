@@ -58,8 +58,9 @@ Writing editor that identifies and removes AI writing patterns to make text soun
 
 Spec-Driven Development toolkit: capture Decision Records and Lessons Learned with guided workflows
 and standardized templates (MADR format), write a story's design spec in a compact, decision-centred
-form, gate an approved spec into a pull request before any implementation, and review the resulting
-pull requests in depth. The Azure DevOps side of delivery — pull requests, work items, and
+form, gate an approved spec into a pull request before any implementation, test a UI change by hand
+and put screenshots of it into its pull request, and review the resulting pull requests in depth.
+The Azure DevOps side of delivery — pull requests, work items, and
 pipelines/changelogs — comes from `ado-toolkit`, which installs along with `sdd-kit` as its
 dependency.
 
@@ -67,8 +68,8 @@ dependency.
 |---|---|
 | Install | `claude plugin install sdd-kit@mediainterface` |
 | Type | Skills + SessionStart hook (the spec→PR policy) |
-| Requires | The `ado-toolkit` plugin (installed automatically as a dependency). Nothing beyond it for `/create-decision` and `/create-lesson-learned`; `/design-spec` reads the work item via `/ado-workitem`. `/pr-review` and `/spec-pr` on Azure DevOps need what `ado-toolkit` needs (`az` CLI with the `azure-devops` extension, `az devops login`); `/spec-pr` additionally needs the `gh` CLI on GitHub remotes. |
-| Skills | `/create-decision`, `/create-lesson-learned`, `/design-spec`, `/spec-pr`, `/pr-review` |
+| Requires | The `ado-toolkit` plugin (installed automatically as a dependency). Nothing beyond it for `/create-decision` and `/create-lesson-learned`; `/design-spec` reads the work item via `/ado-workitem`. `/pr-review` and `/spec-pr` on Azure DevOps need what `ado-toolkit` needs (`az` CLI with the `azure-devops` extension, `az devops login`); `/spec-pr` additionally needs the `gh` CLI on GitHub remotes. `/pr-screenshots` drives web and Electron apps with Playwright (the Playwright MCP, e.g. the official `playwright` plugin, for browser apps; Node.js for Electron) and uploads the images with `curl` and integrated Windows/Kerberos authentication; WPF and other UIs get a hint to add screenshots by hand. |
+| Skills | `/create-decision`, `/create-lesson-learned`, `/design-spec`, `/spec-pr`, `/pr-screenshots`, `/pr-review` |
 
 ## Adding a plugin
 
