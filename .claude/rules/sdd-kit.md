@@ -21,5 +21,9 @@ paths:
   the move to `docs/sdd/` is left.
 - **`hooks/sdd-policy.md` is injected into every session.** Keep maintenance notes like the ones
   above out of it.
+- **`/pr-screenshots` uploads PR attachments, not work item attachments** (`_apis/wit/attachments`),
+  although those could be uploaded before the PR exists: whether Azure DevOps keeps an attachment
+  no work item links to is not documented, and images vanishing from merged PRs would go
+  unnoticed.
 - **SDD concepts stay out of `ado-toolkit`.** Spec PRs, the 📝 marker and the Memory Bank live
   here; `/spec-pr` prescribes them to `ado-toolkit:ado-pr`.

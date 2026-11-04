@@ -120,11 +120,14 @@ MCP, and for Electron, a short Playwright script does the same.
 
 ## Step 4: Into the PR description
 
-Images are attached to the PR itself, so the PR has to exist before they can be uploaded.
+Images are attached to the PR itself, so the PR has to exist before they can be uploaded. The
+user still reviews text and images once, before the PR is created.
 
 1. **One review for text and images.** When `ado-toolkit:ado-pr`'s **PR Creation** shows the
-   draft to the user (its step 8), show the screenshots with it and prescribe the section below
-   for its description. Create the PR as that workflow says.
+   draft to the user (its step 8), show the screenshots with it and the section below as it will
+   stand in the description, with the file names in place of the image links. That approval
+   covers the upload and the section. Create the PR as that workflow says, without the section:
+   its links exist only after the upload.
 2. **Upload each image** as a PR attachment. `az` cannot send a binary body, so this one call goes
    through `curl` with integrated Windows/Kerberos authentication (`--negotiate -u :`);
    `{organization}`, `{project}` and `{repository}` are what `ado-toolkit`'s Step 0 detected:
@@ -138,8 +141,9 @@ Images are attached to the PR itself, so the PR has to exist before they can be 
    The response's `url` is the image link — use it exactly as returned. A `401` means integrated
    authentication is not available on this machine: tell the user, and never fall back to a token
    from the environment. The images then go to the user to add by hand.
-3. **Insert the section** with `ado-toolkit:ado-pr`'s **PR Update** — after **Inhalt** (or the
-   repo template's summary), before **Betroffene Komponenten**. German and not wrapped, like all
+3. **Insert the approved section** with `ado-toolkit:ado-pr`'s **PR Update** — after **Inhalt**
+   (or the repo template's summary), before **Betroffene Komponenten**. Only the links are new
+   since the user's approval in step 1, so do not ask again. German and not wrapped, like all
    text sent to Azure DevOps:
 
    ```
