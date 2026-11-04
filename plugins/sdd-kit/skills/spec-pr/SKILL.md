@@ -71,7 +71,7 @@ Each item has exactly one durable home:
 |---|---|
 | The reason a piece of code is the way it is | Inline in the code, as its own reason — noted now, written with the implementation |
 | Requirement, acceptance criterion, scope boundary | The work item (user story) |
-| Recurring "how we write code" rule | A convention in `.claude/rules/` |
+| Recurring "how we write code" rule | A convention — a check, a doc comment, a `CLAUDE.md` section or a `.claude/rules/` file, per **Conventions** in [../memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md) |
 | Significant decision (hard to reverse, eases future decisions, protected product decision, breaks a pattern, cross-cutting) | A Decision Record → invoke the `create-decision` skill (one record per decision) |
 | Recurring pattern or pitfall | A Lesson Learned → invoke the `create-lesson-learned` skill |
 
@@ -108,9 +108,10 @@ A record the spec's own *Memory Bank* section already writes out unfiltered turn
 Records and lessons created here ride in the **same** PR as the spec — note each
 created file's path from the skills' confirmation output, because Step 5 stages
 exactly these paths. (`create-decision` already notes that a decision ships together
-with the spec, so bundling them here is intentional.) A `.claude/rules/` convention
-can go into this PR too. Items destined for a code comment cannot be written yet —
-list them for the user so they reach the implementation.
+with the spec, so bundling them here is intentional.) A convention written as a
+`.claude/rules/` file or a `CLAUDE.md` section can go into this PR too. Items destined
+for a code comment cannot be written yet — list them for the user so they reach the
+implementation.
 
 Skip whatever the user declines.
 

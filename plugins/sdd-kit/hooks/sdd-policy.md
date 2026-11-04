@@ -68,7 +68,8 @@ exactly one durable home:
 - **Inline in the code**, as its own reason next to what it explains (written with
   the implementation) — the default for anything that only makes sense there.
 - **In the user story** — requirement, acceptance criterion, scope boundary.
-- **In a convention** under `.claude/rules/` — a recurring "how we write code" rule.
+- **In a convention** — a recurring "how we write code" rule, placed as *Conventions* in
+  the *Memory Bank records* section below says.
 - **In the Memory Bank** as a Decision Record or Lesson Learned — subject to the
   significance triage below.
 
@@ -113,12 +114,11 @@ Exclusions, each of which overrides a ticked criterion:
 - It is a **detail that touches the whole app** but is neither a product
   decision nor hard to revise.
 
-Otherwise do not propose one — a recurring coding rule belongs in
-`.claude/rules/` (convention), an observed pitfall in
-`/create-lesson-learned`, a project-level instruction in the `CLAUDE.md` of
-that level, and a one-off local design choice inline in the code as its own
-reason. The spec and the PR description are **not** a storage location: both
-are transient.
+Otherwise do not propose one — a recurring coding rule is a convention (see
+the end of this section), an observed pitfall goes to `/create-lesson-learned`,
+a project-level instruction to the `CLAUDE.md` of that level, a one-off local
+design choice inline in the code as its own reason. The spec and the PR
+description are **not** a storage location: both are transient.
 
 Behavior that an exclusion catches — sitting at one spot, in one feature —
 gets an **inline reason in the code**, not a record. All of this applies where
@@ -159,6 +159,21 @@ the repo root only for matters spanning multiple apps/services (or
 repo-wide/process ones); `apps/<app>/` or `services/<service>/` for
 single-app records, even feature-spanning ones. Details: the
 `sdd-kit:create-decision` skill and its shared reference.
+
+**Conventions.** A recurring coding rule is a convention. Ask in this order;
+the first "yes" decides where it lives:
+
+1. **A tool can check it** → the check is the convention (lint rule, type,
+   test), its error message says what to do instead.
+2. **One place in the code is *the* way to do it** (a shared component, hook,
+   module, utility) → its contract in that place's doc comment, and one line
+   naming it in the level's `CLAUDE.md`.
+3. **Otherwise, by who has to follow it** → one app or service: a short
+   section in that level's `CLAUDE.md`; several apps or services, or the whole
+   repo: a rule in `.claude/rules/`.
+
+A rule or `CLAUDE.md` section holds the rule and one example, a short
+background only where the rule is not self-evident, and stays under 80 lines.
 
 ## Generated Markdown: wrap prose at 100 characters
 
@@ -251,8 +266,8 @@ carrying the deletion out is your job — say what you are removing, then do it:
 
 1. **Counter-check first.** Is everything that is needed beyond the story and the
    spec captured outside them — inline in the code as its own reason, in the user
-   story, in a `.claude/rules/` convention, or in the Memory Bank? Anything still
-   living only in the spec or the plan gets captured now. This check was already made
+   story, in a convention, or in the Memory Bank? Anything still living only in the
+   spec or the plan gets captured now. This check was already made
    while the spec was written (see "Spec → PR before implementation"), so here it
    normally only confirms.
 2. **Then delete.** `git rm` the story's spec and plan — under `docs/sdd/specs/` and

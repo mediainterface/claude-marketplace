@@ -9,10 +9,11 @@ This skill guides through creating a Lesson Learned entry and places
 the file on the correct Memory Bank **level** (analogous to decision
 records). Each Lesson Learned is stored as its own file.
 
-This skill is part of the Memory Bank. Conventions live as Claude Code
-Rules in `.claude/rules/` (auto-loaded). Decisions and learnings live
-under `docs/decisions/` and `docs/learnings/` of their level. Levels and
-the placement rule are defined in the shared reference:
+This skill is part of the Memory Bank. Conventions live in a check, a doc
+comment, a `CLAUDE.md` or `.claude/rules/` (see **Conventions** in the
+shared reference). Decisions and learnings live under `docs/decisions/`
+and `docs/learnings/` of their level. Levels and the placement rule are
+defined in the shared reference:
 [memory-bank-shared/REFERENCE.md](../memory-bank-shared/REFERENCE.md).
 Learnings have **no significance gate** — they are deliberately
 low-threshold.
@@ -140,7 +141,8 @@ Show the user:
   do not drift."
 
 If the observation is actually a rule (e.g. "always do it this way"),
-suggest writing a convention (Claude Code Rule in `.claude/rules/`) instead.
+suggest writing a convention instead, placed per **Conventions** in the
+shared reference.
 
 If the observation is actually a decision, suggest using
 `/create-decision` instead (note that it applies a significance gate).

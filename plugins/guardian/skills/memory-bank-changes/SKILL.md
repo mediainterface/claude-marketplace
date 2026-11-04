@@ -45,6 +45,14 @@ has everything at the root.
 The `README.md` index files are **not records** — exclude them from the record
 list (mention an index refresh only in passing, if at all).
 
+`.claude/rules/` holds the conventions that span several apps or services. A
+convention of a single app or service lives as a section of that level's
+`CLAUDE.md`, and one bound to a single place in the code in that place's doc
+comment (sdd-kit's routing). Neither is scanned by default: a `CLAUDE.md` also
+carries project instructions and changes with ordinary edits, and a doc comment
+sits in code. When a guardian asks for them, list the commits in the window
+touching `CLAUDE.md` and `'*/CLAUDE.md'` and name the sections each changed.
+
 ## Process
 
 ### Step 1 — Find the repo
