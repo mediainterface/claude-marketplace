@@ -204,6 +204,17 @@ UI — together with the precedence the spec states: the UI is built on the desi
 the spec wins on every detail it rules. An implementer handed a single task never opens
 the spec's links; without the link in the task, the UI drifts from the design.
 
+**UI changes get screenshots in the implementation PR — taken once.** When the
+implementation PR changes what users see, invoke `sdd-kit:pr-screenshots` right before
+the PR is created: it starts the real app, tests the change by hand and puts screenshots
+of the changed states into the PR description — or, for WPF and other UIs Playwright
+cannot drive, tells the user to add them by hand. One round, when the UI is final: the
+implementation complete, compared with the design, your own review fixes in. Never per
+plan task or for interim states: each round tests the whole change through the app with
+Playwright and captures it, which costs many tokens and much time, and a round on a UI
+that still changes is spent for nothing. A plan with UI tasks gets one closing step for
+it, not a screenshot step per task.
+
 **Delete the spec and the plan in the implementation PR, at its human code review.**
 The story's design spec and implementation plan leave the repository when its
 implementation goes to **code review** — at the latest after the first review round.
