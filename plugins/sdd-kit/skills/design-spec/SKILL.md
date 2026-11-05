@@ -94,7 +94,7 @@ know which source wins.
 |---|---|---|
 | 1 | Context | Three to five sentences: what exists, what is missing, what this story adds. No history, no merge status. |
 | 2 | Decisions | **The core.** One table `Topic \| Decision \| Why` with every choice between alternatives and every deviation from the story's wording or from the design. Mark what the user confirmed. |
-| 3 | Out of scope | One paragraph naming the sibling stories by id and what stays out. |
+| 3 | Out of scope | One paragraph naming the sibling stories by id and what stays out, and what this spec PR itself removes (a predecessor's spec or plan left behind). |
 | 4 | Data / content model | *Optional.* The stored shape and its rules. |
 | 5 | Backend | *Optional.* Request/response as a code block, rules as bullets. |
 | 6 | Client — contract and main | *Optional.* Messages across the process boundary, what main owns. |
@@ -103,9 +103,9 @@ know which source wins.
 | 9 | Edge cases | Table `Case \| Behaviour`. |
 | 10 | Tests | Depth justification in one sentence against the repo's test process, then bullets per test level as that process names them and the repo actually runs them, AC coverage as one paragraph of section references. |
 | 11 | Memory Bank | Governing decision records and conventions (followed, none changed), new records as the sdd-kit skills decided them, and the **list of reasons to carry inline** into the code. |
-| 12 | Delivery | PR split as a table (see below). |
 
-Drop the optional sections the story does not need and renumber; the order stays.
+Drop the optional sections the story does not need and renumber; the order stays. There is no
+delivery section: the split into pull requests is decided in the implementation plan.
 
 ### Checklists for the domain sections
 
@@ -156,13 +156,6 @@ only the outcome: governing records and conventions as followed (a spec applies 
 restate them), new records with the skill's verdict, and the list of reasons that go inline into
 the code instead.
 
-### Delivery
-
-Split into PRs that are each green and shippable on their own, at most about 30 files each;
-give the order and what can run in parallel. Name what this spec PR itself removes (a
-predecessor's spec or plan left behind). The spec and its plan are deleted in the review round
-of the **last** implementation PR, never in a spec PR.
-
 ## Rules
 
 - **Spec, not plan.** No file names, component or hook names, test ids, CSS classes, query
@@ -171,7 +164,8 @@ of the **last** implementation PR, never in a spec PR.
 - **Bullets and tables over prose.** A reviewer comments per line. Prose only where a
   trade-off is argued (why A and not B); one paragraph per trade-off.
 - **Claims about today are checked.** Every "unchanged", "as today" or "existing behaviour" is
-  backed by the code, not by memory; every behaviour that is new appears as work in Delivery.
+  backed by the code, not by memory; every behaviour that is new appears in the decisions or a
+  domain section.
 - **One rule, one place.** State a rule once and refer to it elsewhere; never restate it in own
   words or as a count ("runs at two places") — restatements drift apart with the next change.
 - **Justify the non-obvious only.** No sentence explaining why a toast, why an encoded id, why
