@@ -212,6 +212,11 @@ Do **not** create Azure DevOps tasks for the plan's todo items — neither
 automatically nor by offering it. Plan steps are tracked in the plan alone; they
 add no value as work items for human readers.
 
+**The plan decides the split into pull requests.** The spec carries no delivery section, so the
+implementation plan settles it before any code exists: which PRs, each green and shippable on
+its own, in which order, and what can run in parallel — following the repository's rule on
+pull request size where it has one.
+
 **The spec's design artifact travels into the plan.** When the spec links a design
 artifact (its **Design** bullet), the implementation plan links it as well, with the
 spec's note on how to open it — in its header and in every task that builds or changes
